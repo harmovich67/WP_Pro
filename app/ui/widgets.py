@@ -194,10 +194,11 @@ class ToastNotification(QFrame):
             # Ensure toast is sized first
             self.adjustSize()
             
-            # Position at top-right with safe margins
-            x = parent_geo.width() - self.width() - 30
+            # Position at top-left with safe margins (mirrored for RTL layout,
+            # where the sidebar/content are mirrored to the opposite side)
+            x = 30
             y = 80
-            
+
             # Ensure position is valid and within bounds
             x = max(20, min(x, parent_geo.width() - self.width() - 20))
             y = max(20, y)
