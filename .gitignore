@@ -1,0 +1,10 @@
+.venv/
+build/
+dist/
+wp_local_installer_pro/
+__pycache__/
+*.pyc
+*.db
+*.log
+.env
+*.zip

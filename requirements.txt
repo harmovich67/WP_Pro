@@ -1,0 +1,5 @@
+PyQt6==6.7.1
+requests==2.32.3
+PyMySQL==1.1.1
+cryptography==42.0.5
+pyinstaller==6.3.0
