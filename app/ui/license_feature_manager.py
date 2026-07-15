@@ -187,7 +187,7 @@ class LicenseFeatureManagerPage(QWidget):
         icon.setStyleSheet("font-size: 48px;")
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel("Developer Admin Panel")
+        title = QLabel("لوحة تحكم المطور")
         title.setStyleSheet(
             "font-size: 22px; font-weight: 700; color: #F9FAFB;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -432,7 +432,7 @@ class LicenseFeatureManagerPage(QWidget):
             form.addRow("السعر / شهر:", price_sb)
 
             if tier != "free":
-                period_lbl = QLabel("شهري (monthly)")
+                period_lbl = QLabel("شهري")
                 period_lbl.setStyleSheet("color: #6B7280; font-size: 11px;")
                 form.addRow("الفترة:", period_lbl)
 
