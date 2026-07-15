@@ -47,7 +47,7 @@ class GeminiAssistant:
     def analyze_debug_log(self, log_content: str) -> str:
         """Analyze WordPress debug log using AI"""
         if not self.is_ready():
-            return "❌ Gemini AI not configured. Please set API key."
+            return "❌ Gemini AI غير مُعد. يرجى ضبط مفتاح API."
         
         prompt = f"""أنت خبير WordPress متخصص في تحليل الأخطاء.
 قم بتحليل سجل الأخطاء التالي وقدم:
@@ -69,8 +69,8 @@ class GeminiAssistant:
     def security_scan_code(self, code_snippet: str, file_path: str = "") -> str:
         """Scan code for security issues"""
         if not self.is_ready():
-            return "❌ Gemini AI not configured."
-        
+            return "❌ Gemini AI غير مُعد."
+
         prompt = f"""أنت خبير أمان WordPress. قم بفحص الكود التالي بحثاً عن:
 1. ثغرات أمنية (SQL Injection, XSS, etc.)
 2. كود مشبوه أو خطير
@@ -91,8 +91,8 @@ class GeminiAssistant:
     def performance_suggestions(self, project_info: dict) -> str:
         """Get performance optimization suggestions"""
         if not self.is_ready():
-            return "❌ Gemini AI not configured."
-        
+            return "❌ Gemini AI غير مُعد."
+
         prompt = f"""أنت خبير في تحسين أداء WordPress. بناءً على المعلومات التالية:
 - المشروع: {project_info.get('name', 'Unknown')}
 - المسار: {project_info.get('path', '')}
@@ -109,7 +109,7 @@ class GeminiAssistant:
     def chat(self, message: str, context: str = "") -> str:
         """General chat about WordPress issues"""
         if not self.is_ready():
-            return "❌ Gemini AI not configured. Please add your API key in settings."
+            return "❌ Gemini AI غير مُعد. يرجى إضافة مفتاح API في الإعدادات."
         
         prompt = f"""أنت مساعد WordPress خبير. أجب على السؤال التالي بالعربية:
 
