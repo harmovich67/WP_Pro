@@ -26,10 +26,10 @@ RewriteRule . /index.php [L]
             
             htaccess = Path(project_path) / ".htaccess"
             htaccess.write_text(htaccess_content, encoding="utf-8")
-            log("✅ .htaccess regenerated")
+            log("✅ تمت إعادة إنشاء ملف .htaccess")
             return True
         except Exception as e:
-            log(f"❌ Failed to regenerate .htaccess: {e}")
+            log(f"❌ فشل إعادة إنشاء ملف .htaccess: {e}")
             return False
     
     @staticmethod
@@ -48,10 +48,10 @@ RewriteRule . /index.php [L]
                     os.chmod(item, stat.S_IWRITE | stat.S_IREAD)
                     count += 1
             
-            log(f"✅ Fixed permissions for {count} files")
+            log(f"✅ تم إصلاح الأذونات لعدد {count} من الملفات")
             return True
         except Exception as e:
-            log(f"❌ Failed to fix permissions: {e}")
+            log(f"❌ فشل إصلاح الأذونات: {e}")
             return False
     
     @staticmethod
@@ -76,8 +76,8 @@ RewriteRule . /index.php [L]
                             shutil.rmtree(item)
                             cleared += 1
             
-            log(f"✅ Cleared {cleared} cache items")
+            log(f"✅ تم مسح {cleared} من عناصر ذاكرة التخزين المؤقت")
             return True
         except Exception as e:
-            log(f"❌ Failed to clear cache: {e}")
+            log(f"❌ فشل مسح ذاكرة التخزين المؤقت: {e}")
             return False
