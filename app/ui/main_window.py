@@ -1044,19 +1044,19 @@ class ImportProjectDialog(QDialog):
         
         # Folder picker
         self.path_edit = QLineEdit()
-        self.btn_browse = QPushButton("Browse...")
+        self.btn_browse = QPushButton("استعراض...")
         self.btn_browse.clicked.connect(self._browse)
-        
+
         path_row = QHBoxLayout()
         path_row.addWidget(self.path_edit)
         path_row.addWidget(self.btn_browse)
-        self.form.addRow("Project Folder:", path_row)
-        
+        self.form.addRow("مجلد المشروع:", path_row)
+
         # Details
         self.name_edit = QLineEdit()
         self.url_edit = QLineEdit("http://localhost/")
-        self.form.addRow("Project Name:", self.name_edit)
-        self.form.addRow("Site URL:", self.url_edit)
+        self.form.addRow("اسم المشروع:", self.name_edit)
+        self.form.addRow("رابط الموقع:", self.url_edit)
         
         # DB Details (Collapsible/Editable)
         self.layout.addLayout(self.form)
@@ -1073,14 +1073,14 @@ class ImportProjectDialog(QDialog):
         self.db_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.table_prefix = QLineEdit("wp_")
         
-        self.db_form.addRow("DB Host:", self.db_host)
-        self.db_form.addRow("DB Port:", self.db_port)
-        self.db_form.addRow("DB Name:", self.db_name)
-        self.db_form.addRow("DB User:", self.db_user)
-        self.db_form.addRow("DB Pass:", self.db_pass)
-        self.db_form.addRow("Table Prefix:", self.table_prefix)
-        
-        lbl_db = QLabel("Database Connection (Auto-detected from wp-config.php)")
+        self.db_form.addRow("مضيف قاعدة البيانات:", self.db_host)
+        self.db_form.addRow("منفذ قاعدة البيانات:", self.db_port)
+        self.db_form.addRow("اسم قاعدة البيانات:", self.db_name)
+        self.db_form.addRow("مستخدم قاعدة البيانات:", self.db_user)
+        self.db_form.addRow("كلمة مرور قاعدة البيانات:", self.db_pass)
+        self.db_form.addRow("بادئة الجداول:", self.table_prefix)
+
+        lbl_db = QLabel("اتصال قاعدة البيانات (يُكتشف تلقائياً من wp-config.php)")
         lbl_db.setStyleSheet("font-weight: bold; margin-top: 10px;")
         self.layout.addWidget(lbl_db)
         self.layout.addWidget(self.db_group)
@@ -1094,7 +1094,7 @@ class ImportProjectDialog(QDialog):
         self.path_edit.textChanged.connect(self._on_path_changed)
 
     def _browse(self):
-        d = QFileDialog.getExistingDirectory(self, "Select WordPress Root Folder")
+        d = QFileDialog.getExistingDirectory(self, "اختر مجلد ووردبريس الجذري")
         if d:
             self.path_edit.setText(d)
 
@@ -1202,7 +1202,7 @@ class MainWindow(QMainWindow):
         title_box = QVBoxLayout()
         t = QLabel("Harmulizer Pro")
         t.setObjectName("AppTitle")
-        s = QLabel("Wizard • Templates • DB Tools • Clone/Backup • WP-CLI Console")
+        s = QLabel("معالج الإعداد • القوالب • أدوات قاعدة البيانات • استنساخ/نسخ احتياطي • طرفية WP-CLI")
         # Icon: resolve for both dev and frozen exe
         import sys as _sys
         if getattr(_sys, 'frozen', False):
@@ -1242,7 +1242,7 @@ class MainWindow(QMainWindow):
         top.addWidget(self.btn_license)
 
         # About button
-        self.btn_about = QPushButton("  About")
+        self.btn_about = QPushButton("  حول البرنامج")
         self.btn_about.setFixedSize(80, 40)
         self.btn_about.setStyleSheet("""
             QPushButton {
@@ -1255,7 +1255,7 @@ class MainWindow(QMainWindow):
             }
             QPushButton:hover { background: #4B5563; }
         """)
-        self.btn_about.setToolTip("About Harmulizer Pro")
+        self.btn_about.setToolTip("حول Harmulizer Pro")
         self.btn_about.clicked.connect(self._show_about)
         top.addWidget(self.btn_about)
         
@@ -1276,10 +1276,10 @@ class MainWindow(QMainWindow):
                 }
             """)
             self.btn_theme_toggle.clicked.connect(self._toggle_theme)
-            self.btn_theme_toggle.setToolTip("Toggle Dark/Light Theme")
+            self.btn_theme_toggle.setToolTip("تبديل المظهر الداكن/الفاتح")
             top.addWidget(self.btn_theme_toggle)
 
-        self.status_pill = Pill("Idle", "neutral")
+        self.status_pill = Pill("جاهز", "neutral")
         top.addWidget(self.status_pill)
 
         outer.addLayout(top)
@@ -1294,21 +1294,21 @@ class MainWindow(QMainWindow):
         self.sidebar.setObjectName("Sidebar")
         self.sidebar.setFixedWidth(250)
         self.sidebar.addItems([
-            "🏠 Dashboard",
-            "✨ New Project",
-            "💻 WP-CLI Console",
-            "📦 Backups",
-            "🗄️ Database",
-            "🔗 URL Converter",
-            "🛡️ Security & Hardening",
-            "🩺 Monitoring & Auto-Fix",
-            "🧩 Plugin & Theme Manager",
-            "⚙️ WP-Config Editor",
-            "🛠️ Developer Tools",
-            "🤖 AI Assistant",
-            "🌐 Site Dashboard",
-            "🔑 License Config",
-            "📊 License Dashboard",
+            "🏠 لوحة التحكم",
+            "✨ مشروع جديد",
+            "💻 طرفية WP-CLI",
+            "📦 النسخ الاحتياطي",
+            "🗄️ قاعدة البيانات",
+            "🔗 محوّل الروابط",
+            "🛡️ الأمان والتحصين",
+            "🩺 المراقبة والإصلاح التلقائي",
+            "🧩 إدارة الإضافات والقوالب",
+            "⚙️ محرر wp-config",
+            "🛠️ أدوات المطور",
+            "🤖 المساعد الذكي",
+            "🌐 لوحة تحكم الموقع",
+            "🔑 إعدادات الترخيص",
+            "📊 لوحة تحكم التراخيص",
         ])
         self.sidebar.setCurrentRow(0)
         body.addWidget(self.sidebar)
@@ -1387,9 +1387,9 @@ class MainWindow(QMainWindow):
         # ── Collapsible log area ──────────────────────────────────────
         log_hdr = QHBoxLayout()
         log_hdr.setContentsMargins(0, 0, 0, 0)
-        _log_lbl = QLabel("📋 Operation Log")
+        _log_lbl = QLabel("📋 سجل العمليات")
         _log_lbl.setStyleSheet("color: #6B7280; font-size: 11px;")
-        self._btn_toggle_log = QPushButton("▲ Hide")
+        self._btn_toggle_log = QPushButton("▲ إخفاء")
         self._btn_toggle_log.setFixedHeight(20)
         self._btn_toggle_log.setStyleSheet(
             "QPushButton { background: transparent; color: #6B7280; "
@@ -1403,7 +1403,7 @@ class MainWindow(QMainWindow):
 
         self.progress = QTextEdit()
         self.progress.setReadOnly(True)
-        self.progress.setPlaceholderText("Installation/Worker logs will appear here...")
+        self.progress.setPlaceholderText("ستظهر هنا سجلات التثبيت والعمليات...")
         _log_h = 80 if self._small_screen else 100
         self.progress.setFixedHeight(_log_h)
         outer.addWidget(self.progress)
