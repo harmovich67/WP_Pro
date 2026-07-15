@@ -2402,7 +2402,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._cpt_table = QTableWidget()
         self._cpt_table.setColumnCount(5)
         self._cpt_table.setHorizontalHeaderLabels(
-            ["Slug", "Label", "Public", "Has Archive", "Source"])
+            ["Slug", "التسمية", "عام", "له أرشيف", "المصدر"])
         hh = self._cpt_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -2469,7 +2469,7 @@ class SiteDashboardPage(BaseExtraPage):
 
             for c in rows:
                 name = str(c.get("name", ""))
-                src = "🔧 Harmulizer" if name in mu_slugs else "🔌 Plugin/Theme"
+                src = "🔧 Harmulizer" if name in mu_slugs else "🔌 إضافة/قالب"
                 self._add_cpt_row(
                     name,
                     str(c.get("label", name)),
@@ -2698,7 +2698,7 @@ class SiteDashboardPage(BaseExtraPage):
             QMessageBox.information(
                 self, "تم النسخ",
                 "تم نسخ السؤال إلى الـ Clipboard.\n"
-                "افتح تبويب 'AI Assistant' والصق السؤال هناك.\n\n"
+                "افتح تبويب 'المساعد الذكي' والصق السؤال هناك.\n\n"
                 f"السؤال:\n{question[:300]}…")
 
     # ═════════════════════════════════════════════════════════════════
@@ -2723,7 +2723,7 @@ class SiteDashboardPage(BaseExtraPage):
 
         btn_approve = PrimaryButton("✅ موافقة")
         btn_hold    = _secondary_btn("⏸️ تعليق")
-        btn_spam    = _secondary_btn("🚫 Spam")
+        btn_spam    = _secondary_btn("🚫 بريد مزعج")
         btn_trash   = _secondary_btn("🗑️ سلة المهملات")
         btn_delete  = _secondary_btn("❌ حذف نهائي")
         btn_refresh = _secondary_btn("🔄 تحديث")
@@ -3116,7 +3116,7 @@ class SiteDashboardPage(BaseExtraPage):
              "تحديث siteurl و home في قاعدة البيانات",
              self._qa_update_siteurl, "#F59E0B"),
             ("📋",  "عرض معلومات الموقع",
-             "PHP version, WordPress version, active plugins count",
+             "إصدار PHP، إصدار WordPress، وعدد الإضافات النشطة",
              self._qa_site_info, "#64748B"),
             ("🔌",  "تفعيل / تعطيل Maintenance Mode",
              "تفعيل وضع الصيانة أو إلغاؤه",
@@ -3183,7 +3183,11 @@ class SiteDashboardPage(BaseExtraPage):
         # 1. Accent Bar (Vertical)
         accent = QFrame()
         accent.setFixedWidth(5)
-        accent.setStyleSheet(f"background: {accent_color}; border-top-left-radius: 12px; border-bottom-left-radius: 12px;")
+        # Card is laid out in a QHBoxLayout; under the app-wide RTL
+        # layoutDirection, Qt auto-mirrors QHBoxLayout child order, so this
+        # accent bar (added first) now renders on the card's RIGHT edge —
+        # round the right corners to match, instead of the left ones.
+        accent.setStyleSheet(f"background: {accent_color}; border-top-right-radius: 12px; border-bottom-right-radius: 12px;")
         h.addWidget(accent)
 
         # 2. Icon
@@ -3342,23 +3346,23 @@ class SiteDashboardPage(BaseExtraPage):
         self._run_async(
             ["core", "version"],
             lambda ok, out: self._qa_log_msg(
-                f"🌐 WordPress Version: {out.strip() if ok else '?'}"))
+                f"🌐 إصدار WordPress: {out.strip() if ok else '?'}"))
         self._run_async(
             ["eval", "echo phpversion();"],
             lambda ok, out: self._qa_log_msg(
-                f"🐘 PHP Version: {out.strip() if ok else '?'}"))
+                f"🐘 إصدار PHP: {out.strip() if ok else '?'}"))
         self._run_async(
             ["plugin", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🧩 Active Plugins: {out.strip() if ok else '?'}"))
+                f"🧩 الإضافات النشطة: {out.strip() if ok else '?'}"))
         self._run_async(
             ["theme", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🎨 Active Theme(s): {out.strip() if ok else '?'}"))
+                f"🎨 القوالب النشطة: {out.strip() if ok else '?'}"))
 
     def _qa_toggle_maintenance(self):
         reply = QMessageBox.question(
-            self, "Maintenance Mode",
+            self, "وضع الصيانة",
             "اضغط Yes لتفعيل وضع الصيانة، أو No لإلغائه.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel)
         if reply == QMessageBox.StandardButton.Cancel:
