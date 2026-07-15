@@ -574,25 +574,25 @@ class WizardPage(QWidget):
         self.db_name = QLineEdit()
         self.table_prefix = QLineEdit()
 
-        self.create_db_user = QCheckBox("Create dedicated DB user")
+        self.create_db_user = QCheckBox("إنشاء مستخدم مخصص لقاعدة البيانات")
         self.db_user = QLineEdit()
         self.db_pass = QLineEdit()
         self.db_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.db_user_host = QLineEdit()
 
-        self.btn_test_db = QPushButton("Test DB Connection")
-        self.db_status = Pill("Not tested", "neutral")
+        self.btn_test_db = QPushButton("اختبار الاتصال بقاعدة البيانات")
+        self.db_status = Pill("لم يُختبر بعد", "neutral")
 
-        form.addRow("Host:", self.db_host)
-        form.addRow("Port:", self.db_port)
-        form.addRow("Root user:", self.db_root_user)
-        form.addRow("Root pass:", self.db_root_pass)
-        form.addRow("DB name:", self.db_name)
-        form.addRow("Table prefix:", self.table_prefix)
+        form.addRow("المضيف:", self.db_host)
+        form.addRow("المنفذ:", self.db_port)
+        form.addRow("مستخدم الجذر (root):", self.db_root_user)
+        form.addRow("كلمة مرور الجذر (root):", self.db_root_pass)
+        form.addRow("اسم قاعدة البيانات:", self.db_name)
+        form.addRow("بادئة الجداول:", self.table_prefix)
         form.addRow("", self.create_db_user)
-        form.addRow("New user:", self.db_user)
-        form.addRow("New pass:", self.db_pass)
-        form.addRow("New user host:", self.db_user_host)
+        form.addRow("المستخدم الجديد:", self.db_user)
+        form.addRow("كلمة المرور الجديدة:", self.db_pass)
+        form.addRow("مضيف المستخدم الجديد:", self.db_user_host)
 
         lay.addLayout(form)
 
@@ -623,8 +623,8 @@ class WizardPage(QWidget):
         db = self._get_db_params()
         ok, msg = test_mysql(db)
         kind = "ok" if ok else "bad"
-        self.db_status.set_state("OK" if ok else "FAILED", kind)
-        QMessageBox.information(self, "DB Test", msg)
+        self.db_status.set_state("ناجح" if ok else "فشل", kind)
+        QMessageBox.information(self, "اختبار قاعدة البيانات", msg)
 
     # --- Step 4
     def _build_template_page(self) -> QWidget:
@@ -2063,7 +2063,7 @@ class MainWindow(QMainWindow):
                 }
                 write_project_meta(Path(rec.path), meta, log=self.log)
             except Exception as e:
-                self.log(f"Meta write failed: {e}")
+                self.log(f"فشلت كتابة بيانات المشروع الوصفية: {e}")
             self.store.upsert(rec)
             self.url_page.reload_projects()
             self.manager_page.reload_projects()
@@ -2071,19 +2071,19 @@ class MainWindow(QMainWindow):
             self.dev_tools_page.reload_projects()
 
             # offer open
-            r = QMessageBox.question(self, "Done", "Open site now?")
+            r = QMessageBox.question(self, "تم", "هل تريد فتح الموقع الآن؟")
             if r == QMessageBox.StandardButton.Yes and url:
                 import webbrowser
                 webbrowser.open(url)
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشلت العملية", msg)
 
 
     def _run_backup_worker(self, project_path: str, db: DBParams, out_dir: str):
         self.progress.clear()
-        self.set_status("Backing up...", "info")
+        self.set_status("جارٍ النسخ الاحتياطي...", "info")
         self._worker_thread = QThread()
         self.bw = BackupWorker(project_path, db, out_dir, True, True)
         self.bw.moveToThread(self._worker_thread)
@@ -2098,17 +2098,17 @@ class MainWindow(QMainWindow):
 
     def _backup_done(self, ok: bool, msg: str, bdir: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Backup", f"Backup created:\n{bdir}")
+            QMessageBox.information(self, "نسخ احتياطي", f"تم إنشاء النسخة الاحتياطية:\n{bdir}")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Backup Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل النسخ الاحتياطي", msg)
 
     def _run_restore_worker(self, project_path: str, db: DBParams, backup_dir: str):
         self.progress.clear()
-        self.set_status("Restoring...", "info")
+        self.set_status("جارٍ الاستعادة...", "info")
         self._worker_thread = QThread()
         self.rw = RestoreWorker(project_path, db, backup_dir, True, True)
         self.rw.moveToThread(self._worker_thread)
@@ -2123,17 +2123,17 @@ class MainWindow(QMainWindow):
 
     def _restore_done(self, ok: bool, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Restore", "Restore completed ✅")
+            QMessageBox.information(self, "استعادة", "اكتملت الاستعادة بنجاح ✅")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Restore Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشلت الاستعادة", msg)
 
     def _run_url_worker(self, project_record, db: DBParams, old_url: str, new_url: str, include_guid: bool, rename_folder: bool = False):
         self.progress.clear()
-        self.set_status("Converting URLs...", "info")
+        self.set_status("جارٍ تحويل الروابط...", "info")
 
         from app.core.wp_ops import get_effective_tooling
         php, wpcli, is_phar = get_effective_tooling(project_record, log=self.log)
@@ -2152,30 +2152,30 @@ class MainWindow(QMainWindow):
 
     def _url_done(self, success, msg, project_record: ProjectRecord, new_url: str, new_path: str):
         if success:
-            self.set_status("Done", "success")
+            self.set_status("تم", "success")
             self.log(msg)
-            
+
             # update record
             now = datetime.datetime.utcnow().isoformat() + "Z"
             project_record.url = new_url
             project_record.admin_url = new_url.rstrip("/") + "/wp-admin/"
             project_record.last_action_iso = now
-            
+
             if new_path and str(new_path) != str(project_record.path):
                 old_path = str(project_record.path)
                 project_record.path = str(new_path)
-                self.log(f"Project path updated to: {new_path}")
+                self.log(f"تم تحديث مسار المشروع إلى: {new_path}")
                 # Remove old record to prevent duplicates
                 self.store.delete_by_path(old_path)
-            
+
             self.store.upsert(project_record)
             self.dashboard.reload()
             self.url_page.reload_projects() # Refresh this page specifically to update path in UI
-            QMessageBox.information(self, "Success", msg)
+            QMessageBox.information(self, "تم بنجاح", msg)
         else:
-            self.set_status("Failed", "error")
-            self.log(f"Error: {msg}")
-            QMessageBox.critical(self, "URL Convert Failed", msg)
+            self.set_status("فشلت العملية", "error")
+            self.log(f"خطأ: {msg}")
+            QMessageBox.critical(self, "فشل تحويل الروابط", msg)
 
     
 
@@ -2183,13 +2183,13 @@ class MainWindow(QMainWindow):
     def clone_selected(self):
         cur = self.dashboard.current
         if not cur:
-            QMessageBox.information(self, "Clone", "Select a project first.")
+            QMessageBox.information(self, "استنساخ", "اختر مشروعاً أولاً.")
             return
 
-        dlg = TextInputDialog("Clone Project", [
-            ("name", "New project folder name"),
-            ("url", "New site URL"),
-            ("db", "New DB name"),
+        dlg = TextInputDialog("استنساخ المشروع", [
+            ("name", "اسم مجلد المشروع الجديد"),
+            ("url", "رابط الموقع الجديد"),
+            ("db", "اسم قاعدة البيانات الجديدة"),
         ])
         dlg.edits["name"].setText(cur.name + "-clone")
         dlg.edits["url"].setText(cur.url.rstrip("/") + "-clone")
@@ -2243,7 +2243,7 @@ class MainWindow(QMainWindow):
         }
 
         self.progress.clear()
-        self.set_status("Cloning...", "info")
+        self.set_status("جارٍ الاستنساخ...", "info")
 
         self._worker_thread = QThread()
         self.clone_worker = CloneWorker(params)
@@ -2262,17 +2262,17 @@ class MainWindow(QMainWindow):
 
     def _clone_done(self, ok: bool, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Clone", "Clone done ✅\n(If URL changes didn't fully apply, enable WP-CLI for perfect search-replace.)")
+            QMessageBox.information(self, "استنساخ", "اكتمل الاستنساخ بنجاح ✅\n(إذا لم يُطبَّق تغيير الروابط بالكامل، فعّل WP-CLI للحصول على استبدال بحث مثالي.)")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Clone Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل الاستنساخ", msg)
 
     def _run_scan_worker(self, project_path: str):
         self.progress.clear()
-        self.set_status("Scanning...", "info")
+        self.set_status("جارٍ الفحص...", "info")
         self._worker_thread = QThread()
         self.scan_worker = ScanWorker(project_path)
         self.scan_worker.moveToThread(self._worker_thread)
@@ -2286,10 +2286,10 @@ class MainWindow(QMainWindow):
         self._worker_thread.start()
 
     def _scan_done(self, ok: bool, results: list, msg: str):
-        self.set_status("Ready", "ok")
+        self.set_status("جاهز", "ok")
         if ok:
             self.log(msg)
             self.security_page.on_scan_finished(results)
         else:
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Scan Failed", msg)
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل الفحص", msg)
