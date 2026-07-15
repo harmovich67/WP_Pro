@@ -221,7 +221,7 @@ class DashboardPage(QWidget):
             path=data["path"],
             url=data["url"],
             admin_url=data["url"].rstrip("/") + "/wp-admin/",
-            stack="Unknown", # Imported
+            stack="غير معروف", # Imported
             doc_root=str(path_obj.parent),
             db_host=data["db_host"],
             db_port=data["db_port"],
