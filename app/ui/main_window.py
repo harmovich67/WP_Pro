@@ -1505,38 +1505,38 @@ class MainWindow(QMainWindow):
         # Folder is still locked — ask user to kill web server processes
         ans = QMessageBox.question(
             self,
-            "Files Locked by Web Server",
-            "The project folder is locked by Apache/PHP (Laragon).\n\n"
-            "Do you want to automatically stop Apache and PHP processes to complete the deletion?\n\n"
-            "You can restart Laragon manually afterwards.",
+            "الملفات مقفلة بواسطة خادم الويب",
+            "مجلد المشروع مقفل بواسطة Apache/PHP (Laragon).\n\n"
+            "هل تريد إيقاف عمليات Apache وPHP تلقائياً لإتمام الحذف؟\n\n"
+            "يمكنك إعادة تشغيل Laragon يدوياً بعد ذلك.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if ans != QMessageBox.StandardButton.Yes:
             raise OSError(
-                f"Deletion cancelled. Stop Laragon services manually, then try again."
+                f"تم إلغاء الحذف. أوقف خدمات Laragon يدوياً، ثم حاول مرة أخرى."
             )
 
         killed = self._kill_web_server_processes()
-        self.log(f"Stopped processes: {', '.join(killed) if killed else 'none found'}")
+        self.log(f"تم إيقاف العمليات: {', '.join(killed) if killed else 'لا توجد عمليات'}")
 
         time.sleep(1)
         if _try_delete():
             return
 
         raise OSError(
-            f"Could not delete '{path}' even after stopping web server processes.\n"
-            "Please close any editors or file explorers that have this folder open, then try again."
+            f"تعذّر حذف '{path}' حتى بعد إيقاف عمليات خادم الويب.\n"
+            "يرجى إغلاق أي محررات أو نوافذ مستكشف ملفات مفتوحة على هذا المجلد، ثم حاول مرة أخرى."
         )
 
     def _do_full_delete(self, p: ProjectRecord):
-        self.log(f"Starting full deletion for: {p.name}")
-        self.set_status("Deleting...", "info")
+        self.log(f"بدء الحذف الكامل لـ: {p.name}")
+        self.set_status("جارٍ الحذف...", "info")
 
         try:
             # 1. DB
-            dlg = DbCredsDialog("DB Credentials (for deletion)", default_user="root")
+            dlg = DbCredsDialog("بيانات قاعدة البيانات (للحذف)", default_user="root")
             if dlg.exec() != QDialog.DialogCode.Accepted:
-                self.set_status("Ready", "ok")
+                self.set_status("جاهز", "ok")
                 return
             user, pwd = dlg.creds()
             db = self._db_params_with_creds(p, user, pwd)
@@ -1545,14 +1545,14 @@ class MainWindow(QMainWindow):
             # 2. Files
             p_path = Path(p.path)
             if p_path.exists() and p_path.is_dir():
-                self.log(f"Deleting folder: {p_path}")
+                self.log(f"جارِ حذف المجلد: {p_path}")
                 self._force_delete_folder(p_path)
 
             # 3. Store
             self.store.delete_by_path(p.path)
 
-            self.log("Full deletion completed ✅")
-            self.set_status("Ready", "ok")
+            self.log("اكتمل الحذف الكامل بنجاح ✅")
+            self.set_status("جاهز", "ok")
             self.dashboard.reload()
             self.console.reload_projects()
             self.backup_page.reload_projects()
@@ -1564,12 +1564,12 @@ class MainWindow(QMainWindow):
             self.dev_tools_page.reload_projects()
             self.site_dashboard_page.reload_projects()
 
-            QMessageBox.information(self, "Deleted", f"Project '{p.name}' and its database have been deleted.")
+            QMessageBox.information(self, "تم الحذف", f"تم حذف المشروع '{p.name}' وقاعدة بياناته.")
 
         except Exception as e:
-            self.log(f"ERROR: {e}")
-            self.set_status("Failed", "bad")
-            QMessageBox.critical(self, "Deletion Failed", f"An error occurred during deletion:\n{e}")
+            self.log(f"خطأ: {e}")
+            self.set_status("فشلت العملية", "bad")
+            QMessageBox.critical(self, "فشل الحذف", f"حدث خطأ أثناء الحذف:\n{e}")
 
     def _wrap_pad(self, w: QWidget) -> QWidget:
         c = QWidget()
@@ -1583,7 +1583,7 @@ class MainWindow(QMainWindow):
         """Show / hide the bottom log area."""
         visible = self.progress.isVisible()
         self.progress.setVisible(not visible)
-        self._btn_toggle_log.setText("▼ Show" if visible else "▲ Hide")
+        self._btn_toggle_log.setText("▼ إظهار" if visible else "▲ إخفاء")
 
     def log(self, s: str):
         self.progress.append(s)
@@ -1592,7 +1592,7 @@ class MainWindow(QMainWindow):
         self.status_pill.setParent(None)
         self.status_pill = Pill(text, kind)
         # Put it back in header: easiest - set window title suffix as well
-        self.setWindowTitle(f"WP Local Installer Pro — {text}")
+        self.setWindowTitle(f"Harmulizer Pro — {text}")
     
     def show_toast(self, message: str, toast_type: str = "info", duration: int = 3000):
         """Show a non-blocking toast notification"""
