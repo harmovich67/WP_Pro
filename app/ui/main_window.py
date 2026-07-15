@@ -1819,7 +1819,7 @@ class MainWindow(QMainWindow):
     def _show_about(self):
         """Show professional About dialog."""
         dlg = QDialog(self)
-        dlg.setWindowTitle("About Harmulizer Pro")
+        dlg.setWindowTitle("حول Harmulizer Pro")
         dlg.setFixedSize(480, 420)
         dlg.setStyleSheet("""
             QDialog {
@@ -1850,12 +1850,12 @@ class MainWindow(QMainWindow):
         app_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(app_name)
 
-        version_lbl = QLabel("Version 1.0.0")
+        version_lbl = QLabel("الإصدار 1.0.0")
         version_lbl.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 13px; background: transparent;")
         version_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(version_lbl)
 
-        tagline = QLabel("WordPress Local Development Suite")
+        tagline = QLabel("مجموعة أدوات تطوير ووردبريس المحلية")
         tagline.setStyleSheet("color: rgba(255,255,255,0.6); font-size: 11px; background: transparent;")
         tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(tagline)
@@ -1882,7 +1882,7 @@ class MainWindow(QMainWindow):
         dc_lay.setContentsMargins(20, 16, 20, 16)
         dc_lay.setSpacing(8)
 
-        dev_title = QLabel("Developer")
+        dev_title = QLabel("المطوّر")
         dev_title.setStyleSheet("color: #9CA3AF; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: transparent; border: none;")
         dc_lay.addWidget(dev_title)
 
@@ -1890,7 +1890,7 @@ class MainWindow(QMainWindow):
         dev_name.setStyleSheet("color: #F9FAFB; font-size: 20px; font-weight: 800; background: transparent; border: none;")
         dc_lay.addWidget(dev_name)
 
-        dev_role = QLabel("Software Engineer")
+        dev_role = QLabel("مهندس برمجيات")
         dev_role.setStyleSheet("color: #A5B4FC; font-size: 12px; font-weight: 600; background: transparent; border: none;")
         dc_lay.addWidget(dev_role)
 
@@ -1909,7 +1909,7 @@ class MainWindow(QMainWindow):
         tc_lay.setContentsMargins(20, 14, 20, 14)
         tc_lay.setSpacing(6)
 
-        tech_title = QLabel("Built With")
+        tech_title = QLabel("بُني باستخدام")
         tech_title.setStyleSheet("color: #9CA3AF; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: transparent; border: none;")
         tc_lay.addWidget(tech_title)
 
@@ -1927,12 +1927,12 @@ class MainWindow(QMainWindow):
         f_lay = QHBoxLayout(footer)
         f_lay.setContentsMargins(20, 12, 20, 12)
 
-        copy_lbl = QLabel("\u00a9 2025 Saeed Mahmoud. All rights reserved.")
+        copy_lbl = QLabel("\u00a9 2025 Saeed Mahmoud. \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0642 \u0645\u062d\u0641\u0648\u0638\u0629.")
         copy_lbl.setStyleSheet("color: #6B7280; font-size: 11px; background: transparent;")
         f_lay.addWidget(copy_lbl)
         f_lay.addStretch()
 
-        btn_ok = QPushButton("OK")
+        btn_ok = QPushButton("موافق")
         btn_ok.setStyleSheet("""
             QPushButton {
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #6366F1, stop:1 #4F46E5);
@@ -1956,8 +1956,8 @@ class MainWindow(QMainWindow):
         ok_all = all(c[0] for c in checks)
         for ok, msg in checks:
             self.log(("✅ " if ok else "❌ ") + msg)
-        self.wizard.preflight_box.setPlainText("\n".join([("OK " if ok else "FAIL ") + msg for ok, msg in checks]))
-        QMessageBox.information(self, "Preflight", "All good ✅" if ok_all else "Some checks failed ❌ (see list)")
+        self.wizard.preflight_box.setPlainText("\n".join([("ناجح " if ok else "فشل ") + msg for ok, msg in checks]))
+        QMessageBox.information(self, "فحوصات ما قبل التثبيت", "كل شيء جاهز ✅" if ok_all else "فشلت بعض الفحوصات ❌ (راجع القائمة)")
 
     def do_install(self, wp: WPParams, db: DBParams):
         self.progress.clear()
@@ -1968,14 +1968,14 @@ class MainWindow(QMainWindow):
 
         # basic validation
         if not wp.project_name or not str(wp.doc_root).strip():
-            QMessageBox.warning(self, "Missing", "Project name and document root are required.")
+            QMessageBox.warning(self, "بيانات ناقصة", "اسم المشروع ومجلد المستندات مطلوبان.")
             return
         if not db.db_name:
-            QMessageBox.warning(self, "Missing", "DB name is required.")
+            QMessageBox.warning(self, "بيانات ناقصة", "اسم قاعدة البيانات مطلوب.")
             return
 
         # run worker
-        self.set_status("Installing...", "info")
+        self.set_status("جارٍ التثبيت...", "info")
         self.sidebar.setCurrentRow(0)  # show dashboard to see logs or stay in wizard? 
         # User requested to see creation phases, so we keep logs visible.
 
@@ -1996,7 +1996,7 @@ class MainWindow(QMainWindow):
 
     def _install_done(self, ok: bool, res: dict, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
 
             now = datetime.datetime.utcnow().isoformat() + "Z"
