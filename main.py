@@ -6,6 +6,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtCore import Qt
 from app.ui.theme import ThemeManager
 from app.ui.main_window import MainWindow
+from app.core.i18n import load_language, get_language
 
 
 def _get_icon_path() -> str:
@@ -27,9 +28,12 @@ def main():
 
     app = QApplication(sys.argv)
 
-    # Full RTL layout mirroring for Arabic localization (menus, toolbars,
-    # scrollbars, and default alignment all mirror automatically).
-    app.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+    # Load saved language preference and mirror layout direction accordingly
+    # (RTL for Arabic, LTR for English — menus, toolbars, scrollbars, and
+    # default alignment all mirror automatically).
+    load_language()
+    direction = Qt.LayoutDirection.RightToLeft if get_language() == "ar" else Qt.LayoutDirection.LeftToRight
+    app.setLayoutDirection(direction)
 
     # Set application-wide icon
     icon_path = _get_icon_path()

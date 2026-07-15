@@ -34,6 +34,7 @@ from app.core.workers import (
     InstallWorker, BackupWorker, RestoreWorker, UrlConvertWorker, CloneWorker, ScanWorker
 )
 from app.core.license import LicenseManager
+from app.core.i18n import t as tr, get_language, set_language
 from app.ui.license_dialog import LicenseDialog
 
 
@@ -1202,7 +1203,7 @@ class MainWindow(QMainWindow):
         title_box = QVBoxLayout()
         t = QLabel("Harmulizer Pro")
         t.setObjectName("AppTitle")
-        s = QLabel("معالج الإعداد • القوالب • أدوات قاعدة البيانات • استنساخ/نسخ احتياطي • طرفية WP-CLI")
+        s = QLabel(tr("معالج الإعداد • القوالب • أدوات قاعدة البيانات • استنساخ/نسخ احتياطي • طرفية WP-CLI"))
         # Icon: resolve for both dev and frozen exe
         import sys as _sys
         if getattr(_sys, 'frozen', False):
@@ -1237,14 +1238,14 @@ class MainWindow(QMainWindow):
                     stop:0 #4338CA, stop:1 #6D28D9);
             }
         """)
-        self.btn_license.setToolTip("إدارة الترخيص")
+        self.btn_license.setToolTip(tr("إدارة الترخيص"))
         self.btn_license.clicked.connect(self._show_license_dialog)
         top.addWidget(self.btn_license)
 
-        # About button
-        self.btn_about = QPushButton("  حول البرنامج")
-        self.btn_about.setFixedSize(80, 40)
-        self.btn_about.setStyleSheet("""
+        # Shared style for the secondary (gray, pill-shaped) header buttons —
+        # keeps About and Language visually consistent with each other and
+        # with the license button's height/radius.
+        secondary_header_btn_style = """
             QPushButton {
                 background: #374151;
                 border: 1px solid #4B5563;
@@ -1252,34 +1253,29 @@ class MainWindow(QMainWindow):
                 font-size: 13px;
                 color: #D1D5DB;
                 font-weight: 600;
+                padding: 0 16px;
             }
             QPushButton:hover { background: #4B5563; }
-        """)
-        self.btn_about.setToolTip("حول Harmulizer Pro")
+        """
+
+        # About button
+        self.btn_about = QPushButton(tr("حول البرنامج"))
+        self.btn_about.setFixedHeight(40)
+        self.btn_about.setStyleSheet(secondary_header_btn_style)
+        self.btn_about.setToolTip(tr("حول Harmulizer Pro"))
         self.btn_about.clicked.connect(self._show_about)
         top.addWidget(self.btn_about)
-        
-        # Theme Toggle Button
-        if self.theme_manager:
-            self.btn_theme_toggle = QPushButton()
-            self._update_theme_button_icon()
-            self.btn_theme_toggle.setFixedSize(40, 40)
-            self.btn_theme_toggle.setStyleSheet("""
-                QPushButton {
-                    background: #374151;
-                    border: 1px solid #4B5563;
-                    border-radius: 20px;
-                    font-size: 18px;
-                }
-                QPushButton:hover {
-                    background: #4B5563;
-                }
-            """)
-            self.btn_theme_toggle.clicked.connect(self._toggle_theme)
-            self.btn_theme_toggle.setToolTip("تبديل المظهر الداكن/الفاتح")
-            top.addWidget(self.btn_theme_toggle)
 
-        self.status_pill = Pill("جاهز", "neutral")
+        # Language Toggle Button (shows the language it will switch TO)
+        self.btn_language_toggle = QPushButton()
+        self._update_language_button()
+        self.btn_language_toggle.setFixedSize(56, 40)
+        self.btn_language_toggle.setStyleSheet(secondary_header_btn_style)
+        self.btn_language_toggle.clicked.connect(self._toggle_language)
+        self.btn_language_toggle.setToolTip(tr("تبديل اللغة"))
+        top.addWidget(self.btn_language_toggle)
+
+        self.status_pill = Pill(tr("جاهز"), "neutral")
         top.addWidget(self.status_pill)
 
         outer.addLayout(top)
@@ -1600,21 +1596,44 @@ class MainWindow(QMainWindow):
         toast = ToastNotification(message, toast_type, self)
         toast.show_animated(duration)
     
-    def _toggle_theme(self):
-        """Toggle between dark and light theme"""
-        if self.theme_manager:
-            new_theme = self.theme_manager.toggle_theme()
-            self._update_theme_button_icon()
-            theme_name = "Light" if new_theme == "light" else "Dark"
-            self.show_toast(f"Switched to {theme_name} theme", "info", duration=2000)
-    
-    def _update_theme_button_icon(self):
-        """Update theme toggle button icon based on current theme"""
-        if self.theme_manager:
-            if self.theme_manager.current_theme == "dark":
-                self.btn_theme_toggle.setText("☀️")  # Sun for light mode
-            else:
-                self.btn_theme_toggle.setText("🌙")  # Moon for dark mode
+    def _update_language_button(self):
+        """Show the language the button will switch TO, not the current one."""
+        self.btn_language_toggle.setText("EN" if get_language() == "ar" else "AR")
+
+    def _toggle_language(self):
+        """Switch language and instantly rebuild the main window to apply it
+        (layout direction, window and widget mirroring all need a fresh
+        widget tree — Qt won't re-mirror an already-built window in place)."""
+        new_lang = "en" if get_language() == "ar" else "ar"
+        set_language(new_lang)
+
+        app = QApplication.instance()
+        direction = Qt.LayoutDirection.RightToLeft if new_lang == "ar" else Qt.LayoutDirection.LeftToRight
+        app.setLayoutDirection(direction)
+
+        # The embedded license-dashboard API server binds a fixed port, so it
+        # must be released before the new window's copy tries to bind it too.
+        dashboard_page = getattr(self, "license_dashboard_page", None)
+        if dashboard_page is not None and dashboard_page.api_thread is not None:
+            dashboard_page.api_thread.stop()
+
+        was_maximized = self.isMaximized()
+        geo = self.geometry()
+
+        new_window = MainWindow(self.theme_manager)
+        if was_maximized:
+            new_window.showMaximized()
+        else:
+            new_window.setGeometry(geo)
+            new_window.show()
+
+        # Show the new window before closing this one so Qt never sees zero
+        # visible top-level windows (which would trigger app quit).
+        self.close()
+
+        # Keep a strong reference on the long-lived QApplication instance so
+        # the new window isn't garbage-collected once this method returns.
+        app._active_main_window = new_window
 
     def _update_license_button(self):
         """Update license button text based on current license status"""
