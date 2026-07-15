@@ -62,14 +62,14 @@ class APIServerThread(QThread):
             
         except OSError as e:
             # Port already in use or permission denied
-            error_msg = f"Failed to start API server: {str(e)}"
+            error_msg = f"فشل تشغيل خادم API: {str(e)}"
             logger.error(error_msg)
             self.server_error.emit(error_msg)
             self._running = False
             
         except Exception as e:
             # Other errors
-            error_msg = f"API server error: {str(e)}"
+            error_msg = f"خطأ في خادم API: {str(e)}"
             logger.exception(error_msg)
             self.server_error.emit(error_msg)
             self._running = False
