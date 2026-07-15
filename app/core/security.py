@@ -63,35 +63,35 @@ def apply_htaccess_hardening(project_path: str, log: LogFn):
     root = Path(project_path)
     htaccess = root / ".htaccess"
     
-    log(f"Applying hardening to primary .htaccess in {project_path}")
+    log(f"جارٍ تطبيق التحصين على ملف .htaccess الرئيسي في {project_path}")
     existing = ""
     if htaccess.exists():
         existing = htaccess.read_text(encoding="utf-8")
-    
+
     if "# Hardening Rules by WP Local Installer Pro" in existing:
-        log("Hardening already applied. Updating...")
+        log("التحصين مُطبّق بالفعل. جارٍ التحديث...")
         # Simple update: replace old block if found or just append if logic is complex
         # For simplicity, we append if not found exactly or just skip if already present
         return
 
     with open(htaccess, "a", encoding="utf-8") as f:
         f.write("\n" + HTACCESS_HARDENING_RULES + "\n")
-    log("Primary .htaccess hardened.")
+    log("تم تحصين ملف .htaccess الرئيسي.")
 
     # Hardening uploads folder
     uploads = root / "wp-content" / "uploads"
     if uploads.exists():
         u_htaccess = uploads / ".htaccess"
-        log("Hardening uploads directory...")
+        log("جارٍ تحصين مجلد uploads...")
         with open(u_htaccess, "w", encoding="utf-8") as f:
             f.write(UPLOADS_HTACCESS)
     else:
-        log("Uploads directory not found, skipping sub-folder hardening.")
+        log("لم يتم العثور على مجلد uploads، سيتم تخطي تحصين المجلد الفرعي.")
 
 def scan_for_malware(project_path: str, log: LogFn, progress: Callable[[int], None] | None = None) -> list[dict]:
     root = Path(project_path)
     results = []
-    log(f"Scanning {project_path} for malware signatures...")
+    log(f"جارٍ فحص {project_path} بحثاً عن توقيعات البرمجيات الخبيثة...")
     
     php_files = list(root.rglob("*.php"))
     total = len(php_files)
@@ -114,17 +114,17 @@ def scan_for_malware(project_path: str, log: LogFn, progress: Callable[[int], No
                         "sigs": found
                     })
             except Exception as e:
-                log(f"Could not scan {p}: {e}")
-                
+                log(f"تعذر فحص {p}: {e}")
+
     if progress:
         progress(100)
-    log(f"Scan finished. Found {len(results)} suspicious files.")
+    log(f"انتهى الفحص. تم العثور على {len(results)} ملف مشبوه.")
     return results
 
 def get_file_hashes(project_path: str, log: LogFn) -> dict[str, str]:
     root = Path(project_path)
     hashes = {}
-    log("Generating file integrity manifest...")
+    log("جارٍ إنشاء سجل تكامل الملفات...")
     
     for p in root.rglob("*"):
         if p.is_file() and not p.name.startswith("."):

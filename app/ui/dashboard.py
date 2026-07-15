@@ -91,7 +91,7 @@ class ProjectCard(QFrame):
         info_row = QHBoxLayout()
         
         # Stack info
-        stack_label = QLabel(f"📊 {project.stack or 'Unknown'}")
+        stack_label = QLabel(f"📊 {project.stack or 'غير معروف'}")
         stack_label.setStyleSheet("color: #9CA3AF; font-size: 11px;")
         info_row.addWidget(stack_label)
         
@@ -108,7 +108,7 @@ class ProjectCard(QFrame):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
         
-        btn_open = QPushButton("Open")
+        btn_open = QPushButton("فتح")
         btn_open.clicked.connect(lambda: self.open_site_clicked.emit(self.project))
         btn_open.setStyleSheet("""
             QPushButton {
@@ -126,7 +126,7 @@ class ProjectCard(QFrame):
         """)
         btn_row.addWidget(btn_open)
         
-        btn_admin = QPushButton("Admin")
+        btn_admin = QPushButton("الإدارة")
         btn_admin.clicked.connect(lambda: self.open_admin_clicked.emit(self.project))
         btn_admin.setStyleSheet("""
             QPushButton {
@@ -239,10 +239,10 @@ class DashboardPage(QWidget):
         stats_row.setSpacing(16)
         
         # Create stat cards and keep reference to value labels
-        self.stat_total = StatCard("Total Projects", "0", "📦", "#3B82F6")
-        self.stat_running = StatCard("Active", "0", "⚡", "#10B981")
-        self.stat_backups = StatCard("Backups", "0", "🔄", "#F59E0B")
-        self.stat_issues = StatCard("Issues", "0", "⚠️", "#EF4444")
+        self.stat_total = StatCard("إجمالي المشاريع", "0", "📦", "#3B82F6")
+        self.stat_running = StatCard("نشط", "0", "⚡", "#10B981")
+        self.stat_backups = StatCard("النسخ الاحتياطية", "0", "🔄", "#F59E0B")
+        self.stat_issues = StatCard("المشاكل", "0", "⚠️", "#EF4444")
         
         # Direct references to value labels
         self.stat_total_value = self.stat_total.value_label
@@ -261,8 +261,8 @@ class DashboardPage(QWidget):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(12)
         
-        self.btn_new = PrimaryButton("➕ New Project")
-        self.btn_import = QPushButton("📥 Import Existing")
+        self.btn_new = PrimaryButton("➕ مشروع جديد")
+        self.btn_import = QPushButton("📥 استيراد موجود")
         self.btn_import.setStyleSheet("""
             QPushButton {
                 background: #374151;
@@ -277,7 +277,7 @@ class DashboardPage(QWidget):
             }
         """)
         
-        self.btn_clone = QPushButton("📋 Clone")
+        self.btn_clone = QPushButton("📋 استنساخ")
         self.btn_clone.setStyleSheet("""
             QPushButton {
                 background: #374151;
@@ -412,12 +412,12 @@ class DashboardPage(QWidget):
     
     def remove_project(self, project: ProjectRecord):
         msg = QMessageBox(self)
-        msg.setWindowTitle("Delete Project")
-        msg.setText(f"How would you like to delete '{project.name}'?")
-        msg.setInformativeText("Warning: 'Delete Everything' cannot be undone.")
-        
-        btn_remove_only = msg.addButton("Remove from List Only", QMessageBox.ButtonRole.ActionRole)
-        btn_full_delete = msg.addButton("Delete Everything (Files + DB)", QMessageBox.ButtonRole.DestructiveRole)
+        msg.setWindowTitle("حذف المشروع")
+        msg.setText(f"كيف تريد حذف '{project.name}'؟")
+        msg.setInformativeText("تحذير: لا يمكن التراجع عن 'حذف كل شيء'.")
+
+        btn_remove_only = msg.addButton("إزالة من القائمة فقط", QMessageBox.ButtonRole.ActionRole)
+        btn_full_delete = msg.addButton("حذف كل شيء (الملفات + قاعدة البيانات)", QMessageBox.ButtonRole.DestructiveRole)
         msg.addButton(QMessageBox.StandardButton.Cancel)
         
         msg.exec()
@@ -440,7 +440,7 @@ class DashboardPage(QWidget):
         
         # Validation
         if not path_obj.exists() or not path_obj.is_dir():
-            QMessageBox.critical(self, "Error", "Invalid project path.")
+            QMessageBox.critical(self, "خطأ", "مسار المشروع غير صالح.")
             return
 
         now = datetime.datetime.utcnow().isoformat() + "Z"
@@ -451,7 +451,7 @@ class DashboardPage(QWidget):
             path=data["path"],
             url=data["url"],
             admin_url=data["url"].rstrip("/") + "/wp-admin/",
-            stack="Unknown",  # Imported
+            stack="غير معروف",  # Imported
             doc_root=str(path_obj.parent),
             db_host=data["db_host"],
             db_port=data["db_port"],
@@ -461,9 +461,9 @@ class DashboardPage(QWidget):
             table_prefix=data["table_prefix"],
             created_at_iso=now,
             last_action_iso=now,
-            notes="Imported project"
+            notes="مشروع مستورد"
         )
-        
+
         self.store.upsert(rec)
         self.reload()
-        QMessageBox.information(self, "Success", f"Project '{rec.name}' imported successfully.")
+        QMessageBox.information(self, "نجاح", f"تم استيراد المشروع '{rec.name}' بنجاح! 🎉")

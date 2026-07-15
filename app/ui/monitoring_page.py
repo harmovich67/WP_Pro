@@ -17,33 +17,33 @@ class MonitoringPage(BaseExtraPage):
         super().__init__(store, parent_window)
         
         # Site Health Card
-        health_card, h_lay = make_card("Site Health", "Monitor site availability")
-        
-        self.health_status = QLabel("Status: Not Checked")
+        health_card, h_lay = make_card("صحة الموقع", "مراقبة توفر الموقع")
+
+        self.health_status = QLabel("الحالة: لم يتم الفحص")
         self.health_status.setStyleSheet("font-size: 14px; font-weight: bold;")
         h_lay.addWidget(self.health_status)
-        
-        self.btn_check_health = PrimaryButton("Check Site Health")
+
+        self.btn_check_health = PrimaryButton("فحص صحة الموقع")
         self.btn_check_health.clicked.connect(self._check_health)
         h_lay.addWidget(row_buttons(self.btn_check_health))
-        
+
         # Debug Log Card
-        debug_card, d_lay = make_card("Recent Errors", "From debug.log")
-        
+        debug_card, d_lay = make_card("الأخطاء الأخيرة", "من ملف debug.log")
+
         self.errors_list = QListWidget()
         self.errors_list.setMaximumHeight(200)
         d_lay.addWidget(self.errors_list)
-        
-        self.btn_refresh_errors = QPushButton("Refresh Errors")
+
+        self.btn_refresh_errors = QPushButton("تحديث الأخطاء")
         self.btn_refresh_errors.clicked.connect(self._refresh_errors)
         d_lay.addWidget(row_buttons(self.btn_refresh_errors))
-        
+
         # Auto-Fix Card
-        fix_card, f_lay = make_card("Quick Fixes", "Fix common issues")
-        
-        self.btn_fix_htaccess = QPushButton("Regenerate .htaccess")
-        self.btn_fix_perms = QPushButton("Fix Permissions")
-        self.btn_clear_cache = QPushButton("Clear Cache")
+        fix_card, f_lay = make_card("إصلاحات سريعة", "إصلاح المشاكل الشائعة")
+
+        self.btn_fix_htaccess = QPushButton("إعادة إنشاء .htaccess")
+        self.btn_fix_perms = QPushButton("إصلاح الصلاحيات")
+        self.btn_clear_cache = QPushButton("مسح الذاكرة المؤقتة")
         
         self.btn_fix_htaccess.clicked.connect(self._regenerate_htaccess)
         self.btn_fix_perms.clicked.connect(self._fix_permissions)
@@ -70,7 +70,7 @@ class MonitoringPage(BaseExtraPage):
     def _on_project_cleared(self):
         self._set_enabled(False)
         self.errors_list.clear()
-        self.health_status.setText("Status: Not Checked")
+        self.health_status.setText("الحالة: لم يتم الفحص")
     
     def _set_enabled(self, val: bool):
         self.btn_check_health.setEnabled(val)
@@ -85,7 +85,7 @@ class MonitoringPage(BaseExtraPage):
 
         from app.core.workers import HealthCheckWorker
 
-        self.health_status.setText("Checking...")
+        self.health_status.setText("جارٍ الفحص...")
         self.health_status.setStyleSheet("font-size: 14px; font-weight: bold;")
         self.btn_check_health.setEnabled(False)
 
@@ -100,10 +100,10 @@ class MonitoringPage(BaseExtraPage):
     def _on_health_result(self, result: dict):
         self.btn_check_health.setEnabled(True)
         if result["status"] == "online":
-            self.health_status.setText(f"✅ Online - {result['status_code']} ({result['response_time']:.2f}s)")
+            self.health_status.setText(f"✅ متصل - {result['status_code']} ({result['response_time']:.2f} ث)")
             self.health_status.setStyleSheet("color: green; font-size: 14px; font-weight: bold;")
         else:
-            error_msg = result.get("error", result.get("status_code", "Unknown"))
+            error_msg = result.get("error", result.get("status_code", "غير معروف"))
             self.health_status.setText(f"❌ {result['status']} - {error_msg}")
             self.health_status.setStyleSheet("color: red; font-size: 14px; font-weight: bold;")
     
@@ -116,7 +116,7 @@ class MonitoringPage(BaseExtraPage):
         errors = SiteMonitor.parse_debug_log(self.current.path)
         
         if not errors:
-            self.errors_list.addItem("✅ No errors found in debug.log")
+            self.errors_list.addItem("✅ لم يتم العثور على أخطاء في debug.log")
             return
         
         for error in errors[-20:]:  # Last 20 errors
@@ -130,16 +130,16 @@ class MonitoringPage(BaseExtraPage):
         
         r = QMessageBox.question(
             self,
-            "Confirm",
-            "This will regenerate .htaccess with WordPress defaults.\n\nContinue?",
+            "تأكيد",
+            "سيؤدي هذا إلى إعادة إنشاء ملف .htaccess بالإعدادات الافتراضية لـ WordPress.\n\nهل تريد المتابعة؟",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if r != QMessageBox.StandardButton.Yes:
             return
-        
+
         success = AutoFix.regenerate_htaccess(self.current.path, self.parent_window.log)
         if success:
-            QMessageBox.information(self, "Success", ".htaccess regenerated successfully!")
+            QMessageBox.information(self, "نجاح", "تمت إعادة إنشاء ملف .htaccess بنجاح! 🎉")
     
     def _fix_permissions(self):
         if not self.current: return
@@ -148,22 +148,22 @@ class MonitoringPage(BaseExtraPage):
         
         r = QMessageBox.question(
             self,
-            "Confirm",
-            "This will fix file permissions (remove read-only).\n\nContinue?",
+            "تأكيد",
+            "سيؤدي هذا إلى إصلاح صلاحيات الملفات (إزالة القراءة فقط).\n\nهل تريد المتابعة؟",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if r != QMessageBox.StandardButton.Yes:
             return
-        
+
         success = AutoFix.fix_permissions(self.current.path, self.parent_window.log)
         if success:
-            QMessageBox.information(self, "Success", "Permissions fixed!")
-    
+            QMessageBox.information(self, "نجاح", "تم إصلاح الصلاحيات! 🎉")
+
     def _clear_cache(self):
         if not self.current: return
-        
+
         from app.core.auto_fix import AutoFix
-        
+
         success = AutoFix.clear_cache(self.current.path, self.parent_window.log)
         if success:
-            QMessageBox.information(self, "Success", "Cache cleared!")
+            QMessageBox.information(self, "نجاح", "تم مسح الذاكرة المؤقتة! 🎉")

@@ -111,7 +111,7 @@ def apply_dark_theme(app: QApplication):
         QListWidget#Sidebar {
             background: #0F172A;
             border: none;
-            border-right: 1px solid #1E293B;
+            border-left: 1px solid #1E293B;
             outline: none;
             padding-top: 20px;
         }
@@ -174,7 +174,7 @@ def apply_dark_theme(app: QApplication):
         QTabBar::tab {
             background: #1F2937;
             padding: 8px 12px;
-            margin-right: 2px;
+            margin-left: 2px;
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
         }
@@ -264,7 +264,7 @@ def apply_light_theme(app: QApplication):
         QListWidget#Sidebar {
             background: #FFFFFF;
             border: none;
-            border-right: 1px solid #E5E7EB;
+            border-left: 1px solid #E5E7EB;
             outline: none;
             padding-top: 20px;
         }
@@ -306,7 +306,7 @@ def apply_light_theme(app: QApplication):
         QTabBar::tab {
             background: #F3F4F6;
             padding: 8px 12px;
-            margin-right: 2px;
+            margin-left: 2px;
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
             color: #6B7280;

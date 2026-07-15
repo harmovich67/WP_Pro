@@ -72,15 +72,15 @@ class _PostEditDialog(QDialog):
                  data: dict | None = None, parent=None):
         super().__init__(parent)
         is_edit = data is not None
-        label = "Post" if post_type == "post" else "Page"
-        self.setWindowTitle(f"{'Edit' if is_edit else 'New'} {label}")
+        label = "مقال" if post_type == "post" else "صفحة"
+        self.setWindowTitle(f"{'تعديل' if is_edit else 'إضافة'} {label}")
         self.setMinimumSize(640, 520)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
         self._title = QLineEdit(data.get("post_title", "") if data else "")
-        self._title.setPlaceholderText("Enter title here…")
+        self._title.setPlaceholderText("اكتب العنوان هنا…")
 
         self._status = QComboBox()
         self._status.addItems(["publish", "draft", "private", "pending"])
@@ -91,19 +91,19 @@ class _PostEditDialog(QDialog):
 
         self._excerpt = QLineEdit(
             data.get("post_excerpt", "") if data else "")
-        self._excerpt.setPlaceholderText("Optional excerpt")
+        self._excerpt.setPlaceholderText("مقتطف اختياري")
 
         self._content = QTextEdit()
         self._content.setPlaceholderText(
-            "Post content (plain text or HTML)…")
+            "محتوى المقال (نص عادي أو HTML)…")
         if data and data.get("post_content"):
             self._content.setPlainText(data["post_content"])
 
-        form.addRow("Title:", self._title)
-        form.addRow("Status:", self._status)
-        form.addRow("Excerpt:", self._excerpt)
+        form.addRow("العنوان:", self._title)
+        form.addRow("الحالة:", self._status)
+        form.addRow("المقتطف:", self._excerpt)
         layout.addLayout(form)
-        layout.addWidget(QLabel("Content:"))
+        layout.addWidget(QLabel("المحتوى:"))
         layout.addWidget(self._content, 1)
 
         btns = QDialogButtonBox(
@@ -127,13 +127,13 @@ class _UserCreateDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Create New User")
+        self.setWindowTitle("إنشاء مستخدم جديد")
         self.setMinimumWidth(420)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
-        self._username  = QLineEdit(); self._username.setPlaceholderText("username")
+        self._username  = QLineEdit(); self._username.setPlaceholderText("اسم المستخدم")
         self._email     = QLineEdit(); self._email.setPlaceholderText("user@example.com")
         self._password  = QLineEdit(); self._password.setEchoMode(QLineEdit.EchoMode.Password)
         self._firstname = QLineEdit()
@@ -142,12 +142,12 @@ class _UserCreateDialog(QDialog):
         self._role.addItems(
             ["subscriber", "contributor", "author", "editor", "administrator"])
 
-        form.addRow("Username:",   self._username)
-        form.addRow("Email:",      self._email)
-        form.addRow("Password:",   self._password)
-        form.addRow("First Name:", self._firstname)
-        form.addRow("Last Name:",  self._lastname)
-        form.addRow("Role:",       self._role)
+        form.addRow("اسم المستخدم:", self._username)
+        form.addRow("البريد الإلكتروني:", self._email)
+        form.addRow("كلمة المرور:", self._password)
+        form.addRow("الاسم الأول:", self._firstname)
+        form.addRow("اسم العائلة:", self._lastname)
+        form.addRow("الدور:", self._role)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
@@ -173,7 +173,7 @@ class _OptionEditDialog(QDialog):
 
     def __init__(self, name: str, value: str, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"Edit Option: {name}")
+        self.setWindowTitle(f"تعديل الخيار: {name}")
         self.setMinimumWidth(520)
 
         layout = QVBoxLayout(self)
@@ -185,8 +185,8 @@ class _OptionEditDialog(QDialog):
         self._value.setPlainText(value)
         self._value.setMaximumHeight(220)
 
-        form.addRow("Option:", name_lbl)
-        form.addRow("Value:",  self._value)
+        form.addRow("الخيار:", name_lbl)
+        form.addRow("القيمة:", self._value)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
@@ -308,7 +308,7 @@ class _AcfFieldDialog(QDialog):
             self._name.setEnabled(False)  # slug should not change after creation
 
         form.addRow("التسمية *:", self._label)
-        form.addRow("Name (slug) *:", self._name)
+        form.addRow("الاسم (slug) *:", self._name)
         form.addRow("النوع:", self._type)
         form.addRow("التعليمات:", self._instructions)
         form.addRow("", self._required)
@@ -361,10 +361,10 @@ class _CptDialog(QDialog):
                 self._plural.setText(nice + "s")
         self._slug.textChanged.connect(_auto_labels)
 
-        form.addRow("Slug *:", self._slug)
-        form.addRow("Singular label *:", self._singular)
-        form.addRow("Plural label *:", self._plural)
-        form.addRow("Icon (dashicon):", self._icon)
+        form.addRow("الـ Slug *:", self._slug)
+        form.addRow("التسمية المفردة *:", self._singular)
+        form.addRow("التسمية الجمع *:", self._plural)
+        form.addRow("الأيقونة (dashicon):", self._icon)
         layout.addLayout(form)
 
         # Supports checkboxes
@@ -374,13 +374,13 @@ class _CptDialog(QDialog):
 
         self._sup: dict[str, QCheckBox] = {}
         for key, label, default, row in [
-            ("title",          "Title",          True,  supports_row1),
-            ("editor",         "Editor",         True,  supports_row1),
-            ("thumbnail",      "Featured Image", True,  supports_row1),
-            ("excerpt",        "Excerpt",        False, supports_row2),
-            ("comments",       "Comments",       False, supports_row2),
-            ("revisions",      "Revisions",      False, supports_row2),
-            ("custom-fields",  "Custom Fields",  False, supports_row2),
+            ("title",          "العنوان",          True,  supports_row1),
+            ("editor",         "المحرر",           True,  supports_row1),
+            ("thumbnail",      "الصورة البارزة",   True,  supports_row1),
+            ("excerpt",        "المقتطف",          False, supports_row2),
+            ("comments",       "التعليقات",        False, supports_row2),
+            ("revisions",      "المراجعات",        False, supports_row2),
+            ("custom-fields",  "الحقول المخصصة",   False, supports_row2),
         ]:
             cb = QCheckBox(label)
             cb.setChecked(default)
@@ -392,10 +392,10 @@ class _CptDialog(QDialog):
 
         # Options row
         options_row = QHBoxLayout()
-        self._public     = QCheckBox("Public");     self._public.setChecked(True)
-        self._archive    = QCheckBox("Has Archive"); self._archive.setChecked(True)
-        self._rest       = QCheckBox("Show in REST"); self._rest.setChecked(True)
-        self._hier       = QCheckBox("Hierarchical"); self._hier.setChecked(False)
+        self._public     = QCheckBox("عام (Public)");     self._public.setChecked(True)
+        self._archive    = QCheckBox("له أرشيف");          self._archive.setChecked(True)
+        self._rest       = QCheckBox("إظهار في REST");     self._rest.setChecked(True)
+        self._hier       = QCheckBox("هرمي (Hierarchical)"); self._hier.setChecked(False)
         for cb in [self._public, self._archive, self._rest, self._hier]:
             options_row.addWidget(cb)
         options_row.addStretch()
@@ -465,8 +465,8 @@ class _AcfCodeDialog(QDialog):
         # Header
         header = QLabel(
             f"<b>حقل:</b> {flabel}  &nbsp;|&nbsp;  "
-            f"<b>Name:</b> <code>{fname}</code>  &nbsp;|&nbsp;  "
-            f"<b>Type:</b> <code>{ftype}</code>")
+            f"<b>الاسم:</b> <code>{fname}</code>  &nbsp;|&nbsp;  "
+            f"<b>النوع:</b> <code>{ftype}</code>")
         header.setStyleSheet("padding: 6px; color: #D1FAE5;")
         layout.addWidget(header)
 
@@ -635,8 +635,8 @@ class SiteDashboardPage(BaseExtraPage):
         self._lbl_version = QLabel("")
         self._lbl_version.setStyleSheet("color: #9CA3AF; font-size: 12px;")
 
-        btn_open  = _secondary_btn("🌐 Open Site")
-        btn_admin = _secondary_btn("⚙️ Open Admin")
+        btn_open  = _secondary_btn("🌐 فتح الموقع")
+        btn_admin = _secondary_btn("⚙️ فتح لوحة الإدارة")
         btn_open.clicked.connect(self._open_site)
         btn_admin.clicked.connect(self._open_admin)
 
@@ -702,17 +702,17 @@ class SiteDashboardPage(BaseExtraPage):
     # ─────────────────────────────────────────────────────────────────
 
     def _build_tabs(self):
-        self._tabs.addTab(self._build_content_tab("post"),  "📝 Posts")
-        self._tabs.addTab(self._build_content_tab("page"),  "📄 Pages")
-        self._tabs.addTab(self._build_users_tab(),           "👥 Users")
-        self._tabs.addTab(self._build_plugins_tab(),         "🧩 Plugins")
-        self._tabs.addTab(self._build_themes_tab(),          "🎨 Themes")
-        self._tabs.addTab(self._build_options_tab(),         "⚙️ Options")
-        self._tabs.addTab(self._build_acf_tab(),             "🔧 ACF Fields")
-        self._tabs.addTab(self._build_cpt_tab(),             "📋 Post Types")
-        self._tabs.addTab(self._build_comments_tab(),        "💬 Comments")
-        self._tabs.addTab(self._build_taxonomies_tab(),      "🏷️ Taxonomies")
-        self._tabs.addTab(self._build_quick_actions_tab(),   "⚡ Quick Actions")
+        self._tabs.addTab(self._build_content_tab("post"),  "📝 المقالات")
+        self._tabs.addTab(self._build_content_tab("page"),  "📄 الصفحات")
+        self._tabs.addTab(self._build_users_tab(),           "👥 المستخدمون")
+        self._tabs.addTab(self._build_plugins_tab(),         "🧩 الإضافات")
+        self._tabs.addTab(self._build_themes_tab(),          "🎨 القوالب")
+        self._tabs.addTab(self._build_options_tab(),         "⚙️ الخيارات")
+        self._tabs.addTab(self._build_acf_tab(),             "🔧 حقول ACF")
+        self._tabs.addTab(self._build_cpt_tab(),             "📋 أنواع المحتوى")
+        self._tabs.addTab(self._build_comments_tab(),        "💬 التعليقات")
+        self._tabs.addTab(self._build_taxonomies_tab(),      "🏷️ التصنيفات")
+        self._tabs.addTab(self._build_quick_actions_tab(),   "⚡ إجراءات سريعة")
         self._tabs.currentChanged.connect(self._on_tab_changed)
 
     # ── Posts & Pages ─────────────────────────────────────────────────
@@ -722,11 +722,11 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        label = "Post" if post_type == "post" else "Page"
-        btn_new     = PrimaryButton(f"➕ New {label}")
-        btn_edit    = _secondary_btn("✏️ Edit")
-        btn_delete  = _secondary_btn("🗑️ Delete")
-        btn_refresh = _secondary_btn("🔄 Refresh")
+        label = "مقال" if post_type == "post" else "صفحة"
+        btn_new     = PrimaryButton(f"➕ {label} جديد" if post_type == "post" else f"➕ {label} جديدة")
+        btn_edit    = _secondary_btn("✏️ تعديل")
+        btn_delete  = _secondary_btn("🗑️ حذف")
+        btn_refresh = _secondary_btn("🔄 تحديث")
 
         row = QHBoxLayout()
         row.addWidget(btn_new)
@@ -738,7 +738,7 @@ class SiteDashboardPage(BaseExtraPage):
 
         table = QTableWidget()
         table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(["ID", "Title", "Status", "Date"])
+        table.setHorizontalHeaderLabels(["ID", "العنوان", "الحالة", "التاريخ"])
         hh = table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -773,9 +773,9 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_new     = PrimaryButton("➕ New User")
-        btn_delete  = _secondary_btn("🗑️ Delete User")
-        btn_refresh = _secondary_btn("🔄 Refresh")
+        btn_new     = PrimaryButton("➕ مستخدم جديد")
+        btn_delete  = _secondary_btn("🗑️ حذف المستخدم")
+        btn_refresh = _secondary_btn("🔄 تحديث")
 
         row = QHBoxLayout()
         row.addWidget(btn_new)
@@ -787,7 +787,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._users_table = QTableWidget()
         self._users_table.setColumnCount(5)
         self._users_table.setHorizontalHeaderLabels(
-            ["ID", "Login", "Display Name", "Email", "Role"])
+            ["ID", "اسم الدخول", "الاسم المعروض", "البريد الإلكتروني", "الدور"])
         self._users_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch)
         self._users_table.setSelectionBehavior(
@@ -809,9 +809,9 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_toggle  = _secondary_btn("⚡ Activate / Deactivate")
-        btn_delete  = _secondary_btn("🗑️ Delete")
-        btn_refresh = _secondary_btn("🔄 Refresh")
+        btn_toggle  = _secondary_btn("⚡ تفعيل / إلغاء التفعيل")
+        btn_delete  = _secondary_btn("🗑️ حذف")
+        btn_refresh = _secondary_btn("🔄 تحديث")
 
         row = QHBoxLayout()
         row.addWidget(btn_toggle)
@@ -823,7 +823,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._plugins_table = QTableWidget()
         self._plugins_table.setColumnCount(4)
         self._plugins_table.setHorizontalHeaderLabels(
-            ["Slug", "Status", "Version", "Update"])
+            ["Slug", "الحالة", "الإصدار", "تحديث"])
         hh = self._plugins_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -848,8 +848,8 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_activate = PrimaryButton("✅ Activate Theme")
-        btn_refresh  = _secondary_btn("🔄 Refresh")
+        btn_activate = PrimaryButton("✅ تفعيل القالب")
+        btn_refresh  = _secondary_btn("🔄 تحديث")
 
         row = QHBoxLayout()
         row.addWidget(btn_activate)
@@ -860,7 +860,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._themes_table = QTableWidget()
         self._themes_table.setColumnCount(3)
         self._themes_table.setHorizontalHeaderLabels(
-            ["Name", "Status", "Version"])
+            ["الاسم", "الحالة", "الإصدار"])
         hh = self._themes_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -883,8 +883,8 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_edit    = _secondary_btn("✏️ Edit Option")
-        btn_refresh = _secondary_btn("🔄 Refresh")
+        btn_edit    = _secondary_btn("✏️ تعديل الخيار")
+        btn_refresh = _secondary_btn("🔄 تحديث")
 
         row = QHBoxLayout()
         row.addWidget(btn_edit)
@@ -893,15 +893,15 @@ class SiteDashboardPage(BaseExtraPage):
         vbox.addLayout(row)
 
         hint = QLabel(
-            "Common WordPress options — double-click a row to edit.  "
-            "🟢 WooCommerce   🔵 Multilingual")
+            "خيارات ووردبريس الشائعة — انقر نقراً مزدوجاً على صف لتعديله.  "
+            "🟢 WooCommerce   🔵 تعدد اللغات")
         hint.setStyleSheet("color: #9CA3AF; font-size: 11px;")
         vbox.addWidget(hint)
 
         self._options_table = QTableWidget()
         self._options_table.setColumnCount(2)
         self._options_table.setHorizontalHeaderLabels(
-            ["Option Name", "Value"])
+            ["اسم الخيار", "القيمة"])
         hh = self._options_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -1592,35 +1592,35 @@ class SiteDashboardPage(BaseExtraPage):
 
     # ── Field type options offered in the "Add Field" dialog ─────────
     _ACF_FIELD_TYPES = [
-        ("text",         "Text"),
-        ("textarea",     "Textarea"),
-        ("number",       "Number"),
-        ("email",        "Email"),
-        ("url",          "URL"),
-        ("password",     "Password"),
-        ("image",        "Image"),
-        ("file",         "File"),
-        ("gallery",      "Gallery"),
-        ("wysiwyg",      "WYSIWYG Editor"),
+        ("text",         "نص"),
+        ("textarea",     "نص متعدد الأسطر"),
+        ("number",       "رقم"),
+        ("email",        "بريد إلكتروني"),
+        ("url",          "رابط (URL)"),
+        ("password",     "كلمة مرور"),
+        ("image",        "صورة"),
+        ("file",         "ملف"),
+        ("gallery",      "معرض صور"),
+        ("wysiwyg",      "محرر WYSIWYG"),
         ("oembed",       "oEmbed"),
-        ("select",       "Select"),
-        ("checkbox",     "Checkbox"),
-        ("radio",        "Radio Button"),
-        ("button_group", "Button Group"),
-        ("true_false",   "True / False"),
-        ("link",         "Link"),
-        ("post_object",  "Post Object"),
-        ("page_link",    "Page Link"),
-        ("relationship", "Relationship"),
-        ("taxonomy",     "Taxonomy"),
-        ("user",         "User"),
-        ("date_picker",  "Date Picker"),
-        ("date_time_picker", "Date-Time Picker"),
-        ("time_picker",  "Time Picker"),
-        ("color_picker", "Color Picker"),
-        ("group",        "Group"),
-        ("repeater",     "Repeater"),
-        ("flexible_content", "Flexible Content"),
+        ("select",       "قائمة اختيار"),
+        ("checkbox",     "مربع اختيار"),
+        ("radio",        "زر اختيار (Radio)"),
+        ("button_group", "مجموعة أزرار"),
+        ("true_false",   "صح / خطأ"),
+        ("link",         "رابط"),
+        ("post_object",  "كائن مقال (Post Object)"),
+        ("page_link",    "رابط صفحة"),
+        ("relationship", "علاقة (Relationship)"),
+        ("taxonomy",     "تصنيف"),
+        ("user",         "مستخدم"),
+        ("date_picker",  "منتقي تاريخ"),
+        ("date_time_picker", "منتقي تاريخ ووقت"),
+        ("time_picker",  "منتقي وقت"),
+        ("color_picker", "منتقي لون"),
+        ("group",        "مجموعة"),
+        ("repeater",     "متكرر (Repeater)"),
+        ("flexible_content", "محتوى مرن (Flexible Content)"),
     ]
 
     # ── ACF tab builder ───────────────────────────────────────────────
@@ -1691,7 +1691,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._acf_fields_table = QTableWidget()
         self._acf_fields_table.setColumnCount(4)
         self._acf_fields_table.setHorizontalHeaderLabels(
-            ["Label", "Name (slug)", "Type", "Key"])
+            ["التسمية", "الاسم (slug)", "النوع", "المفتاح"])
         hh = self._acf_fields_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -1880,7 +1880,7 @@ class SiteDashboardPage(BaseExtraPage):
                     })
             except Exception as exc:
                 QMessageBox.warning(
-                    self, "DB Error", f"لا يمكن تحميل مجموعات ACF:\n{exc}")
+                    self, "خطأ في قاعدة البيانات", f"لا يمكن تحميل مجموعات ACF:\n{exc}")
 
         for g in groups:
             item = QListWidgetItem(
@@ -1949,7 +1949,7 @@ class SiteDashboardPage(BaseExtraPage):
                     })
             except Exception as exc:
                 QMessageBox.warning(
-                    self, "DB Error", f"لا يمكن تحميل الحقول:\n{exc}")
+                    self, "خطأ في قاعدة البيانات", f"لا يمكن تحميل الحقول:\n{exc}")
 
         self._acf_fields_table.setRowCount(len(fields))
         for i, f in enumerate(fields):
@@ -2402,7 +2402,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._cpt_table = QTableWidget()
         self._cpt_table.setColumnCount(5)
         self._cpt_table.setHorizontalHeaderLabels(
-            ["Slug", "Label", "Public", "Has Archive", "Source"])
+            ["Slug", "التسمية", "عام", "له أرشيف", "المصدر"])
         hh = self._cpt_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -2469,7 +2469,7 @@ class SiteDashboardPage(BaseExtraPage):
 
             for c in rows:
                 name = str(c.get("name", ""))
-                src = "🔧 Harmulizer" if name in mu_slugs else "🔌 Plugin/Theme"
+                src = "🔧 Harmulizer" if name in mu_slugs else "🔌 إضافة/قالب"
                 self._add_cpt_row(
                     name,
                     str(c.get("label", name)),
@@ -2698,7 +2698,7 @@ class SiteDashboardPage(BaseExtraPage):
             QMessageBox.information(
                 self, "تم النسخ",
                 "تم نسخ السؤال إلى الـ Clipboard.\n"
-                "افتح تبويب 'AI Assistant' والصق السؤال هناك.\n\n"
+                "افتح تبويب 'المساعد الذكي' والصق السؤال هناك.\n\n"
                 f"السؤال:\n{question[:300]}…")
 
     # ═════════════════════════════════════════════════════════════════
@@ -2723,7 +2723,7 @@ class SiteDashboardPage(BaseExtraPage):
 
         btn_approve = PrimaryButton("✅ موافقة")
         btn_hold    = _secondary_btn("⏸️ تعليق")
-        btn_spam    = _secondary_btn("🚫 Spam")
+        btn_spam    = _secondary_btn("🚫 بريد مزعج")
         btn_trash   = _secondary_btn("🗑️ سلة المهملات")
         btn_delete  = _secondary_btn("❌ حذف نهائي")
         btn_refresh = _secondary_btn("🔄 تحديث")
@@ -3116,7 +3116,7 @@ class SiteDashboardPage(BaseExtraPage):
              "تحديث siteurl و home في قاعدة البيانات",
              self._qa_update_siteurl, "#F59E0B"),
             ("📋",  "عرض معلومات الموقع",
-             "PHP version, WordPress version, active plugins count",
+             "إصدار PHP، إصدار WordPress، وعدد الإضافات النشطة",
              self._qa_site_info, "#64748B"),
             ("🔌",  "تفعيل / تعطيل Maintenance Mode",
              "تفعيل وضع الصيانة أو إلغاؤه",
@@ -3183,7 +3183,11 @@ class SiteDashboardPage(BaseExtraPage):
         # 1. Accent Bar (Vertical)
         accent = QFrame()
         accent.setFixedWidth(5)
-        accent.setStyleSheet(f"background: {accent_color}; border-top-left-radius: 12px; border-bottom-left-radius: 12px;")
+        # Card is laid out in a QHBoxLayout; under the app-wide RTL
+        # layoutDirection, Qt auto-mirrors QHBoxLayout child order, so this
+        # accent bar (added first) now renders on the card's RIGHT edge —
+        # round the right corners to match, instead of the left ones.
+        accent.setStyleSheet(f"background: {accent_color}; border-top-right-radius: 12px; border-bottom-right-radius: 12px;")
         h.addWidget(accent)
 
         # 2. Icon
@@ -3342,23 +3346,23 @@ class SiteDashboardPage(BaseExtraPage):
         self._run_async(
             ["core", "version"],
             lambda ok, out: self._qa_log_msg(
-                f"🌐 WordPress Version: {out.strip() if ok else '?'}"))
+                f"🌐 إصدار WordPress: {out.strip() if ok else '?'}"))
         self._run_async(
             ["eval", "echo phpversion();"],
             lambda ok, out: self._qa_log_msg(
-                f"🐘 PHP Version: {out.strip() if ok else '?'}"))
+                f"🐘 إصدار PHP: {out.strip() if ok else '?'}"))
         self._run_async(
             ["plugin", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🧩 Active Plugins: {out.strip() if ok else '?'}"))
+                f"🧩 الإضافات النشطة: {out.strip() if ok else '?'}"))
         self._run_async(
             ["theme", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🎨 Active Theme(s): {out.strip() if ok else '?'}"))
+                f"🎨 القوالب النشطة: {out.strip() if ok else '?'}"))
 
     def _qa_toggle_maintenance(self):
         reply = QMessageBox.question(
-            self, "Maintenance Mode",
+            self, "وضع الصيانة",
             "اضغط Yes لتفعيل وضع الصيانة، أو No لإلغائه.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel)
         if reply == QMessageBox.StandardButton.Cancel:

@@ -76,7 +76,7 @@ class ScanResultDialog(QDialog):
         body_lay.setContentsMargins(20, 16, 20, 16)
 
         # Scanning animation dots
-        self.scan_anim_lbl = QLabel("  Scanning ")
+        self.scan_anim_lbl = QLabel("  جاري الفحص ")
         self.scan_anim_lbl.setStyleSheet(
             "color: #A5B4FC; font-size: 14px; font-weight: 600; background: transparent;"
         )
@@ -170,7 +170,7 @@ class ScanResultDialog(QDialog):
         self._dot_count = (self._dot_count + 1) % 4
         dots = "." * self._dot_count
         spaces = " " * (3 - self._dot_count)
-        self.scan_anim_lbl.setText(f"  Scanning {dots}{spaces}")
+        self.scan_anim_lbl.setText(f"  جاري الفحص {dots}{spaces}")
 
     # ── Show result with typing animation ──
     def show_result(self, text: str):
@@ -299,7 +299,7 @@ class AIChatWindow(QDialog):
         self.project = project_record
         self.threadpool = QThreadPool()
         
-        self.setWindowTitle(f"💬 AI Assistant - {project_record.name}")
+        self.setWindowTitle(f"💬 المساعد الذكي - {project_record.name}")
         self.resize(800, 600)
         
         layout = QVBoxLayout(self)
@@ -331,7 +331,7 @@ class AIChatWindow(QDialog):
         message = self.chat_input.text().strip()
         if not message: return
         
-        self.chat_history.append(f"\n🙋 **You:** {message}")
+        self.chat_history.append(f"\n🙋 **أنت:** {message}")
         self.chat_input.clear()
         self.btn_send.setEnabled(False)
         self.chat_history.append("⏳ تفكير...")
@@ -354,7 +354,7 @@ class AIChatWindow(QDialog):
         
     def _handle_error(self, err: str):
         self.btn_send.setEnabled(True)
-        self.chat_history.append(f"❌ Error: {err}")
+        self.chat_history.append(f"❌ خطأ: {err}")
 
 
 class AIAssistantPage(BaseExtraPage):
@@ -367,11 +367,11 @@ class AIAssistantPage(BaseExtraPage):
         
         # Header
         header_card, h_lay = make_card(
-            "🤖 AI Assistant",
+            "🤖 المساعد الذكي",
             "مساعد ذكي لتحليل الأخطاء والمشاكل باستخدام Gemini AI"
         )
-        
-        self.btn_set_api = QPushButton("⚙️ Set API Key")
+
+        self.btn_set_api = QPushButton("⚙️ تعيين API Key")
         self.btn_set_api.clicked.connect(self._set_api_key)
         h_lay.addWidget(row_buttons(self.btn_set_api))
         
@@ -386,9 +386,9 @@ class AIAssistantPage(BaseExtraPage):
         # Quick Actions Card
         actions_card, a_lay = make_card("⚡ Quick Actions", "تحليل سريع")
         
-        self.btn_analyze_debug = QPushButton("🔍 Analyze Debug Log")
-        self.btn_security_scan = QPushButton("🛡️ Security Scan")
-        self.btn_performance = QPushButton("⚡ Performance Tips")
+        self.btn_analyze_debug = QPushButton("🔍 تحليل سجل الأخطاء")
+        self.btn_security_scan = QPushButton("🛡️ فحص الحماية والأمان")
+        self.btn_performance = QPushButton("⚡ نصائح الأداء والسرعة")
         
         self.btn_analyze_debug.clicked.connect(self._analyze_debug)
         self.btn_security_scan.clicked.connect(self._security_scan)
@@ -461,7 +461,7 @@ class AIAssistantPage(BaseExtraPage):
                 self._save_api_key(key)
                 self.api_key = key
                 self._init_ai()
-                QMessageBox.information(self, "Success", "API Key saved successfully!")
+                QMessageBox.information(self, "نجاح", "تم حفظ API Key بنجاح! 🎉")
     
     def _on_project_selected(self, p: ProjectRecord):
         self._set_enabled(True)
@@ -494,7 +494,7 @@ class AIAssistantPage(BaseExtraPage):
 
         log_path = Path(self.current.path) / "wp-content" / "debug.log"
         if not log_path.exists():
-            QMessageBox.warning(self, "Not Found", "لا يوجد ملف debug.log في المشروع.")
+            QMessageBox.warning(self, "غير موجود", "لا يوجد ملف debug.log في المشروع.")
             return
 
         dlg = self._open_scan_dialog("تحليل سجل الأخطاء", "🔍", self.btn_analyze_debug)
@@ -513,7 +513,7 @@ class AIAssistantPage(BaseExtraPage):
 
         config_path = Path(self.current.path) / "wp-config.php"
         if not config_path.exists():
-            QMessageBox.warning(self, "Not Found", "لا يوجد ملف wp-config.php في المشروع.")
+            QMessageBox.warning(self, "غير موجود", "لا يوجد ملف wp-config.php في المشروع.")
             return
 
         dlg = self._open_scan_dialog("فحص الحماية والأمان", "🛡️", self.btn_security_scan)

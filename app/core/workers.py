@@ -22,7 +22,7 @@ class InstallWorker(QObject):
         try:
             self.progress.emit(0)
             res = install_wordpress(self.wp, self.db, log=self.log.emit, progress=self.progress.emit)
-            self.done.emit(True, res, "Install finished ✅")
+            self.done.emit(True, res, "اكتمل التثبيت ✅")
         except Exception as e:
             self.done.emit(False, {}, f"{e}")
 
@@ -47,7 +47,7 @@ class BackupWorker(QObject):
                 log=self.log.emit, progress=self.progress.emit,
                 include_files=self.include_files, include_db=self.include_db
             )
-            self.done.emit(True, "Backup finished ✅", str(bdir))
+            self.done.emit(True, "اكتملت النسخة الاحتياطية ✅", str(bdir))
         except Exception as e:
             self.done.emit(False, str(e), "")
 
@@ -71,7 +71,7 @@ class RestoreWorker(QObject):
                 log=self.log.emit, progress=self.progress.emit,
                 restore_files=self.restore_files, restore_db=self.restore_db
             )
-            self.done.emit(True, "Restore finished ✅")
+            self.done.emit(True, "اكتملت الاستعادة ✅")
         except Exception as e:
             self.done.emit(False, str(e))
 
@@ -99,7 +99,7 @@ class UrlConvertWorker(QObject):
             
             # WP-CLI / DB Search Replace
             if self.php_path and self.wpcli_path:
-                self.log.emit("Using WP-CLI search-replace (safe for serialized data)...")
+                self.log.emit("جارٍ استخدام WP-CLI search-replace (آمن للبيانات المتسلسلة)...")
                 
                 # Check & Fix hardcoded URLs in wp-config.php BEFORE replace to ensure consistency
                 try:
@@ -111,16 +111,16 @@ class UrlConvertWorker(QObject):
                     for key in ["WP_HOME", "WP_SITEURL"]:
                         pattern = re.compile(rf"define\(\s*['\"]{key}['\"]\s*,\s*['\"][^'\"]+['\"]\s*\);", re.IGNORECASE)
                         if pattern.search(config_txt):
-                            self.log.emit(f"Updating {key} in wp-config.php...")
+                            self.log.emit(f"جارٍ تحديث {key} في wp-config.php...")
                             config_txt = pattern.sub(f"define( '{key}', '{self.new_url}' );", config_txt)
                             updated = True
                     
                     if updated:
                         config_path.write_text(config_txt, encoding="utf-8")
-                        self.log.emit("Fixed hardcoded URLs in wp-config.php ✅")
-                        
+                        self.log.emit("تم إصلاح الروابط الثابتة في wp-config.php ✅")
+
                 except Exception as e:
-                    self.log.emit(f"Warning: Could not check wp-config.php: {e}")
+                    self.log.emit(f"تحذير: تعذر التحقق من wp-config.php: {e}")
 
                 wp_cli_search_replace(
                     self.project_path, self.php_path, self.wpcli_path, self.wpcli_is_phar,
@@ -128,14 +128,14 @@ class UrlConvertWorker(QObject):
                 )
                 
                 # Flush Cache
-                self.log.emit("Flushing object cache...")
+                self.log.emit("جارٍ تفريغ ذاكرة التخزين المؤقت للكائنات...")
                 from app.core.wp_ops import run_wpcli
                 run_wpcli(
                     self.project_path, self.php_path, self.wpcli_path, self.wpcli_is_phar,
                     ["cache", "flush"], self.log.emit
                 )
             else:
-                self.log.emit("WP-CLI not available — applying limited DB update (options only).")
+                self.log.emit("WP-CLI غير متاح — سيتم تطبيق تحديث محدود لقاعدة البيانات (الخيارات فقط).")
                 search_replace_url_in_db(self.db, self.old_url, self.new_url, self.log.emit)
             
             self.progress.emit(80)
@@ -158,23 +158,23 @@ class UrlConvertWorker(QObject):
                         new_folder_path = self.project_path.parent / path_slug
                         if new_folder_path != self.project_path:
                             if new_folder_path.exists():
-                                self.log.emit(f"⚠️ Cannot rename folder: '{path_slug}' already exists.")
+                                self.log.emit(f"⚠️ لا يمكن إعادة تسمية المجلد: '{path_slug}' موجود بالفعل.")
                             else:
-                                self.log.emit(f"Renaming folder to: {path_slug} ...")
+                                self.log.emit(f"جارٍ إعادة تسمية المجلد إلى: {path_slug} ...")
                                 # We need to close any open file handles? Usually ok on Windows if no other app uses it.
                                 # But we might need to be careful with logging/python using files.
                                 # shutil.move is risky if file is locked.
                                 try:
                                     shutil.move(str(self.project_path), str(new_folder_path))
                                     final_path = str(new_folder_path)
-                                    self.log.emit("Folder renamed successfully ✅")
+                                    self.log.emit("تمت إعادة تسمية المجلد بنجاح ✅")
                                 except Exception as ren_err:
-                                    self.log.emit(f"❌ Folder rename failed: {ren_err}")
+                                    self.log.emit(f"❌ فشلت إعادة تسمية المجلد: {ren_err}")
                 except Exception as e:
-                    self.log.emit(f"Error parsing URL for rename: {e}")
+                    self.log.emit(f"خطأ في تحليل الرابط لإعادة التسمية: {e}")
 
             self.progress.emit(100)
-            self.done.emit(True, "URL conversion done ✅", final_path)
+            self.done.emit(True, "اكتمل تحويل الرابط ✅", final_path)
 
         except Exception as e:
             self.done.emit(False, str(e), str(self.project_path))
@@ -203,7 +203,7 @@ class CloneWorker(QObject):
                 log=self.log.emit,
                 progress=self.progress.emit,
             )
-            self.done.emit(True, "Clone finished ✅")
+            self.done.emit(True, "اكتمل الاستنساخ ✅")
         except Exception as e:
             self.done.emit(False, f"{e}")
 
@@ -233,7 +233,7 @@ class ScanWorker(QObject):
         try:
             from app.core.security import scan_for_malware
             res = scan_for_malware(self.project_path, self.log.emit, self.progress.emit)
-            self.done.emit(True, res, "Scan finished ✅")
+            self.done.emit(True, res, "اكتمل الفحص ✅")
         except Exception as e:
             self.done.emit(False, [], str(e))
 

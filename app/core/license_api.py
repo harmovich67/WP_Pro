@@ -554,18 +554,18 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         license = db.query(License).filter(License.key == data.license_key).first()
         
         if not license:
-            return {"success": False, "message": "License not found"}
-        
+            return {"success": False, "message": "مفتاح الترخيص غير صالح"}
+
         activation = db.query(Activation).filter(
             Activation.license_id == license.id,
             Activation.machine_id == data.machine_id
         ).first()
-        
+
         if activation:
             activation.is_active = False
             db.commit()
-        
-        return {"success": True, "message": "Deactivated successfully"}
+
+        return {"success": True, "message": "تم إلغاء التفعيل بنجاح"}
     
     # Activation management endpoints
     @app.get("/api/licenses/{license_id}/activations")

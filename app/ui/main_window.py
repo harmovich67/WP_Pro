@@ -50,8 +50,8 @@ class DbCredsDialog(QDialog):
         self.user.setText(default_user)
         self.password = QLineEdit()
         self.password.setEchoMode(QLineEdit.EchoMode.Password)
-        form.addRow("DB user:", self.user)
-        form.addRow("DB password:", self.password)
+        form.addRow("مستخدم قاعدة البيانات:", self.user)
+        form.addRow("كلمة مرور قاعدة البيانات:", self.password)
         v.addLayout(form)
         bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         bb.accepted.connect(self.accept)
@@ -64,16 +64,16 @@ class DbCredsDialog(QDialog):
 class UrlConvertDialog(QDialog):
     def __init__(self, old_url: str):
         super().__init__()
-        self.setWindowTitle("Convert URLs")
+        self.setWindowTitle("تحويل الروابط (URLs)")
         self.setMinimumWidth(560)
         v = QVBoxLayout(self)
         form = QFormLayout()
         self.old = QLineEdit()
         self.old.setText(old_url)
         self.new = QLineEdit()
-        self.include_guid = QCheckBox("Include GUID column (usually OFF)")
-        form.addRow("Old URL:", self.old)
-        form.addRow("New URL:", self.new)
+        self.include_guid = QCheckBox("تضمين عمود GUID (يُترك مغلقاً عادةً)")
+        form.addRow("الرابط القديم:", self.old)
+        form.addRow("الرابط الجديد:", self.new)
         form.addRow("", self.include_guid)
         v.addLayout(form)
         bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -121,17 +121,17 @@ class DashboardPage(QWidget):
         outer.setContentsMargins(0,0,0,0)
         outer.setSpacing(12)
 
-        card, lay = make_card("Projects", "Your created local WordPress instances")
+        card, lay = make_card("المشاريع", "مواقع ووردبريس المحلية التي أنشأتها")
         self.list = QListWidget()
         lay.addWidget(self.list)
 
-        self.btn_new = PrimaryButton("New Project")
-        self.btn_import = QPushButton("Import Existing")
-        self.btn_open = QPushButton("Open Site")
-        self.btn_admin = QPushButton("Open Admin")
-        self.btn_folder = QPushButton("Open Folder")
-        self.btn_clone = QPushButton("Clone")
-        self.btn_delete = QPushButton("Remove from list")
+        self.btn_new = PrimaryButton("مشروع جديد")
+        self.btn_import = QPushButton("استيراد مشروع موجود")
+        self.btn_open = QPushButton("فتح الموقع")
+        self.btn_admin = QPushButton("فتح لوحة التحكم")
+        self.btn_folder = QPushButton("فتح المجلد")
+        self.btn_clone = QPushButton("استنساخ")
+        self.btn_delete = QPushButton("إزالة من القائمة")
 
         lay.addWidget(row_buttons(self.btn_new, self.btn_import, self.btn_open, self.btn_admin, self.btn_folder, self.btn_clone, self.btn_delete))
 
@@ -183,12 +183,12 @@ class DashboardPage(QWidget):
             return
             
         msg = QMessageBox(self)
-        msg.setWindowTitle("Delete Project")
-        msg.setText(f"How would you like to delete '{self.current.name}'?")
-        msg.setInformativeText("Warning: 'Delete Everything' cannot be undone.")
-        
-        btn_remove_only = msg.addButton("Remove from List Only", QMessageBox.ButtonRole.ActionRole)
-        btn_full_delete = msg.addButton("Delete Everything (Files + DB)", QMessageBox.ButtonRole.DestructiveRole)
+        msg.setWindowTitle("حذف المشروع")
+        msg.setText(f"كيف تريد حذف '{self.current.name}'؟")
+        msg.setInformativeText("تحذير: خيار 'حذف كل شيء' لا يمكن التراجع عنه.")
+
+        btn_remove_only = msg.addButton("إزالة من القائمة فقط", QMessageBox.ButtonRole.ActionRole)
+        btn_full_delete = msg.addButton("حذف كل شيء (الملفات + قاعدة البيانات)", QMessageBox.ButtonRole.DestructiveRole)
         msg.addButton(QMessageBox.StandardButton.Cancel)
         
         msg.exec()
@@ -210,7 +210,7 @@ class DashboardPage(QWidget):
         
         # Validation
         if not path_obj.exists() or not path_obj.is_dir():
-            QMessageBox.critical(self, "Error", "Invalid project path.")
+            QMessageBox.critical(self, "خطأ", "مسار المشروع غير صالح.")
             return
 
         now = datetime.datetime.utcnow().isoformat() + "Z"
@@ -221,7 +221,7 @@ class DashboardPage(QWidget):
             path=data["path"],
             url=data["url"],
             admin_url=data["url"].rstrip("/") + "/wp-admin/",
-            stack="Unknown", # Imported
+            stack="غير معروف", # Imported
             doc_root=str(path_obj.parent),
             db_host=data["db_host"],
             db_port=data["db_port"],
@@ -231,7 +231,7 @@ class DashboardPage(QWidget):
             table_prefix=data["table_prefix"],
             created_at_iso=now,
             last_action_iso=now,
-            notes="Imported project"
+            notes="مشروع مستورد"
         )
         
         self.store.upsert(rec)
@@ -270,15 +270,15 @@ class DashboardPage(QWidget):
             if old_url and old_url != new_url:
                 search_replace_url_in_db(db, old_url, new_url, lambda _: None)
                 QMessageBox.information(
-                    self, "Success",
-                    f"Project '{rec.name}' imported.\nURL updated: {old_url} → {new_url}"
+                    self, "تم بنجاح",
+                    f"تم استيراد المشروع '{rec.name}'.\nتم تحديث الرابط: {old_url} → {new_url}"
                 )
             else:
-                QMessageBox.information(self, "Success", f"Project '{rec.name}' imported successfully.")
+                QMessageBox.information(self, "تم بنجاح", f"تم استيراد المشروع '{rec.name}' بنجاح.")
         except Exception as e:
             QMessageBox.warning(
-                self, "Imported with Warning",
-                f"Project saved, but could not update URLs in DB:\n{e}"
+                self, "تم الاستيراد مع تحذير",
+                f"تم حفظ المشروع، لكن تعذّر تحديث الروابط في قاعدة البيانات:\n{e}"
             )
 
 
@@ -293,7 +293,7 @@ class WizardPage(QWidget):
         outer.setSpacing(12)
 
         # Top info
-        hdr_card, hdr_lay = make_card("New Project Wizard", "Step-by-step setup. You can save and reuse presets.")
+        hdr_card, hdr_lay = make_card("معالج مشروع جديد", "إعداد خطوة بخطوة. يمكنك حفظ الإعدادات المسبقة وإعادة استخدامها.")
         outer.addWidget(hdr_card)
 
         # Stepper + stacked pages
@@ -301,7 +301,7 @@ class WizardPage(QWidget):
         row.setSpacing(12)
 
         self.step_list = QListWidget()
-        self.step_list.addItems(["1) Project", "2) Site", "3) Database", "4) Template", "5) Review"])
+        self.step_list.addItems(["1) المشروع", "2) الموقع", "3) قاعدة البيانات", "4) القالب", "5) المراجعة"])
         self.step_list.setFixedWidth(220)
         self.step_list.setCurrentRow(0)
 
@@ -325,11 +325,11 @@ class WizardPage(QWidget):
         outer.addLayout(row, 1)
 
         # Bottom nav
-        nav_card, nav_lay = make_card("Actions", "")
-        self.btn_back = QPushButton("Back")
-        self.btn_next = PrimaryButton("Next")
-        self.btn_preflight = QPushButton("Preflight Checks")
-        self.btn_install = PrimaryButton("Install")
+        nav_card, nav_lay = make_card("الإجراءات", "")
+        self.btn_back = QPushButton("رجوع")
+        self.btn_next = PrimaryButton("التالي")
+        self.btn_preflight = QPushButton("فحوصات ما قبل التثبيت")
+        self.btn_install = PrimaryButton("تثبيت")
         self.btn_install.setEnabled(False)
 
         nav_lay.addWidget(row_buttons(self.btn_back, self.btn_next, self.btn_preflight, self.btn_install))
@@ -357,18 +357,18 @@ class WizardPage(QWidget):
         v.setContentsMargins(14,14,14,14)
         v.setSpacing(12)
 
-        card, lay = make_card("Project", "Choose stack, docroot, and project name")
+        card, lay = make_card("المشروع", "اختر البيئة (Stack) ومجلد المستندات واسم المشروع")
         form = QFormLayout()
         form.setVerticalSpacing(10)
 
         self.stack_combo = QComboBox()
         if is_windows():
-            self.stack_combo.addItems(["Laragon (Windows)", "Custom"])
+            self.stack_combo.addItems(["Laragon (Windows)", "مخصص"])
         else:
-            self.stack_combo.addItems(["Custom Stack (Linux/Unix)", "Custom"])
+            self.stack_combo.addItems(["بيئة مخصصة (Linux/Unix)", "مخصص"])
 
         self.laragon_root = QLineEdit()
-        self.btn_laragon = QPushButton("Browse...")
+        self.btn_laragon = QPushButton("استعراض...")
 
         lr_row = QHBoxLayout()
         lr_row.setContentsMargins(0,0,0,0)
@@ -377,7 +377,7 @@ class WizardPage(QWidget):
         lr_row.addWidget(self.btn_laragon)
 
         self.doc_root = QLineEdit()
-        self.btn_doc = QPushButton("Browse...")
+        self.btn_doc = QPushButton("استعراض...")
         dr_row = QHBoxLayout()
         dr_row.setContentsMargins(0,0,0,0)
         dr_row.setSpacing(8)
@@ -385,14 +385,14 @@ class WizardPage(QWidget):
         dr_row.addWidget(self.btn_doc)
 
         self.project_name = QLineEdit()
-        self.overwrite = QCheckBox("Overwrite existing folder")
+        self.overwrite = QCheckBox("استبدال المجلد الموجود")
 
-        form.addRow("Stack:", self.stack_combo)
-        form.addRow("Laragon root:", QWidget())
+        form.addRow("البيئة (Stack):", self.stack_combo)
+        form.addRow("مجلد Laragon الجذري:", QWidget())
         form.itemAt(form.rowCount()-1, QFormLayout.ItemRole.FieldRole).widget().setLayout(lr_row)
-        form.addRow("Document root:", QWidget())
+        form.addRow("مجلد المستندات (Document root):", QWidget())
         form.itemAt(form.rowCount()-1, QFormLayout.ItemRole.FieldRole).widget().setLayout(dr_row)
-        form.addRow("Project name:", self.project_name)
+        form.addRow("اسم المشروع:", self.project_name)
         form.addRow("", self.overwrite)
 
         lay.addLayout(form)
@@ -406,7 +406,7 @@ class WizardPage(QWidget):
 
         # defaults
         self.laragon_root.setText("C:\\laragon" if is_windows() else "")
-        self.os_label = QLabel(f"Detected OS: {'Windows' if is_windows() else 'Linux/Unix' if is_linux() else 'Unknown'}")
+        self.os_label = QLabel(f"نظام التشغيل المكتشف: {'Windows' if is_windows() else 'Linux/Unix' if is_linux() else 'غير معروف'}")
         if is_windows() or is_linux():
             self.os_label.setStyleSheet("color: #155724; background-color: #d4edda; border-radius: 4px; padding: 4px;")
         else:
@@ -436,12 +436,12 @@ class WizardPage(QWidget):
             self.db_port.setValue(prof.db_port)
 
     def _pick_docroot(self):
-        p = QFileDialog.getExistingDirectory(self, "Select Document Root", self.doc_root.text() or str(Path.home()))
+        p = QFileDialog.getExistingDirectory(self, "اختر مجلد المستندات (Document Root)", self.doc_root.text() or str(Path.home()))
         if p:
             self.doc_root.setText(p)
 
     def _pick_laragon(self):
-        p = QFileDialog.getExistingDirectory(self, "Select Laragon Root", self.laragon_root.text() or "C:\\")
+        p = QFileDialog.getExistingDirectory(self, "اختر مجلد Laragon الجذري", self.laragon_root.text() or "C:\\")
         if p:
             self.laragon_root.setText(p)
             # Re-apply stack defaults using updated Laragon root
@@ -455,7 +455,7 @@ class WizardPage(QWidget):
         v.setContentsMargins(14,14,14,14)
         v.setSpacing(12)
 
-        card, lay = make_card("Site", "WordPress admin and URL settings")
+        card, lay = make_card("الموقع", "إعدادات مدير ووردبريس والرابط")
         form = QFormLayout()
         form.setVerticalSpacing(10)
 
@@ -470,37 +470,37 @@ class WizardPage(QWidget):
         self.wp_zip_url.setText(WORDPRESS_LATEST_ZIP)
 
         self.local_zip = QLineEdit()
-        self.btn_local_zip = QPushButton("Pick local ZIP (optional)")
+        self.btn_local_zip = QPushButton("اختيار ملف ZIP محلي (اختياري)")
         zrow = QHBoxLayout()
         zrow.setContentsMargins(0,0,0,0)
         zrow.setSpacing(8)
         zrow.addWidget(self.local_zip, 1)
         zrow.addWidget(self.btn_local_zip)
 
-        form.addRow("Site title:", self.site_title)
-        form.addRow("Site URL:", self.site_url)
-        form.addRow("Admin user:", self.admin_user)
-        form.addRow("Admin pass:", self.admin_pass)
-        form.addRow("Admin email:", self.admin_email)
-        form.addRow("WP ZIP URL:", self.wp_zip_url)
-        form.addRow("Offline ZIP:", QWidget())
+        form.addRow("عنوان الموقع:", self.site_title)
+        form.addRow("رابط الموقع:", self.site_url)
+        form.addRow("اسم مستخدم المدير:", self.admin_user)
+        form.addRow("كلمة مرور المدير:", self.admin_pass)
+        form.addRow("البريد الإلكتروني للمدير:", self.admin_email)
+        form.addRow("رابط ملف ووردبريس المضغوط:", self.wp_zip_url)
+        form.addRow("ملف ZIP بدون اتصال:", QWidget())
         form.itemAt(form.rowCount()-1, QFormLayout.ItemRole.FieldRole).widget().setLayout(zrow)
 
         lay.addLayout(form)
         v.addWidget(card)
 
-        card2, lay2 = make_card("Auto Install", "Optional: finish install using WP-CLI")
+        card2, lay2 = make_card("التثبيت التلقائي", "اختياري: إتمام التثبيت باستخدام WP-CLI")
         form2 = QFormLayout()
         form2.setVerticalSpacing(10)
 
-        self.auto_install = QCheckBox("Auto install with WP-CLI")
-        self.download_wpcli = QCheckBox("Auto-download wp-cli.phar if missing")
+        self.auto_install = QCheckBox("تثبيت تلقائي باستخدام WP-CLI")
+        self.download_wpcli = QCheckBox("تنزيل wp-cli.phar تلقائياً إن لم يكن موجوداً")
         self.download_wpcli.setChecked(True)
 
         self.php_path = QLineEdit()
         self.wpcli_path = QLineEdit()
-        self.btn_php = QPushButton("Browse PHP")
-        self.btn_wpcli = QPushButton("Browse WP-CLI")
+        self.btn_php = QPushButton("استعراض PHP")
+        self.btn_wpcli = QPushButton("استعراض WP-CLI")
 
         php_row = QHBoxLayout()
         php_row.setContentsMargins(0,0,0,0)
@@ -516,9 +516,9 @@ class WizardPage(QWidget):
 
         form2.addRow("", self.auto_install)
         form2.addRow("", self.download_wpcli)
-        form2.addRow("PHP path:", QWidget())
+        form2.addRow("مسار PHP:", QWidget())
         form2.itemAt(form2.rowCount()-1, QFormLayout.ItemRole.FieldRole).widget().setLayout(php_row)
-        form2.addRow("WP-CLI path:", QWidget())
+        form2.addRow("مسار WP-CLI:", QWidget())
         form2.itemAt(form2.rowCount()-1, QFormLayout.ItemRole.FieldRole).widget().setLayout(wpcli_row)
 
         lay2.addLayout(form2)
@@ -531,7 +531,7 @@ class WizardPage(QWidget):
         self.project_name.textChanged.connect(self._autofill_from_name)
 
         # defaults
-        self.site_title.setText("My WordPress")
+        self.site_title.setText("موقعي على ووردبريس")
         self.admin_user.setText("admin")
         self.admin_email.setText("admin@example.com")
         self.auto_install.setChecked(True)
@@ -539,17 +539,17 @@ class WizardPage(QWidget):
         return w
 
     def _pick_zip(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select wordpress.zip", "", "ZIP (*.zip)")
+        p, _ = QFileDialog.getOpenFileName(self, "اختر ملف wordpress.zip", "", "ZIP (*.zip)")
         if p:
             self.local_zip.setText(p)
 
     def _pick_php(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select PHP executable", self.php_path.text() or str(Path.home()))
+        p, _ = QFileDialog.getOpenFileName(self, "اختر ملف PHP التنفيذي", self.php_path.text() or str(Path.home()))
         if p:
             self.php_path.setText(p)
 
     def _pick_wpcli(self):
-        p, _ = QFileDialog.getOpenFileName(self, "Select WP-CLI (wp/wp.bat/wp-cli.phar)", self.wpcli_path.text() or str(Path.home()))
+        p, _ = QFileDialog.getOpenFileName(self, "اختر WP-CLI (wp/wp.bat/wp-cli.phar)", self.wpcli_path.text() or str(Path.home()))
         if p:
             self.wpcli_path.setText(p)
 
@@ -574,25 +574,25 @@ class WizardPage(QWidget):
         self.db_name = QLineEdit()
         self.table_prefix = QLineEdit()
 
-        self.create_db_user = QCheckBox("Create dedicated DB user")
+        self.create_db_user = QCheckBox("إنشاء مستخدم مخصص لقاعدة البيانات")
         self.db_user = QLineEdit()
         self.db_pass = QLineEdit()
         self.db_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.db_user_host = QLineEdit()
 
-        self.btn_test_db = QPushButton("Test DB Connection")
-        self.db_status = Pill("Not tested", "neutral")
+        self.btn_test_db = QPushButton("اختبار الاتصال بقاعدة البيانات")
+        self.db_status = Pill("لم يُختبر بعد", "neutral")
 
-        form.addRow("Host:", self.db_host)
-        form.addRow("Port:", self.db_port)
-        form.addRow("Root user:", self.db_root_user)
-        form.addRow("Root pass:", self.db_root_pass)
-        form.addRow("DB name:", self.db_name)
-        form.addRow("Table prefix:", self.table_prefix)
+        form.addRow("المضيف:", self.db_host)
+        form.addRow("المنفذ:", self.db_port)
+        form.addRow("مستخدم الجذر (root):", self.db_root_user)
+        form.addRow("كلمة مرور الجذر (root):", self.db_root_pass)
+        form.addRow("اسم قاعدة البيانات:", self.db_name)
+        form.addRow("بادئة الجداول:", self.table_prefix)
         form.addRow("", self.create_db_user)
-        form.addRow("New user:", self.db_user)
-        form.addRow("New pass:", self.db_pass)
-        form.addRow("New user host:", self.db_user_host)
+        form.addRow("المستخدم الجديد:", self.db_user)
+        form.addRow("كلمة المرور الجديدة:", self.db_pass)
+        form.addRow("مضيف المستخدم الجديد:", self.db_user_host)
 
         lay.addLayout(form)
 
@@ -623,8 +623,8 @@ class WizardPage(QWidget):
         db = self._get_db_params()
         ok, msg = test_mysql(db)
         kind = "ok" if ok else "bad"
-        self.db_status.set_state("OK" if ok else "FAILED", kind)
-        QMessageBox.information(self, "DB Test", msg)
+        self.db_status.set_state("ناجح" if ok else "فشل", kind)
+        QMessageBox.information(self, "اختبار قاعدة البيانات", msg)
 
     # --- Step 4
     def _build_template_page(self) -> QWidget:
@@ -633,26 +633,26 @@ class WizardPage(QWidget):
         v.setContentsMargins(14,14,14,14)
         v.setSpacing(12)
 
-        card, lay = make_card("Template", "Choose starter template + plugins + theme + dev mode")
+        card, lay = make_card("القالب", "اختر القالب الأساسي والإضافات والقالب ووضع المطور")
         form = QFormLayout()
         form.setVerticalSpacing(10)
 
         self.template = QComboBox()
-        self.template.addItems(["Blank", "Dev Starter", "WooCommerce Starter", "SEO Starter"])
+        self.template.addItems(["فارغ", "بداية للمطورين", "بداية ووكومرس", "بداية SEO"])
 
         self.theme = QLineEdit()
         self.plugins = QTextEdit()
-        self.plugins.setPlaceholderText("One plugin slug per line (e.g., query-monitor)\nOnly applied if Auto Install is enabled (WP-CLI).")
+        self.plugins.setPlaceholderText("اكتب معرّف إضافة واحد في كل سطر (مثال: query-monitor)\nيُطبَّق فقط إذا كان التثبيت التلقائي مفعّلاً (WP-CLI).")
 
-        self.dev_mode = QCheckBox("Enable Dev Mode (WP_DEBUG + log)")
+        self.dev_mode = QCheckBox("تفعيل وضع المطور (WP_DEBUG + سجل الأخطاء)")
         self.permalinks = QLineEdit()
         self.permalinks.setText("/%postname%/")
 
-        form.addRow("Template:", self.template)
-        form.addRow("Theme slug (optional):", self.theme)
-        form.addRow("Plugins:", self.plugins)
+        form.addRow("القالب الأساسي:", self.template)
+        form.addRow("معرّف قالب ووردبريس (اختياري):", self.theme)
+        form.addRow("الإضافات:", self.plugins)
         form.addRow("", self.dev_mode)
-        form.addRow("Permalinks:", self.permalinks)
+        form.addRow("روابط دائمة (Permalinks):", self.permalinks)
 
         lay.addLayout(form)
         v.addWidget(card)
@@ -667,12 +667,12 @@ class WizardPage(QWidget):
 
     def _apply_template(self, name: str):
         presets = {
-            "Blank": {"theme": "", "plugins": [], "dev": False},
-            "Dev Starter": {"theme": "", "plugins": ["query-monitor", "classic-editor"], "dev": True},
-            "WooCommerce Starter": {"theme": "storefront", "plugins": ["woocommerce", "query-monitor"], "dev": True},
-            "SEO Starter": {"theme": "", "plugins": ["rank-math", "query-monitor"], "dev": True},
+            "فارغ": {"theme": "", "plugins": [], "dev": False},
+            "بداية للمطورين": {"theme": "", "plugins": ["query-monitor", "classic-editor"], "dev": True},
+            "بداية ووكومرس": {"theme": "storefront", "plugins": ["woocommerce", "query-monitor"], "dev": True},
+            "بداية SEO": {"theme": "", "plugins": ["rank-math", "query-monitor"], "dev": True},
         }
-        p = presets.get(name, presets["Blank"])
+        p = presets.get(name, presets["فارغ"])
         self.theme.setText(p["theme"])
         self.plugins.setPlainText("\n".join(p["plugins"]))
         self.dev_mode.setChecked(bool(p["dev"]))
@@ -684,7 +684,7 @@ class WizardPage(QWidget):
         v.setContentsMargins(14,14,14,14)
         v.setSpacing(12)
 
-        card, lay = make_card("Review", "Preflight first, then install")
+        card, lay = make_card("المراجعة", "قم بفحوصات ما قبل التثبيت أولاً، ثم ثبّت")
         self.review = QTextEdit()
         self.review.setReadOnly(True)
         lay.addWidget(self.review)
@@ -692,7 +692,7 @@ class WizardPage(QWidget):
         self.preflight_box = QTextEdit()
         self.preflight_box.setReadOnly(True)
         self.preflight_box.setFixedHeight(200)
-        lay.addWidget(QLabel("Preflight checks:"))
+        lay.addWidget(QLabel("فحوصات ما قبل التثبيت:"))
         lay.addWidget(self.preflight_box)
 
         v.addWidget(card)
@@ -812,19 +812,19 @@ class WPCLIConsolePage(QWidget):
         outer.setContentsMargins(0,0,0,0)
         outer.setSpacing(12)
 
-        card, lay = make_card("WP-CLI Console", "Run wp-cli commands for a selected project (requires php+wp-cli)")
+        card, lay = make_card("طرفية WP-CLI", "تشغيل أوامر wp-cli على مشروع محدد (يتطلب php + wp-cli)")
         form = QFormLayout()
         form.setVerticalSpacing(10)
 
         self.project = QComboBox()
         self.cmd = QLineEdit()
-        self.cmd.setPlaceholderText("e.g., plugin list --status=active")
-        self.btn_run = PrimaryButton("Run")
+        self.cmd.setPlaceholderText("مثال: plugin list --status=active")
+        self.btn_run = PrimaryButton("تشغيل")
         self.out = QTextEdit()
         self.out.setReadOnly(True)
 
-        form.addRow("Project:", self.project)
-        form.addRow("Command:", self.cmd)
+        form.addRow("المشروع:", self.project)
+        form.addRow("الأمر:", self.cmd)
         lay.addLayout(form)
         lay.addWidget(row_buttons(self.btn_run))
 
@@ -850,13 +850,13 @@ class WPCLIConsolePage(QWidget):
         # Best effort: use system php/wp or user installs
         php = which_any(["php", "php.exe"])
         if not php:
-            QMessageBox.warning(self, "Missing", "PHP not found in PATH. Provide PHP by installing or using Laragon.")
+            QMessageBox.warning(self, "غير موجود", "لم يتم العثور على PHP في PATH. وفّر PHP بتثبيته أو باستخدام Laragon.")
             return
 
         wpcli = which_any(["wp", "wp.bat", "wp.cmd"])
         is_phar = False
         if not wpcli:
-            QMessageBox.warning(self, "Missing", "WP-CLI not found in PATH. Install WP-CLI or use wizard auto-download.")
+            QMessageBox.warning(self, "غير موجود", "لم يتم العثور على WP-CLI في PATH. ثبّت WP-CLI أو استخدم التنزيل التلقائي من المعالج.")
             return
 
         cmdline = self.cmd.text().strip()
@@ -880,7 +880,7 @@ class ProjectToolsPage(QWidget):
         outer.setContentsMargins(0,0,0,0)
         outer.setSpacing(12)
 
-        card, lay = make_card("Project Tools", "DB per project • Backup/Restore • URL conversion")
+        card, lay = make_card("أدوات المشروع", "قاعدة بيانات لكل مشروع • نسخ احتياطي/استعادة • تحويل الروابط")
         form = QFormLayout()
         form.setVerticalSpacing(10)
 
@@ -889,10 +889,10 @@ class ProjectToolsPage(QWidget):
         self.details.setReadOnly(True)
         self.details.setFixedHeight(220)
 
-        self.btn_open_phpmyadmin = QPushButton("Open phpMyAdmin")
-        self.btn_backup = PrimaryButton("Backup (Files + DB)")
-        self.btn_restore = QPushButton("Restore Backup")
-        self.btn_convert = PrimaryButton("Convert URLs")
+        self.btn_open_phpmyadmin = QPushButton("فتح phpMyAdmin")
+        self.btn_backup = PrimaryButton("نسخ احتياطي (الملفات + قاعدة البيانات)")
+        self.btn_restore = QPushButton("استعادة نسخة احتياطية")
+        self.btn_convert = PrimaryButton("تحويل الروابط")
 
         btn_row = QHBoxLayout()
         btn_row.addWidget(self.btn_open_phpmyadmin)
@@ -901,7 +901,7 @@ class ProjectToolsPage(QWidget):
         btn_row.addWidget(self.btn_convert)
         btn_row.addStretch(1)
 
-        form.addRow("Project:", self.project)
+        form.addRow("المشروع:", self.project)
         lay.addLayout(form)
         lay.addWidget(self.details)
         lay.addLayout(btn_row)
@@ -937,11 +937,11 @@ class ProjectToolsPage(QWidget):
     def _refresh(self):
         p = self.current_project()
         if not p:
-            self.details.setPlainText("No project selected.")
+            self.details.setPlainText("لم يتم اختيار أي مشروع.")
             return
 
         lar_db = self._laragon_db_dir(p) if (p.stack or "").lower().startswith("laragon") else ""
-        note = "DB storage is managed by your MySQL server (data directory)." if not lar_db else f"Laragon MySQL data folder (expected): {lar_db}"
+        note = "يتم تخزين قاعدة البيانات بواسطة خادم MySQL الخاص بك (مجلد البيانات)." if not lar_db else f"مجلد بيانات MySQL في Laragon (المتوقع): {lar_db}"
 
         txt = {
             "project": p.name,
@@ -981,13 +981,13 @@ class ProjectToolsPage(QWidget):
         p = self.current_project()
         if not p:
             return
-        dlg = DbCredsDialog("DB Credentials (for backup)", default_user="root")
+        dlg = DbCredsDialog("بيانات قاعدة البيانات (للنسخ الاحتياطي)", default_user="root")
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
         user, pwd = dlg.creds()
 
         default_dir = str((Path(p.path) / ".wpinst" / "backups").resolve())
-        out_dir = QFileDialog.getExistingDirectory(self, "Choose backup folder", default_dir) or default_dir
+        out_dir = QFileDialog.getExistingDirectory(self, "اختر مجلد النسخ الاحتياطي", default_dir) or default_dir
 
         db = self._db_params_with_creds(p, user, pwd)
         self.parent_window._run_backup_worker(p.path, db, out_dir)
@@ -997,14 +997,14 @@ class ProjectToolsPage(QWidget):
         if not p:
             return
         default_dir = str((Path(p.path) / ".wpinst" / "backups").resolve())
-        bdir = QFileDialog.getExistingDirectory(self, "Select backup folder", default_dir)
+        bdir = QFileDialog.getExistingDirectory(self, "اختر مجلد النسخة الاحتياطية", default_dir)
         if not bdir:
             return
-        r = QMessageBox.question(self, "Confirm Restore", "This will overwrite files and DB.\nContinue?")
+        r = QMessageBox.question(self, "تأكيد الاستعادة", "سيؤدي هذا إلى استبدال الملفات وقاعدة البيانات.\nهل تريد المتابعة؟")
         if r != QMessageBox.StandardButton.Yes:
             return
 
-        dlg = DbCredsDialog("DB Credentials (for restore)", default_user="root")
+        dlg = DbCredsDialog("بيانات قاعدة البيانات (للاستعادة)", default_user="root")
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
         user, pwd = dlg.creds()
@@ -1021,10 +1021,10 @@ class ProjectToolsPage(QWidget):
             return
         old_url, new_url, include_guid = ud.values()
         if not old_url or not new_url:
-            QMessageBox.warning(self, "Missing", "Old/New URL required.")
+            QMessageBox.warning(self, "بيانات ناقصة", "الرابط القديم والرابط الجديد مطلوبان.")
             return
 
-        dlg = DbCredsDialog("DB Credentials (for URL convert)", default_user="root")
+        dlg = DbCredsDialog("بيانات قاعدة البيانات (لتحويل الروابط)", default_user="root")
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
         user, pwd = dlg.creds()
@@ -1036,7 +1036,7 @@ class ProjectToolsPage(QWidget):
 class ImportProjectDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Import Existing WordPress Project")
+        self.setWindowTitle("استيراد مشروع ووردبريس موجود")
         self.setMinimumWidth(500)
         
         self.layout = QVBoxLayout(self)
@@ -1044,19 +1044,19 @@ class ImportProjectDialog(QDialog):
         
         # Folder picker
         self.path_edit = QLineEdit()
-        self.btn_browse = QPushButton("Browse...")
+        self.btn_browse = QPushButton("استعراض...")
         self.btn_browse.clicked.connect(self._browse)
-        
+
         path_row = QHBoxLayout()
         path_row.addWidget(self.path_edit)
         path_row.addWidget(self.btn_browse)
-        self.form.addRow("Project Folder:", path_row)
-        
+        self.form.addRow("مجلد المشروع:", path_row)
+
         # Details
         self.name_edit = QLineEdit()
         self.url_edit = QLineEdit("http://localhost/")
-        self.form.addRow("Project Name:", self.name_edit)
-        self.form.addRow("Site URL:", self.url_edit)
+        self.form.addRow("اسم المشروع:", self.name_edit)
+        self.form.addRow("رابط الموقع:", self.url_edit)
         
         # DB Details (Collapsible/Editable)
         self.layout.addLayout(self.form)
@@ -1073,14 +1073,14 @@ class ImportProjectDialog(QDialog):
         self.db_pass.setEchoMode(QLineEdit.EchoMode.Password)
         self.table_prefix = QLineEdit("wp_")
         
-        self.db_form.addRow("DB Host:", self.db_host)
-        self.db_form.addRow("DB Port:", self.db_port)
-        self.db_form.addRow("DB Name:", self.db_name)
-        self.db_form.addRow("DB User:", self.db_user)
-        self.db_form.addRow("DB Pass:", self.db_pass)
-        self.db_form.addRow("Table Prefix:", self.table_prefix)
-        
-        lbl_db = QLabel("Database Connection (Auto-detected from wp-config.php)")
+        self.db_form.addRow("مضيف قاعدة البيانات:", self.db_host)
+        self.db_form.addRow("منفذ قاعدة البيانات:", self.db_port)
+        self.db_form.addRow("اسم قاعدة البيانات:", self.db_name)
+        self.db_form.addRow("مستخدم قاعدة البيانات:", self.db_user)
+        self.db_form.addRow("كلمة مرور قاعدة البيانات:", self.db_pass)
+        self.db_form.addRow("بادئة الجداول:", self.table_prefix)
+
+        lbl_db = QLabel("اتصال قاعدة البيانات (يُكتشف تلقائياً من wp-config.php)")
         lbl_db.setStyleSheet("font-weight: bold; margin-top: 10px;")
         self.layout.addWidget(lbl_db)
         self.layout.addWidget(self.db_group)
@@ -1094,7 +1094,7 @@ class ImportProjectDialog(QDialog):
         self.path_edit.textChanged.connect(self._on_path_changed)
 
     def _browse(self):
-        d = QFileDialog.getExistingDirectory(self, "Select WordPress Root Folder")
+        d = QFileDialog.getExistingDirectory(self, "اختر مجلد ووردبريس الجذري")
         if d:
             self.path_edit.setText(d)
 
@@ -1202,7 +1202,7 @@ class MainWindow(QMainWindow):
         title_box = QVBoxLayout()
         t = QLabel("Harmulizer Pro")
         t.setObjectName("AppTitle")
-        s = QLabel("Wizard • Templates • DB Tools • Clone/Backup • WP-CLI Console")
+        s = QLabel("معالج الإعداد • القوالب • أدوات قاعدة البيانات • استنساخ/نسخ احتياطي • طرفية WP-CLI")
         # Icon: resolve for both dev and frozen exe
         import sys as _sys
         if getattr(_sys, 'frozen', False):
@@ -1242,7 +1242,7 @@ class MainWindow(QMainWindow):
         top.addWidget(self.btn_license)
 
         # About button
-        self.btn_about = QPushButton("  About")
+        self.btn_about = QPushButton("  حول البرنامج")
         self.btn_about.setFixedSize(80, 40)
         self.btn_about.setStyleSheet("""
             QPushButton {
@@ -1255,7 +1255,7 @@ class MainWindow(QMainWindow):
             }
             QPushButton:hover { background: #4B5563; }
         """)
-        self.btn_about.setToolTip("About Harmulizer Pro")
+        self.btn_about.setToolTip("حول Harmulizer Pro")
         self.btn_about.clicked.connect(self._show_about)
         top.addWidget(self.btn_about)
         
@@ -1276,10 +1276,10 @@ class MainWindow(QMainWindow):
                 }
             """)
             self.btn_theme_toggle.clicked.connect(self._toggle_theme)
-            self.btn_theme_toggle.setToolTip("Toggle Dark/Light Theme")
+            self.btn_theme_toggle.setToolTip("تبديل المظهر الداكن/الفاتح")
             top.addWidget(self.btn_theme_toggle)
 
-        self.status_pill = Pill("Idle", "neutral")
+        self.status_pill = Pill("جاهز", "neutral")
         top.addWidget(self.status_pill)
 
         outer.addLayout(top)
@@ -1294,21 +1294,21 @@ class MainWindow(QMainWindow):
         self.sidebar.setObjectName("Sidebar")
         self.sidebar.setFixedWidth(250)
         self.sidebar.addItems([
-            "🏠 Dashboard",
-            "✨ New Project",
-            "💻 WP-CLI Console",
-            "📦 Backups",
-            "🗄️ Database",
-            "🔗 URL Converter",
-            "🛡️ Security & Hardening",
-            "🩺 Monitoring & Auto-Fix",
-            "🧩 Plugin & Theme Manager",
-            "⚙️ WP-Config Editor",
-            "🛠️ Developer Tools",
-            "🤖 AI Assistant",
-            "🌐 Site Dashboard",
-            "🔑 License Config",
-            "📊 License Dashboard",
+            "🏠 لوحة التحكم",
+            "✨ مشروع جديد",
+            "💻 طرفية WP-CLI",
+            "📦 النسخ الاحتياطي",
+            "🗄️ قاعدة البيانات",
+            "🔗 محوّل الروابط",
+            "🛡️ الأمان والتحصين",
+            "🩺 المراقبة والإصلاح التلقائي",
+            "🧩 إدارة الإضافات والقوالب",
+            "⚙️ محرر wp-config",
+            "🛠️ أدوات المطور",
+            "🤖 المساعد الذكي",
+            "🌐 لوحة تحكم الموقع",
+            "🔑 إعدادات الترخيص",
+            "📊 لوحة تحكم التراخيص",
         ])
         self.sidebar.setCurrentRow(0)
         body.addWidget(self.sidebar)
@@ -1387,9 +1387,9 @@ class MainWindow(QMainWindow):
         # ── Collapsible log area ──────────────────────────────────────
         log_hdr = QHBoxLayout()
         log_hdr.setContentsMargins(0, 0, 0, 0)
-        _log_lbl = QLabel("📋 Operation Log")
+        _log_lbl = QLabel("📋 سجل العمليات")
         _log_lbl.setStyleSheet("color: #6B7280; font-size: 11px;")
-        self._btn_toggle_log = QPushButton("▲ Hide")
+        self._btn_toggle_log = QPushButton("▲ إخفاء")
         self._btn_toggle_log.setFixedHeight(20)
         self._btn_toggle_log.setStyleSheet(
             "QPushButton { background: transparent; color: #6B7280; "
@@ -1403,7 +1403,7 @@ class MainWindow(QMainWindow):
 
         self.progress = QTextEdit()
         self.progress.setReadOnly(True)
-        self.progress.setPlaceholderText("Installation/Worker logs will appear here...")
+        self.progress.setPlaceholderText("ستظهر هنا سجلات التثبيت والعمليات...")
         _log_h = 80 if self._small_screen else 100
         self.progress.setFixedHeight(_log_h)
         outer.addWidget(self.progress)
@@ -1505,38 +1505,38 @@ class MainWindow(QMainWindow):
         # Folder is still locked — ask user to kill web server processes
         ans = QMessageBox.question(
             self,
-            "Files Locked by Web Server",
-            "The project folder is locked by Apache/PHP (Laragon).\n\n"
-            "Do you want to automatically stop Apache and PHP processes to complete the deletion?\n\n"
-            "You can restart Laragon manually afterwards.",
+            "الملفات مقفلة بواسطة خادم الويب",
+            "مجلد المشروع مقفل بواسطة Apache/PHP (Laragon).\n\n"
+            "هل تريد إيقاف عمليات Apache وPHP تلقائياً لإتمام الحذف؟\n\n"
+            "يمكنك إعادة تشغيل Laragon يدوياً بعد ذلك.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if ans != QMessageBox.StandardButton.Yes:
             raise OSError(
-                f"Deletion cancelled. Stop Laragon services manually, then try again."
+                f"تم إلغاء الحذف. أوقف خدمات Laragon يدوياً، ثم حاول مرة أخرى."
             )
 
         killed = self._kill_web_server_processes()
-        self.log(f"Stopped processes: {', '.join(killed) if killed else 'none found'}")
+        self.log(f"تم إيقاف العمليات: {', '.join(killed) if killed else 'لا توجد عمليات'}")
 
         time.sleep(1)
         if _try_delete():
             return
 
         raise OSError(
-            f"Could not delete '{path}' even after stopping web server processes.\n"
-            "Please close any editors or file explorers that have this folder open, then try again."
+            f"تعذّر حذف '{path}' حتى بعد إيقاف عمليات خادم الويب.\n"
+            "يرجى إغلاق أي محررات أو نوافذ مستكشف ملفات مفتوحة على هذا المجلد، ثم حاول مرة أخرى."
         )
 
     def _do_full_delete(self, p: ProjectRecord):
-        self.log(f"Starting full deletion for: {p.name}")
-        self.set_status("Deleting...", "info")
+        self.log(f"بدء الحذف الكامل لـ: {p.name}")
+        self.set_status("جارٍ الحذف...", "info")
 
         try:
             # 1. DB
-            dlg = DbCredsDialog("DB Credentials (for deletion)", default_user="root")
+            dlg = DbCredsDialog("بيانات قاعدة البيانات (للحذف)", default_user="root")
             if dlg.exec() != QDialog.DialogCode.Accepted:
-                self.set_status("Ready", "ok")
+                self.set_status("جاهز", "ok")
                 return
             user, pwd = dlg.creds()
             db = self._db_params_with_creds(p, user, pwd)
@@ -1545,14 +1545,14 @@ class MainWindow(QMainWindow):
             # 2. Files
             p_path = Path(p.path)
             if p_path.exists() and p_path.is_dir():
-                self.log(f"Deleting folder: {p_path}")
+                self.log(f"جارِ حذف المجلد: {p_path}")
                 self._force_delete_folder(p_path)
 
             # 3. Store
             self.store.delete_by_path(p.path)
 
-            self.log("Full deletion completed ✅")
-            self.set_status("Ready", "ok")
+            self.log("اكتمل الحذف الكامل بنجاح ✅")
+            self.set_status("جاهز", "ok")
             self.dashboard.reload()
             self.console.reload_projects()
             self.backup_page.reload_projects()
@@ -1564,12 +1564,12 @@ class MainWindow(QMainWindow):
             self.dev_tools_page.reload_projects()
             self.site_dashboard_page.reload_projects()
 
-            QMessageBox.information(self, "Deleted", f"Project '{p.name}' and its database have been deleted.")
+            QMessageBox.information(self, "تم الحذف", f"تم حذف المشروع '{p.name}' وقاعدة بياناته.")
 
         except Exception as e:
-            self.log(f"ERROR: {e}")
-            self.set_status("Failed", "bad")
-            QMessageBox.critical(self, "Deletion Failed", f"An error occurred during deletion:\n{e}")
+            self.log(f"خطأ: {e}")
+            self.set_status("فشلت العملية", "bad")
+            QMessageBox.critical(self, "فشل الحذف", f"حدث خطأ أثناء الحذف:\n{e}")
 
     def _wrap_pad(self, w: QWidget) -> QWidget:
         c = QWidget()
@@ -1583,7 +1583,7 @@ class MainWindow(QMainWindow):
         """Show / hide the bottom log area."""
         visible = self.progress.isVisible()
         self.progress.setVisible(not visible)
-        self._btn_toggle_log.setText("▼ Show" if visible else "▲ Hide")
+        self._btn_toggle_log.setText("▼ إظهار" if visible else "▲ إخفاء")
 
     def log(self, s: str):
         self.progress.append(s)
@@ -1592,7 +1592,7 @@ class MainWindow(QMainWindow):
         self.status_pill.setParent(None)
         self.status_pill = Pill(text, kind)
         # Put it back in header: easiest - set window title suffix as well
-        self.setWindowTitle(f"WP Local Installer Pro — {text}")
+        self.setWindowTitle(f"Harmulizer Pro — {text}")
     
     def show_toast(self, message: str, toast_type: str = "info", duration: int = 3000):
         """Show a non-blocking toast notification"""
@@ -1819,7 +1819,7 @@ class MainWindow(QMainWindow):
     def _show_about(self):
         """Show professional About dialog."""
         dlg = QDialog(self)
-        dlg.setWindowTitle("About Harmulizer Pro")
+        dlg.setWindowTitle("حول Harmulizer Pro")
         dlg.setFixedSize(480, 420)
         dlg.setStyleSheet("""
             QDialog {
@@ -1850,12 +1850,12 @@ class MainWindow(QMainWindow):
         app_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(app_name)
 
-        version_lbl = QLabel("Version 1.0.0")
+        version_lbl = QLabel("الإصدار 1.0.0")
         version_lbl.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 13px; background: transparent;")
         version_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(version_lbl)
 
-        tagline = QLabel("WordPress Local Development Suite")
+        tagline = QLabel("مجموعة أدوات تطوير ووردبريس المحلية")
         tagline.setStyleSheet("color: rgba(255,255,255,0.6); font-size: 11px; background: transparent;")
         tagline.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h_lay.addWidget(tagline)
@@ -1882,7 +1882,7 @@ class MainWindow(QMainWindow):
         dc_lay.setContentsMargins(20, 16, 20, 16)
         dc_lay.setSpacing(8)
 
-        dev_title = QLabel("Developer")
+        dev_title = QLabel("المطوّر")
         dev_title.setStyleSheet("color: #9CA3AF; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: transparent; border: none;")
         dc_lay.addWidget(dev_title)
 
@@ -1890,7 +1890,7 @@ class MainWindow(QMainWindow):
         dev_name.setStyleSheet("color: #F9FAFB; font-size: 20px; font-weight: 800; background: transparent; border: none;")
         dc_lay.addWidget(dev_name)
 
-        dev_role = QLabel("Software Engineer")
+        dev_role = QLabel("مهندس برمجيات")
         dev_role.setStyleSheet("color: #A5B4FC; font-size: 12px; font-weight: 600; background: transparent; border: none;")
         dc_lay.addWidget(dev_role)
 
@@ -1909,7 +1909,7 @@ class MainWindow(QMainWindow):
         tc_lay.setContentsMargins(20, 14, 20, 14)
         tc_lay.setSpacing(6)
 
-        tech_title = QLabel("Built With")
+        tech_title = QLabel("بُني باستخدام")
         tech_title.setStyleSheet("color: #9CA3AF; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: transparent; border: none;")
         tc_lay.addWidget(tech_title)
 
@@ -1927,12 +1927,12 @@ class MainWindow(QMainWindow):
         f_lay = QHBoxLayout(footer)
         f_lay.setContentsMargins(20, 12, 20, 12)
 
-        copy_lbl = QLabel("\u00a9 2025 Saeed Mahmoud. All rights reserved.")
+        copy_lbl = QLabel("\u00a9 2025 Saeed Mahmoud. \u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0642 \u0645\u062d\u0641\u0648\u0638\u0629.")
         copy_lbl.setStyleSheet("color: #6B7280; font-size: 11px; background: transparent;")
         f_lay.addWidget(copy_lbl)
         f_lay.addStretch()
 
-        btn_ok = QPushButton("OK")
+        btn_ok = QPushButton("موافق")
         btn_ok.setStyleSheet("""
             QPushButton {
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #6366F1, stop:1 #4F46E5);
@@ -1956,8 +1956,8 @@ class MainWindow(QMainWindow):
         ok_all = all(c[0] for c in checks)
         for ok, msg in checks:
             self.log(("✅ " if ok else "❌ ") + msg)
-        self.wizard.preflight_box.setPlainText("\n".join([("OK " if ok else "FAIL ") + msg for ok, msg in checks]))
-        QMessageBox.information(self, "Preflight", "All good ✅" if ok_all else "Some checks failed ❌ (see list)")
+        self.wizard.preflight_box.setPlainText("\n".join([("ناجح " if ok else "فشل ") + msg for ok, msg in checks]))
+        QMessageBox.information(self, "فحوصات ما قبل التثبيت", "كل شيء جاهز ✅" if ok_all else "فشلت بعض الفحوصات ❌ (راجع القائمة)")
 
     def do_install(self, wp: WPParams, db: DBParams):
         self.progress.clear()
@@ -1968,14 +1968,14 @@ class MainWindow(QMainWindow):
 
         # basic validation
         if not wp.project_name or not str(wp.doc_root).strip():
-            QMessageBox.warning(self, "Missing", "Project name and document root are required.")
+            QMessageBox.warning(self, "بيانات ناقصة", "اسم المشروع ومجلد المستندات مطلوبان.")
             return
         if not db.db_name:
-            QMessageBox.warning(self, "Missing", "DB name is required.")
+            QMessageBox.warning(self, "بيانات ناقصة", "اسم قاعدة البيانات مطلوب.")
             return
 
         # run worker
-        self.set_status("Installing...", "info")
+        self.set_status("جارٍ التثبيت...", "info")
         self.sidebar.setCurrentRow(0)  # show dashboard to see logs or stay in wizard? 
         # User requested to see creation phases, so we keep logs visible.
 
@@ -1996,7 +1996,7 @@ class MainWindow(QMainWindow):
 
     def _install_done(self, ok: bool, res: dict, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
 
             now = datetime.datetime.utcnow().isoformat() + "Z"
@@ -2063,7 +2063,7 @@ class MainWindow(QMainWindow):
                 }
                 write_project_meta(Path(rec.path), meta, log=self.log)
             except Exception as e:
-                self.log(f"Meta write failed: {e}")
+                self.log(f"فشلت كتابة بيانات المشروع الوصفية: {e}")
             self.store.upsert(rec)
             self.url_page.reload_projects()
             self.manager_page.reload_projects()
@@ -2071,19 +2071,19 @@ class MainWindow(QMainWindow):
             self.dev_tools_page.reload_projects()
 
             # offer open
-            r = QMessageBox.question(self, "Done", "Open site now?")
+            r = QMessageBox.question(self, "تم", "هل تريد فتح الموقع الآن؟")
             if r == QMessageBox.StandardButton.Yes and url:
                 import webbrowser
                 webbrowser.open(url)
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشلت العملية", msg)
 
 
     def _run_backup_worker(self, project_path: str, db: DBParams, out_dir: str):
         self.progress.clear()
-        self.set_status("Backing up...", "info")
+        self.set_status("جارٍ النسخ الاحتياطي...", "info")
         self._worker_thread = QThread()
         self.bw = BackupWorker(project_path, db, out_dir, True, True)
         self.bw.moveToThread(self._worker_thread)
@@ -2098,17 +2098,17 @@ class MainWindow(QMainWindow):
 
     def _backup_done(self, ok: bool, msg: str, bdir: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Backup", f"Backup created:\n{bdir}")
+            QMessageBox.information(self, "نسخ احتياطي", f"تم إنشاء النسخة الاحتياطية:\n{bdir}")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Backup Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل النسخ الاحتياطي", msg)
 
     def _run_restore_worker(self, project_path: str, db: DBParams, backup_dir: str):
         self.progress.clear()
-        self.set_status("Restoring...", "info")
+        self.set_status("جارٍ الاستعادة...", "info")
         self._worker_thread = QThread()
         self.rw = RestoreWorker(project_path, db, backup_dir, True, True)
         self.rw.moveToThread(self._worker_thread)
@@ -2123,17 +2123,17 @@ class MainWindow(QMainWindow):
 
     def _restore_done(self, ok: bool, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Restore", "Restore completed ✅")
+            QMessageBox.information(self, "استعادة", "اكتملت الاستعادة بنجاح ✅")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Restore Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشلت الاستعادة", msg)
 
     def _run_url_worker(self, project_record, db: DBParams, old_url: str, new_url: str, include_guid: bool, rename_folder: bool = False):
         self.progress.clear()
-        self.set_status("Converting URLs...", "info")
+        self.set_status("جارٍ تحويل الروابط...", "info")
 
         from app.core.wp_ops import get_effective_tooling
         php, wpcli, is_phar = get_effective_tooling(project_record, log=self.log)
@@ -2152,30 +2152,30 @@ class MainWindow(QMainWindow):
 
     def _url_done(self, success, msg, project_record: ProjectRecord, new_url: str, new_path: str):
         if success:
-            self.set_status("Done", "success")
+            self.set_status("تم", "success")
             self.log(msg)
-            
+
             # update record
             now = datetime.datetime.utcnow().isoformat() + "Z"
             project_record.url = new_url
             project_record.admin_url = new_url.rstrip("/") + "/wp-admin/"
             project_record.last_action_iso = now
-            
+
             if new_path and str(new_path) != str(project_record.path):
                 old_path = str(project_record.path)
                 project_record.path = str(new_path)
-                self.log(f"Project path updated to: {new_path}")
+                self.log(f"تم تحديث مسار المشروع إلى: {new_path}")
                 # Remove old record to prevent duplicates
                 self.store.delete_by_path(old_path)
-            
+
             self.store.upsert(project_record)
             self.dashboard.reload()
             self.url_page.reload_projects() # Refresh this page specifically to update path in UI
-            QMessageBox.information(self, "Success", msg)
+            QMessageBox.information(self, "تم بنجاح", msg)
         else:
-            self.set_status("Failed", "error")
-            self.log(f"Error: {msg}")
-            QMessageBox.critical(self, "URL Convert Failed", msg)
+            self.set_status("فشلت العملية", "error")
+            self.log(f"خطأ: {msg}")
+            QMessageBox.critical(self, "فشل تحويل الروابط", msg)
 
     
 
@@ -2183,13 +2183,13 @@ class MainWindow(QMainWindow):
     def clone_selected(self):
         cur = self.dashboard.current
         if not cur:
-            QMessageBox.information(self, "Clone", "Select a project first.")
+            QMessageBox.information(self, "استنساخ", "اختر مشروعاً أولاً.")
             return
 
-        dlg = TextInputDialog("Clone Project", [
-            ("name", "New project folder name"),
-            ("url", "New site URL"),
-            ("db", "New DB name"),
+        dlg = TextInputDialog("استنساخ المشروع", [
+            ("name", "اسم مجلد المشروع الجديد"),
+            ("url", "رابط الموقع الجديد"),
+            ("db", "اسم قاعدة البيانات الجديدة"),
         ])
         dlg.edits["name"].setText(cur.name + "-clone")
         dlg.edits["url"].setText(cur.url.rstrip("/") + "-clone")
@@ -2243,7 +2243,7 @@ class MainWindow(QMainWindow):
         }
 
         self.progress.clear()
-        self.set_status("Cloning...", "info")
+        self.set_status("جارٍ الاستنساخ...", "info")
 
         self._worker_thread = QThread()
         self.clone_worker = CloneWorker(params)
@@ -2262,17 +2262,17 @@ class MainWindow(QMainWindow):
 
     def _clone_done(self, ok: bool, msg: str):
         if ok:
-            self.set_status("Ready", "ok")
+            self.set_status("جاهز", "ok")
             self.log(msg)
-            QMessageBox.information(self, "Clone", "Clone done ✅\n(If URL changes didn't fully apply, enable WP-CLI for perfect search-replace.)")
+            QMessageBox.information(self, "استنساخ", "اكتمل الاستنساخ بنجاح ✅\n(إذا لم يُطبَّق تغيير الروابط بالكامل، فعّل WP-CLI للحصول على استبدال بحث مثالي.)")
         else:
-            self.set_status("Failed", "bad")
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Clone Failed", msg)
+            self.set_status("فشلت العملية", "bad")
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل الاستنساخ", msg)
 
     def _run_scan_worker(self, project_path: str):
         self.progress.clear()
-        self.set_status("Scanning...", "info")
+        self.set_status("جارٍ الفحص...", "info")
         self._worker_thread = QThread()
         self.scan_worker = ScanWorker(project_path)
         self.scan_worker.moveToThread(self._worker_thread)
@@ -2286,10 +2286,10 @@ class MainWindow(QMainWindow):
         self._worker_thread.start()
 
     def _scan_done(self, ok: bool, results: list, msg: str):
-        self.set_status("Ready", "ok")
+        self.set_status("جاهز", "ok")
         if ok:
             self.log(msg)
             self.security_page.on_scan_finished(results)
         else:
-            self.log("ERROR: " + msg)
-            QMessageBox.critical(self, "Scan Failed", msg)
+            self.log("خطأ: " + msg)
+            QMessageBox.critical(self, "فشل الفحص", msg)

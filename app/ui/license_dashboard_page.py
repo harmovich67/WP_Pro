@@ -81,7 +81,7 @@ class LicenseDashboardPage(QWidget):
         icon.setStyleSheet("font-size: 64px;")
         vbox.addWidget(icon)
 
-        title = QLabel("License Dashboard")
+        title = QLabel("لوحة تحكم الترخيص")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("color: #e5e7eb; font-size: 22px; font-weight: bold;")
         vbox.addWidget(title)
@@ -193,9 +193,9 @@ class LicenseDashboardPage(QWidget):
 
         QMessageBox.critical(
             self,
-            "Dashboard Error",
-            f"Failed to start license dashboard server:\n\n{error_msg}\n\n"
-            f"Please check if port {self.port} is available and try restarting the application."
+            "خطأ في لوحة التحكم",
+            f"فشل تشغيل خادم لوحة تحكم الترخيص:\n\n{error_msg}\n\n"
+            f"يرجى التحقق من أن المنفذ {self.port} متاح، ثم إعادة تشغيل التطبيق."
         )
         self._show_error_page(error_msg)
     
@@ -218,7 +218,7 @@ class LicenseDashboardPage(QWidget):
             self.web_view.loadFinished.connect(self._on_page_loaded)
         else:
             logger.error(f"Dashboard HTML not found at {dashboard_html}")
-            self._show_error_page("Dashboard HTML file not found")
+            self._show_error_page("ملف HTML الخاص بلوحة التحكم غير موجود")
     
     @pyqtSlot(bool)
     def _on_page_loaded(self, success: bool) -> None:
@@ -239,7 +239,7 @@ class LicenseDashboardPage(QWidget):
             self._inject_api_url()
         else:
             logger.error("Dashboard page failed to load")
-            self._show_error_page("Failed to load dashboard page")
+            self._show_error_page("فشل تحميل صفحة لوحة التحكم")
     
     def _inject_api_url(self) -> None:
         """Inject API URL into the dashboard page"""
@@ -270,7 +270,7 @@ class LicenseDashboardPage(QWidget):
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>Dashboard Error</title>
+            <title>خطأ في لوحة التحكم</title>
             <style>
                 body {{
                     font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -309,15 +309,15 @@ class LicenseDashboardPage(QWidget):
                     font-family: 'Courier New', monospace;
                     font-size: 12px;
                     color: #ef4444;
-                    text-align: left;
+                    text-align: right;
                     word-break: break-word;
                 }}
             </style>
         </head>
         <body>
             <div class="error-container">
-                <h1>⚠️ Dashboard Error</h1>
-                <p>The license dashboard failed to start. Please check the error details below and try restarting the application.</p>
+                <h1>⚠️ خطأ في لوحة التحكم</h1>
+                <p>فشل تشغيل لوحة تحكم الترخيص. يرجى مراجعة تفاصيل الخطأ أدناه ثم إعادة تشغيل التطبيق.</p>
                 <div class="error-details">{error_msg}</div>
             </div>
         </body>
