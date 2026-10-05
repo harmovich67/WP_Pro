@@ -39,5 +39,6 @@ cloudflared*
 
 # Agent / IDE configs
 .claude/
+.kiro/
 .vscode/
 .idea/
