@@ -16,6 +16,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, String, Boolean, DateTime, Integer, JSON, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
+from app.core.i18n import t as tr
 
 
 def _setup_dashboard_logging() -> logging.Logger:
@@ -483,7 +484,7 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         license = db.query(License).filter(License.key == data.license_key).first()
         
         if not license:
-            return VerifyResponse(success=False, message="مفتاح الترخيص غير صالح")
+            return VerifyResponse(success=False, message=tr("مفتاح الترخيص غير صالح"))
         
         # Check existing activation for this machine FIRST
         existing = db.query(Activation).filter(
@@ -495,7 +496,7 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         if existing:
             # Check expiration
             if license.expires_at and license.expires_at < datetime.utcnow():
-                return VerifyResponse(success=False, message="الترخيص منتهي الصلاحية")
+                return VerifyResponse(success=False, message=tr("الترخيص منتهي الصلاحية"))
             
             # Reactivate the license if it was deactivated
             if not license.is_active:
@@ -515,11 +516,11 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         
         # For new machines, check if license is active
         if not license.is_active:
-            return VerifyResponse(success=False, message="الترخيص معطل")
+            return VerifyResponse(success=False, message=tr("الترخيص معطل"))
         
         # Check expiration
         if license.expires_at and license.expires_at < datetime.utcnow():
-            return VerifyResponse(success=False, message="الترخيص منتهي الصلاحية")
+            return VerifyResponse(success=False, message=tr("الترخيص منتهي الصلاحية"))
         
         # Check max activations
         active_count = db.query(Activation).filter(
@@ -530,7 +531,7 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         if active_count >= license.max_activations:
             return VerifyResponse(
                 success=False,
-                message=f"تم استنفاد عدد التفعيلات المسموح ({license.max_activations})"
+                message=f"{tr('تم استنفاد عدد التفعيلات المسموح (')}{license.max_activations})"
             )
         
         # Create new activation
@@ -554,7 +555,7 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
         license = db.query(License).filter(License.key == data.license_key).first()
         
         if not license:
-            return {"success": False, "message": "مفتاح الترخيص غير صالح"}
+            return {"success": False, "message": tr("مفتاح الترخيص غير صالح")}
 
         activation = db.query(Activation).filter(
             Activation.license_id == license.id,
@@ -565,7 +566,7 @@ def create_app(db_path: str = "licenses.db") -> FastAPI:
             activation.is_active = False
             db.commit()
 
-        return {"success": True, "message": "تم إلغاء التفعيل بنجاح"}
+        return {"success": True, "message": tr("تم إلغاء التفعيل بنجاح")}
     
     # Activation management endpoints
     @app.get("/api/licenses/{license_id}/activations")

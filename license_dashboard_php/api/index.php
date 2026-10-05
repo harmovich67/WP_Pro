@@ -3,9 +3,20 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../db.php';
 require_once __DIR__ . '/../helpers.php';
 
-$scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); // .../tafeal/api
+$scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = trim(substr($path, strlen($scriptDir)), '/');
+
+// Optional fallback for hosts where .htaccess fails
+if (isset($_GET['route']) && $_GET['route'] !== '') {
+    $path = trim($_GET['route'], '/');
+}
+
+// If path starts with index.php/ (e.g. from PATH_INFO fallback), strip it
+if (strpos($path, 'index.php/') === 0) {
+    $path = substr($path, 10);
+}
+
 $segments = $path === '' ? [] : explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
 

@@ -24,9 +24,24 @@ function read_json_body(): array {
 
 function require_admin(): void {
     $headers = function_exists('getallheaders') ? getallheaders() : [];
+    
+    // 1. Try Authorization header
     $auth = $headers['Authorization']
         ?? $headers['authorization']
         ?? ($_SERVER['HTTP_AUTHORIZATION'] ?? '');
+        
+    // 2. Try X-Admin-Token header as fallback
+    if (!$auth) {
+        $auth = $headers['X-Admin-Token'] ?? $headers['x-admin-token'] ?? ($_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '');
+        if ($auth && strpos($auth, 'Bearer') === false) {
+            $auth = 'Bearer ' . $auth;
+        }
+    }
+    
+    // 3. Try query parameter as ultimate fallback
+    if (!$auth && isset($_GET['token']) && $_GET['token'] !== '') {
+        $auth = 'Bearer ' . $_GET['token'];
+    }
 
     if ($auth !== 'Bearer ' . ADMIN_TOKEN) {
         json_response(['detail' => 'Unauthorized'], 401);

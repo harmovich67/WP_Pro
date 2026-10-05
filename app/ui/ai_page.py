@@ -12,6 +12,7 @@ from app.ui.widgets import make_card, PrimaryButton, row_buttons
 from app.core.projects_store import ProjectsStore, ProjectRecord
 from app.ui.extra_pages import BaseExtraPage
 from app.core.ai_worker import AIWorker
+from app.core.i18n import t as tr
 
 
 class ScanResultDialog(QDialog):
@@ -53,7 +54,7 @@ class ScanResultDialog(QDialog):
         title_lbl.setStyleSheet("color: white; font-size: 18px; font-weight: 800; background: transparent;")
         h_lay.addWidget(title_lbl)
 
-        self.status_lbl = QLabel("جاري الفحص...")
+        self.status_lbl = QLabel(tr("جاري الفحص..."))
         self.status_lbl.setStyleSheet("color: rgba(255,255,255,0.85); font-size: 13px; background: transparent;")
         h_lay.addWidget(self.status_lbl)
 
@@ -76,7 +77,7 @@ class ScanResultDialog(QDialog):
         body_lay.setContentsMargins(20, 16, 20, 16)
 
         # Scanning animation dots
-        self.scan_anim_lbl = QLabel("  جاري الفحص ")
+        self.scan_anim_lbl = QLabel(tr("  جاري الفحص "))
         self.scan_anim_lbl.setStyleSheet(
             "color: #A5B4FC; font-size: 14px; font-weight: 600; background: transparent;"
         )
@@ -128,7 +129,7 @@ class ScanResultDialog(QDialog):
         f_lay.addWidget(self.result_badge)
         f_lay.addStretch()
 
-        self.btn_copy = QPushButton("نسخ النتائج")
+        self.btn_copy = QPushButton(tr("نسخ النتائج"))
         self.btn_copy.setStyleSheet("""
             QPushButton {
                 background: #1F2937; border: 1px solid #374151; border-radius: 6px;
@@ -140,7 +141,7 @@ class ScanResultDialog(QDialog):
         self.btn_copy.clicked.connect(self._copy_results)
         f_lay.addWidget(self.btn_copy)
 
-        self.btn_close = QPushButton("إغلاق")
+        self.btn_close = QPushButton(tr("إغلاق"))
         self.btn_close.setStyleSheet("""
             QPushButton {
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #6366F1, stop:1 #4F46E5);
@@ -170,7 +171,7 @@ class ScanResultDialog(QDialog):
         self._dot_count = (self._dot_count + 1) % 4
         dots = "." * self._dot_count
         spaces = " " * (3 - self._dot_count)
-        self.scan_anim_lbl.setText(f"  جاري الفحص {dots}{spaces}")
+        self.scan_anim_lbl.setText(f"{tr('  جاري الفحص ')}{dots}{spaces}")
 
     # ── Show result with typing animation ──
     def show_result(self, text: str):
@@ -183,10 +184,10 @@ class ScanResultDialog(QDialog):
             QProgressBar { background: rgba(255,255,255,0.15); border: none; border-radius: 2px; }
             QProgressBar::chunk { background: #34D399; border-radius: 2px; }
         """)
-        self.status_lbl.setText("اكتمل الفحص بنجاح")
+        self.status_lbl.setText(tr("اكتمل الفحص بنجاح"))
         self.results_text.setVisible(True)
         self.btn_copy.setVisible(True)
-        self.result_badge.setText(f"عدد الأسطر: {len(text.splitlines())}")
+        self.result_badge.setText(f"{tr('عدد الأسطر: ')}{len(text.splitlines())}")
 
         # Format the text for display
         self._full_text = self._format_result_text(text)
@@ -204,13 +205,13 @@ class ScanResultDialog(QDialog):
             QProgressBar { background: rgba(255,255,255,0.15); border: none; border-radius: 2px; }
             QProgressBar::chunk { background: #EF4444; border-radius: 2px; }
         """)
-        self.status_lbl.setText("حدث خطأ أثناء الفحص")
+        self.status_lbl.setText(tr("حدث خطأ أثناء الفحص"))
         self.results_text.setVisible(True)
         self.results_text.setHtml(
             f'<div style="color:#FCA5A5; padding:12px;">'
             f'<b style="font-size:15px;">خطأ</b><br><br>{error}</div>'
         )
-        self.result_badge.setText("فشل الفحص")
+        self.result_badge.setText(tr("فشل الفحص"))
 
     # ── Typing effect ──
     def _type_next_chunk(self):
@@ -252,9 +253,9 @@ class ScanResultDialog(QDialog):
         from PyQt6.QtWidgets import QApplication
         clipboard = QApplication.clipboard()
         clipboard.setText(self.results_text.toPlainText())
-        self.result_badge.setText("تم النسخ!")
+        self.result_badge.setText(tr("تم النسخ!"))
         QTimer.singleShot(2000, lambda: self.result_badge.setText(
-            f"عدد الأسطر: {len(self._full_text.splitlines())}"
+            f"{tr('عدد الأسطر: ')}{len(self._full_text.splitlines())}"
         ))
 
 class ApiKeyDialog(QDialog):
@@ -299,7 +300,7 @@ class AIChatWindow(QDialog):
         self.project = project_record
         self.threadpool = QThreadPool()
         
-        self.setWindowTitle(f"💬 المساعد الذكي - {project_record.name}")
+        self.setWindowTitle(f"{tr('💬 المساعد الذكي - ')}{project_record.name}")
         self.resize(800, 600)
         
         layout = QVBoxLayout(self)
@@ -313,18 +314,18 @@ class AIChatWindow(QDialog):
         # Input Area
         input_row = QHBoxLayout()
         self.chat_input = QLineEdit()
-        self.chat_input.setPlaceholderText("اكتب سؤالك هنا...")
+        self.chat_input.setPlaceholderText(tr("اكتب سؤالك هنا..."))
         self.chat_input.setStyleSheet("font-size: 14px; padding: 8px;")
         self.chat_input.returnPressed.connect(self._send_chat)
         
-        self.btn_send = PrimaryButton("إرسال")
+        self.btn_send = PrimaryButton(tr("إرسال"))
         self.btn_send.clicked.connect(self._send_chat)
         
         input_row.addWidget(self.chat_input, 1)
         input_row.addWidget(self.btn_send)
         layout.addLayout(input_row)
         
-        self.chat_history.append("🤖 **AI:** أهلاً بك! كيف يمكنني مساعدتك في هذا المشروع؟")
+        self.chat_history.append(tr("🤖 **AI:** أهلاً بك! كيف يمكنني مساعدتك في هذا المشروع؟"))
         self.chat_history.append("─" * 40)
         
     def _send_chat(self):
@@ -334,7 +335,7 @@ class AIChatWindow(QDialog):
         self.chat_history.append(f"\n🙋 **أنت:** {message}")
         self.chat_input.clear()
         self.btn_send.setEnabled(False)
-        self.chat_history.append("⏳ تفكير...")
+        self.chat_history.append(tr("⏳ تفكير..."))
         
         context = f"Project: {self.project.name}, Path: {self.project.path}, URL: {self.project.url}"
         
@@ -354,7 +355,7 @@ class AIChatWindow(QDialog):
         
     def _handle_error(self, err: str):
         self.btn_send.setEnabled(True)
-        self.chat_history.append(f"❌ خطأ: {err}")
+        self.chat_history.append(f"{tr('❌ خطأ: ')}{err}")
 
 
 class AIAssistantPage(BaseExtraPage):
@@ -367,28 +368,28 @@ class AIAssistantPage(BaseExtraPage):
         
         # Header
         header_card, h_lay = make_card(
-            "🤖 المساعد الذكي",
-            "مساعد ذكي لتحليل الأخطاء والمشاكل باستخدام Gemini AI"
+            tr("🤖 المساعد الذكي"),
+            tr("مساعد ذكي لتحليل الأخطاء والمشاكل باستخدام Gemini AI")
         )
 
-        self.btn_set_api = QPushButton("⚙️ تعيين API Key")
+        self.btn_set_api = QPushButton(tr("⚙️ تعيين API Key"))
         self.btn_set_api.clicked.connect(self._set_api_key)
         h_lay.addWidget(row_buttons(self.btn_set_api))
         
         # Main Chat Button
-        chat_card, c_lay = make_card("💬 Chat Room", "افتح نافذة المحادثة الكبيرة")
-        self.btn_open_chat = PrimaryButton("فتح المحادثة (نافذة منفصلة)")
+        chat_card, c_lay = make_card("💬 Chat Room", tr("افتح نافذة المحادثة الكبيرة"))
+        self.btn_open_chat = PrimaryButton(tr("فتح المحادثة (نافذة منفصلة)"))
         self.btn_open_chat.setFixedHeight(50)
         self.btn_open_chat.setStyleSheet("font-size: 16px; font-weight: bold;")
         self.btn_open_chat.clicked.connect(self._open_chat_window)
         c_lay.addWidget(self.btn_open_chat)
 
         # Quick Actions Card
-        actions_card, a_lay = make_card("⚡ Quick Actions", "تحليل سريع")
+        actions_card, a_lay = make_card("⚡ Quick Actions", tr("تحليل سريع"))
         
-        self.btn_analyze_debug = QPushButton("🔍 تحليل سجل الأخطاء")
-        self.btn_security_scan = QPushButton("🛡️ فحص الحماية والأمان")
-        self.btn_performance = QPushButton("⚡ نصائح الأداء والسرعة")
+        self.btn_analyze_debug = QPushButton(tr("🔍 تحليل سجل الأخطاء"))
+        self.btn_security_scan = QPushButton(tr("🛡️ فحص الحماية والأمان"))
+        self.btn_performance = QPushButton(tr("⚡ نصائح الأداء والسرعة"))
         
         self.btn_analyze_debug.clicked.connect(self._analyze_debug)
         self.btn_security_scan.clicked.connect(self._security_scan)
@@ -461,7 +462,7 @@ class AIAssistantPage(BaseExtraPage):
                 self._save_api_key(key)
                 self.api_key = key
                 self._init_ai()
-                QMessageBox.information(self, "نجاح", "تم حفظ API Key بنجاح! 🎉")
+                QMessageBox.information(self, tr("نجاح"), tr("تم حفظ API Key بنجاح! 🎉"))
     
     def _on_project_selected(self, p: ProjectRecord):
         self._set_enabled(True)
@@ -494,10 +495,10 @@ class AIAssistantPage(BaseExtraPage):
 
         log_path = Path(self.current.path) / "wp-content" / "debug.log"
         if not log_path.exists():
-            QMessageBox.warning(self, "غير موجود", "لا يوجد ملف debug.log في المشروع.")
+            QMessageBox.warning(self, tr("غير موجود"), tr("لا يوجد ملف debug.log في المشروع."))
             return
 
-        dlg = self._open_scan_dialog("تحليل سجل الأخطاء", "🔍", self.btn_analyze_debug)
+        dlg = self._open_scan_dialog(tr("تحليل سجل الأخطاء"), "🔍", self.btn_analyze_debug)
 
         try:
             log_content = log_path.read_text(encoding="utf-8", errors="ignore")
@@ -513,10 +514,10 @@ class AIAssistantPage(BaseExtraPage):
 
         config_path = Path(self.current.path) / "wp-config.php"
         if not config_path.exists():
-            QMessageBox.warning(self, "غير موجود", "لا يوجد ملف wp-config.php في المشروع.")
+            QMessageBox.warning(self, tr("غير موجود"), tr("لا يوجد ملف wp-config.php في المشروع."))
             return
 
-        dlg = self._open_scan_dialog("فحص الحماية والأمان", "🛡️", self.btn_security_scan)
+        dlg = self._open_scan_dialog(tr("فحص الحماية والأمان"), "🛡️", self.btn_security_scan)
 
         try:
             code = config_path.read_text(encoding="utf-8")[:3000]
@@ -530,7 +531,7 @@ class AIAssistantPage(BaseExtraPage):
     def _performance_tips(self):
         if not self.current: return
 
-        dlg = self._open_scan_dialog("نصائح الأداء والسرعة", "⚡", self.btn_performance)
+        dlg = self._open_scan_dialog(tr("نصائح الأداء والسرعة"), "⚡", self.btn_performance)
 
         project_info = {
             "name": self.current.name,

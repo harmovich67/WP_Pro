@@ -3,109 +3,141 @@ API Server Thread - Background FastAPI server for License Dashboard
 """
 from __future__ import annotations
 import logging
+import socket
 import threading
-import time
 from typing import Optional
 
-from PyQt6.QtCore import QThread, pyqtSignal
-import uvicorn
+from PyQt6.QtCore import QObject, pyqtSignal
+from app.core.i18n import t as tr
 
 
 logger = logging.getLogger(__name__)
 
 
-class APIServerThread(QThread):
-    """Background thread for running FastAPI server"""
-    
-    server_started = pyqtSignal(str)  # Emits server URL when started
-    server_error = pyqtSignal(str)    # Emits error message on failure
-    
+def _find_free_port(start: int = 8000, end: int = 8100) -> int:
+    """Return the first free TCP port in [start, end). Raises RuntimeError if none found.
+
+    Deliberately does NOT set SO_REUSEADDR: on Windows that flag lets a
+    socket bind to a port another process is already listening on, which
+    makes this check falsely report a taken port as free.
+    """
+    for port in range(start, end):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("127.0.0.1", port))
+                return port
+            except OSError:
+                continue
+    raise RuntimeError(f"No free port found in range {start}–{end}")
+
+
+class APIServerThread(QObject):
+    """
+    Runs a uvicorn/FastAPI server in a plain daemon thread.
+
+    Using a plain thread (instead of QThread) avoids the asyncio ↔ Qt
+    timer conflicts that produced the QObject::killTimer / QBasicTimer
+    warnings when uvicorn was torn down.
+    """
+
+    server_started = pyqtSignal(str)   # Emits server URL when started
+    server_error   = pyqtSignal(str)   # Emits error message on failure
+
     def __init__(self, port: int = 8000, db_path: str = "licenses.db", parent=None):
         super().__init__(parent)
-        self.port = port
+        self.port    = port
         self.db_path = db_path
-        self.server: Optional[uvicorn.Server] = None
-        self._stop_event = threading.Event()
+        self._server: Optional[object] = None   # uvicorn.Server
+        self._thread: Optional[threading.Thread] = None
         self._running = False
-        
-    def run(self) -> None:
-        """Run the FastAPI server in this thread"""
+
+    # ── Public API ────────────────────────────────────────────────────
+
+    def start(self) -> None:
+        """Start the server in a background daemon thread."""
+        if self._running:
+            return
+
+        # Pick a free port (may differ from the requested one)
         try:
-            # Import here to avoid circular imports
+            self.port = _find_free_port(self.port, self.port + 100)
+        except RuntimeError as exc:
+            self.server_error.emit(str(exc))
+            return
+
+        self._thread = threading.Thread(
+            target=self._run_server,
+            name="APIServerThread",
+            daemon=True,          # killed automatically when the main process exits
+        )
+        self._thread.start()
+        logger.info(f"API server thread started (port {self.port})")
+
+    def stop(self) -> None:
+        """Signal uvicorn to shut down and wait for the thread."""
+        if self._server is not None:
+            try:
+                self._server.should_exit = True
+            except Exception:
+                pass
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=5)
+        self._running = False
+        logger.info("API server stopped")
+
+    def is_running(self) -> bool:
+        return self._running
+
+    def get_server_url(self) -> str:
+        return f"http://127.0.0.1:{self.port}"
+
+    # ── Internal ──────────────────────────────────────────────────────
+
+    def _run_server(self) -> None:
+        """Entry point for the daemon thread."""
+        import asyncio
+
+        # Each thread needs its own event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        try:
+            import uvicorn
             from app.core.license_api import create_app
-            
-            # Create FastAPI app with database path
+
             app = create_app(self.db_path)
-            
-            # Configure Uvicorn server
+
             config = uvicorn.Config(
                 app=app,
                 host="127.0.0.1",
                 port=self.port,
-                log_level="error",  # Minimize console output
+                log_level="error",
                 access_log=False,
+                loop="asyncio",
             )
-            
-            self.server = uvicorn.Server(config)
-            
-            # Mark as running
+            self._server = uvicorn.Server(config)
             self._running = True
-            
-            # Emit success signal with server URL
-            server_url = f"http://127.0.0.1:{self.port}"
-            self.server_started.emit(server_url)
-            
-            logger.info(f"API server started on {server_url}")
-            
-            # Run server (blocking call)
-            self.server.run()
-            
-        except OSError as e:
-            # Port already in use or permission denied
-            error_msg = f"فشل تشغيل خادم API: {str(e)}"
-            logger.error(error_msg)
-            self.server_error.emit(error_msg)
+
+            # Emit the URL *before* blocking in server.run()
+            self.server_started.emit(self.get_server_url())
+            logger.info(f"API server running at {self.get_server_url()}")
+
+            # Blocking call — returns when should_exit is set
+            loop.run_until_complete(self._server.serve())
+
+        except OSError as exc:
+            msg = f"{tr('فشل تشغيل خادم API: ')}{exc}"
+            logger.error(msg)
+            self.server_error.emit(msg)
+
+        except Exception as exc:
+            msg = f"{tr('خطأ في خادم API: ')}{exc}"
+            logger.exception(msg)
+            self.server_error.emit(msg)
+
+        finally:
             self._running = False
-            
-        except Exception as e:
-            # Other errors
-            error_msg = f"خطأ في خادم API: {str(e)}"
-            logger.exception(error_msg)
-            self.server_error.emit(error_msg)
-            self._running = False
-    
-    def stop(self) -> None:
-        """Stop the API server gracefully"""
-        if self.server and self._running:
-            logger.info("Stopping API server...")
-            self._stop_event.set()
-            
-            # Signal server to shutdown
-            if hasattr(self.server, 'should_exit'):
-                self.server.should_exit = True
-            
-            # Wait for thread to finish (max 5 seconds)
-            self.wait(5000)
-            
-            self._running = False
-            logger.info("API server stopped")
-    
-    def is_running(self) -> bool:
-        """Check if server is currently running"""
-        return self._running
-    
-    def get_server_url(self) -> str:
-        """Get the server URL"""
-        return f"http://127.0.0.1:{self.port}"
-    
-    def health_check(self) -> bool:
-        """Check if server is responding"""
-        if not self._running:
-            return False
-        
-        try:
-            import requests
-            response = requests.get(f"{self.get_server_url()}/", timeout=1)
-            return response.status_code == 200
-        except Exception:
-            return False
+            try:
+                loop.close()
+            except Exception:
+                pass

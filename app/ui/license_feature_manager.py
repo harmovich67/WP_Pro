@@ -29,6 +29,7 @@ from app.core.license.feature_flags import (
     get_default_feature_tiers, get_default_pricing,
     save_tier_overrides, set_dev_password_hash, verify_dev_password,
 )
+from app.core.i18n import t as tr
 
 
 # ── Tier header colours (background) ──────────────────────────────────────────
@@ -88,7 +89,7 @@ def _btn(text: str, style: str = _BTN) -> QPushButton:
 class _ChangePasswordDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("تغيير كلمة مرور المطور")
+        self.setWindowTitle(tr("تغيير كلمة مرور المطور"))
         self.setMinimumWidth(400)
         layout = QVBoxLayout(self)
         form = QFormLayout()
@@ -96,12 +97,12 @@ class _ChangePasswordDialog(QDialog):
         self._old  = QLineEdit(); self._old.setEchoMode(QLineEdit.EchoMode.Password)
         self._new1 = QLineEdit(); self._new1.setEchoMode(QLineEdit.EchoMode.Password)
         self._new2 = QLineEdit(); self._new2.setEchoMode(QLineEdit.EchoMode.Password)
-        self._new1.setPlaceholderText("8 أحرف على الأقل")
-        self._new2.setPlaceholderText("أعد كتابة كلمة المرور")
+        self._new1.setPlaceholderText(tr("8 أحرف على الأقل"))
+        self._new2.setPlaceholderText(tr("أعد كتابة كلمة المرور"))
 
-        form.addRow("كلمة المرور الحالية:", self._old)
-        form.addRow("كلمة المرور الجديدة:", self._new1)
-        form.addRow("تأكيد كلمة المرور:", self._new2)
+        form.addRow(tr("كلمة المرور الحالية:"), self._old)
+        form.addRow(tr("كلمة المرور الجديدة:"), self._new1)
+        form.addRow(tr("تأكيد كلمة المرور:"), self._new2)
         layout.addLayout(form)
 
         bb = QDialogButtonBox(
@@ -113,14 +114,14 @@ class _ChangePasswordDialog(QDialog):
 
     def _validate(self):
         if not verify_dev_password(self._old.text()):
-            QMessageBox.warning(self, "خطأ", "كلمة المرور الحالية غير صحيحة.")
+            QMessageBox.warning(self, tr("خطأ"), tr("كلمة المرور الحالية غير صحيحة."))
             return
         new = self._new1.text()
         if len(new) < 6:
-            QMessageBox.warning(self, "خطأ", "كلمة المرور الجديدة قصيرة جداً (6 أحرف كحد أدنى).")
+            QMessageBox.warning(self, tr("خطأ"), tr("كلمة المرور الجديدة قصيرة جداً (6 أحرف كحد أدنى)."))
             return
         if new != self._new2.text():
-            QMessageBox.warning(self, "خطأ", "كلمتا المرور الجديدتان لا تتطابقان.")
+            QMessageBox.warning(self, tr("خطأ"), tr("كلمتا المرور الجديدتان لا تتطابقان."))
             return
         self.accept()
 
@@ -152,6 +153,7 @@ class LicenseFeatureManagerPage(QWidget):
         "security", "manager", "config_editor",
         "devtools", "ai_assistant", "monitoring",
         "site_dashboard",
+        "url_sharing", "php_switcher", "multisite",
     ]
     _TIERS = ["free", "basic", "pro", "enterprise"]
 
@@ -187,18 +189,18 @@ class LicenseFeatureManagerPage(QWidget):
         icon.setStyleSheet("font-size: 48px;")
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        title = QLabel("لوحة تحكم المطور")
+        title = QLabel(tr("لوحة تحكم المطور"))
         title.setStyleSheet(
             "font-size: 22px; font-weight: 700; color: #F9FAFB;")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        subtitle = QLabel("أدخل كلمة مرور المطور للوصول إلى إعدادات الباقات")
+        subtitle = QLabel(tr("أدخل كلمة مرور المطور للوصول إلى إعدادات الباقات"))
         subtitle.setStyleSheet("color: #9CA3AF; font-size: 13px;")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._pass_input = QLineEdit()
         self._pass_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self._pass_input.setPlaceholderText("كلمة المرور…")
+        self._pass_input.setPlaceholderText(tr("كلمة المرور…"))
         self._pass_input.setMaximumWidth(320)
         self._pass_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._pass_input.returnPressed.connect(self._try_unlock)
@@ -207,11 +209,11 @@ class LicenseFeatureManagerPage(QWidget):
         self._lock_error.setStyleSheet("color: #F87171; font-size: 12px;")
         self._lock_error.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        btn_unlock = _btn("🔓 دخول", _BTN_PRIMARY)
+        btn_unlock = _btn(tr("🔓 دخول"), _BTN_PRIMARY)
         btn_unlock.setMaximumWidth(200)
         btn_unlock.clicked.connect(self._try_unlock)
 
-        hint = QLabel("كلمة المرور الافتراضية: harmulizer2024")
+        hint = QLabel(tr("كلمة المرور الافتراضية: harmulizer2024"))
         hint.setStyleSheet("color: #6B7280; font-size: 11px;")
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -238,7 +240,7 @@ class LicenseFeatureManagerPage(QWidget):
             self._main_widget.setVisible(True)
             self._load_matrix()
         else:
-            self._lock_error.setText("❌ كلمة المرور غير صحيحة")
+            self._lock_error.setText(tr("❌ كلمة المرور غير صحيحة"))
             self._pass_input.clear()
             self._pass_input.setFocus()
 
@@ -254,15 +256,15 @@ class LicenseFeatureManagerPage(QWidget):
 
         # ── Header row ────────────────────────────────────────────────
         hdr = QHBoxLayout()
-        title = QLabel("🔑  إدارة مميزات الباقات")
+        title = QLabel(tr("🔑  إدارة مميزات الباقات"))
         title.setStyleSheet(
             "font-size: 18px; font-weight: 700; color: #F9FAFB;")
         hdr.addWidget(title)
         hdr.addStretch()
 
-        btn_lock = _btn("🔒 قفل")
+        btn_lock = _btn(tr("🔒 قفل"))
         btn_lock.clicked.connect(self._lock)
-        btn_change_pass = _btn("🔑 تغيير كلمة المرور")
+        btn_change_pass = _btn(tr("🔑 تغيير كلمة المرور"))
         btn_change_pass.clicked.connect(self._change_password)
         hdr.addWidget(btn_change_pass)
         hdr.addWidget(btn_lock)
@@ -270,8 +272,8 @@ class LicenseFeatureManagerPage(QWidget):
 
         # ── Tabs ──────────────────────────────────────────────────────
         tabs = QTabWidget()
-        tabs.addTab(self._build_matrix_tab(), "📊 مصفوفة الميزات")
-        tabs.addTab(self._build_pricing_tab(), "💰 الأسعار والباقات")
+        tabs.addTab(self._build_matrix_tab(), tr("📊 مصفوفة الميزات"))
+        tabs.addTab(self._build_pricing_tab(), tr("💰 الأسعار والباقات"))
         v.addWidget(tabs, 1)
 
         # ── Bottom action bar ─────────────────────────────────────────
@@ -279,8 +281,8 @@ class LicenseFeatureManagerPage(QWidget):
         self._status_lbl = QLabel("")
         self._status_lbl.setStyleSheet("color: #6B7280; font-size: 11px;")
 
-        btn_save  = _btn("💾  حفظ جميع التغييرات", _BTN_PRIMARY)
-        btn_reset = _btn("↩  إعادة الافتراضي", _BTN_DANGER)
+        btn_save  = _btn(tr("💾  حفظ جميع التغييرات"), _BTN_PRIMARY)
+        btn_reset = _btn(tr("↩  إعادة الافتراضي"), _BTN_DANGER)
         btn_save.clicked.connect(self._save)
         btn_reset.clicked.connect(self._reset_to_defaults)
 
@@ -307,7 +309,7 @@ class LicenseFeatureManagerPage(QWidget):
         self._matrix_table = QTableWidget()
         self._matrix_table.setColumnCount(len(self._TIERS) + 1)  # +1 for feature name
 
-        headers = ["الميزة"] + [
+        headers = [tr("الميزة")] + [
             f"{TIER_NAMES[t]}\n({PRICING[t]['price']}$)" for t in self._TIERS
         ]
         self._matrix_table.setHorizontalHeaderLabels(headers)
@@ -345,7 +347,7 @@ class LicenseFeatureManagerPage(QWidget):
                     sb = QSpinBox()
                     sb.setRange(-1, 9999)
                     sb.setValue(val if isinstance(val, int) else 1)
-                    sb.setSpecialValueText("∞ غير محدود")
+                    sb.setSpecialValueText(tr("∞ غير محدود"))
                     sb.setMinimumWidth(110)
                     sb.setStyleSheet(
                         "QSpinBox { background: #1E293B; color: #F9FAFB; "
@@ -428,13 +430,13 @@ class LicenseFeatureManagerPage(QWidget):
                 "QLineEdit { background: #0F172A; color: #F9FAFB; "
                 "border: 1px solid #334155; border-radius: 4px; padding: 4px; }")
 
-            form.addRow("اسم الباقة:", name_edit)
-            form.addRow("السعر / شهر:", price_sb)
+            form.addRow(tr("اسم الباقة:"), name_edit)
+            form.addRow(tr("السعر / شهر:"), price_sb)
 
             if tier != "free":
-                period_lbl = QLabel("شهري")
+                period_lbl = QLabel(tr("شهري"))
                 period_lbl.setStyleSheet("color: #6B7280; font-size: 11px;")
-                form.addRow("الفترة:", period_lbl)
+                form.addRow(tr("الفترة:"), period_lbl)
 
             card_v.addLayout(form)
             v.addWidget(card)
@@ -499,7 +501,7 @@ class LicenseFeatureManagerPage(QWidget):
 
         import datetime as _dt
         self._status_lbl.setText(
-            f"✅ تم الحفظ بنجاح — {_dt.datetime.now().strftime('%H:%M:%S')}")
+            f"{tr('✅ تم الحفظ بنجاح — ')}{_dt.datetime.now().strftime('%H:%M:%S')}")
         self._status_lbl.setStyleSheet(
             "color: #34D399; font-size: 11px; padding: 2px;")
 
@@ -509,7 +511,7 @@ class LicenseFeatureManagerPage(QWidget):
 
     def _reset_to_defaults(self):
         reply = QMessageBox.question(
-            self, "تأكيد الإعادة",
+            self, tr("تأكيد الإعادة"),
             "هل تريد إعادة جميع الميزات والأسعار إلى القيم الافتراضية؟\n"
             "سيتم حذف أي تخصيصات محفوظة.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -525,7 +527,7 @@ class LicenseFeatureManagerPage(QWidget):
 
         save_tier_overrides(defaults_tiers, defaults_pricing)
         self._load_matrix()
-        self._status_lbl.setText("↩  تمت إعادة الضبط إلى الافتراضي")
+        self._status_lbl.setText(tr("↩  تمت إعادة الضبط إلى الافتراضي"))
         self._status_lbl.setStyleSheet("color: #F59E0B; font-size: 11px; padding: 2px;")
 
         if self._on_features_saved:
@@ -545,7 +547,7 @@ class LicenseFeatureManagerPage(QWidget):
                 dlg.new_password().encode()).hexdigest()
             set_dev_password_hash(new_hash)
             QMessageBox.information(
-                self, "تم", "تم تغيير كلمة مرور المطور بنجاح.")
+                self, tr("تم"), tr("تم تغيير كلمة مرور المطور بنجاح."))
 
     # Re-lock when the page is hidden (navigated away from)
     def hideEvent(self, event):

@@ -17,12 +17,13 @@ from app.core.workers import (
     BackupWorker, RestoreWorker, UrlConvertWorker
 )
 from app.ui.widgets import make_card, Pill, PrimaryButton, row_buttons
+from app.core.i18n import t as tr
 
 # ----------------- Settings Dialog -----------------
 class ProjectSettingsDialog(QDialog):
     def __init__(self, p: ProjectRecord, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"الإعدادات: {p.name}")
+        self.setWindowTitle(f"{tr('الإعدادات: ')}{p.name}")
         self.setMinimumWidth(450)
         
         layout = QVBoxLayout(self)
@@ -42,14 +43,14 @@ class ProjectSettingsDialog(QDialog):
         self.db_name = QLineEdit(p.db_name)
         self.table_prefix = QLineEdit(p.table_prefix)
         
-        form.addRow("مسار المشروع:", self.project_path)
-        form.addRow("---", QLabel("اتصال قاعدة البيانات:"))
-        form.addRow("مضيف قاعدة البيانات:", self.host)
-        form.addRow("منفذ قاعدة البيانات:", self.port)
-        form.addRow("مستخدم قاعدة البيانات:", self.user)
-        form.addRow("كلمة مرور قاعدة البيانات:", self.password)
-        form.addRow("اسم قاعدة البيانات:", self.db_name)
-        form.addRow("بادئة الجداول:", self.table_prefix)
+        form.addRow(tr("مسار المشروع:"), self.project_path)
+        form.addRow("---", QLabel(tr("اتصال قاعدة البيانات:")))
+        form.addRow(tr("مضيف قاعدة البيانات:"), self.host)
+        form.addRow(tr("منفذ قاعدة البيانات:"), self.port)
+        form.addRow(tr("مستخدم قاعدة البيانات:"), self.user)
+        form.addRow(tr("كلمة مرور قاعدة البيانات:"), self.password)
+        form.addRow(tr("اسم قاعدة البيانات:"), self.db_name)
+        form.addRow(tr("بادئة الجداول:"), self.table_prefix)
         
         layout.addLayout(form)
         
@@ -74,7 +75,7 @@ class ProjectSettingsDialog(QDialog):
 class TableDataDialog(QDialog):
     def __init__(self, table_name: str, db_params, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"بيانات الجدول: {table_name}")
+        self.setWindowTitle(f"{tr('بيانات الجدول: ')}{table_name}")
         self.setMinimumSize(800, 600)
         
         self.table_name = table_name
@@ -83,7 +84,7 @@ class TableDataDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # Info label
-        info = QLabel(f"عرض البيانات من الجدول: {table_name}")
+        info = QLabel(f"{tr('عرض البيانات من الجدول: ')}{table_name}")
         info.setStyleSheet("font-weight: bold;")
         layout.addWidget(info)
 
@@ -93,7 +94,7 @@ class TableDataDialog(QDialog):
         layout.addWidget(self.data_table)
 
         # Close button
-        btn_close = QPushButton("إغلاق")
+        btn_close = QPushButton(tr("إغلاق"))
         btn_close.clicked.connect(self.close)
         layout.addWidget(btn_close)
         
@@ -128,13 +129,13 @@ class TableDataDialog(QDialog):
                     self.data_table.resizeColumnsToContents()
                 else:
                     self.data_table.setColumnCount(1)
-                    self.data_table.setHorizontalHeaderLabels(["رسالة"])
+                    self.data_table.setHorizontalHeaderLabels([tr("رسالة")])
                     self.data_table.setRowCount(1)
-                    self.data_table.setItem(0, 0, QTableWidgetItem("الجدول فارغ"))
+                    self.data_table.setItem(0, 0, QTableWidgetItem(tr("الجدول فارغ")))
 
             conn.close()
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل تحميل بيانات الجدول:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل تحميل بيانات الجدول:\n{e}")
 
 
 # ----------------- Base Page -----------------
@@ -150,14 +151,14 @@ class BaseExtraPage(QWidget):
         self.main_layout.setSpacing(12)
 
         # Common Project Selector
-        top_card, top_lay = make_card("اختر مشروعًا", "")
+        top_card, top_lay = make_card(tr("اختر مشروعًا"), "")
 
         sel_row = QHBoxLayout()
         self.combo = QComboBox()
         self.combo.currentIndexChanged.connect(self._on_combo_change)
         sel_row.addWidget(self.combo, 1)
 
-        self.btn_settings = QPushButton("⚙ الإعدادات")
+        self.btn_settings = QPushButton(tr("⚙ الإعدادات"))
         self.btn_settings.setFixedWidth(100)
         self.btn_settings.clicked.connect(self._open_settings)
         self.btn_settings.setEnabled(False)
@@ -178,7 +179,7 @@ class BaseExtraPage(QWidget):
         self.combo.blockSignals(True)
         curr_path = self.current.path if self.current else None
         self.combo.clear()
-        self.combo.addItem("اختر مشروعًا...", None)
+        self.combo.addItem(tr("اختر مشروعًا..."), None)
         
         index_to_set = 0
         projects = self.store.list_projects()
@@ -245,9 +246,9 @@ class BaseExtraPage(QWidget):
                 self.current.table_prefix = data["table_prefix"]
                 self.store.upsert(self.current)
                 self.reload_projects() # Refresh UI
-                QMessageBox.information(self, "تم الحفظ", "تم تحديث الإعدادات.")
+                QMessageBox.information(self, tr("تم الحفظ"), tr("تم تحديث الإعدادات."))
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"تعذر فتح الإعدادات:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"تعذر فتح الإعدادات:\n{e}")
 
     def _on_project_cleared(self):
         pass
@@ -258,20 +259,20 @@ class BackupPage(BaseExtraPage):
     def __init__(self, store: ProjectsStore, parent_window: QWidget):
         super().__init__(store, parent_window)
         
-        card, lay = make_card("النسخ الاحتياطي", "إدارة النسخ الاحتياطية لهذا المشروع")
+        card, lay = make_card(tr("النسخ الاحتياطي"), tr("إدارة النسخ الاحتياطية لهذا المشروع"))
 
         # Controls
         row = QHBoxLayout()
-        self.btn_backup_files = QPushButton("نسخ الملفات فقط احتياطيًا")
-        self.btn_backup_db = QPushButton("نسخ قاعدة البيانات فقط احتياطيًا")
-        self.btn_backup_full = PrimaryButton("نسخة احتياطية كاملة")
+        self.btn_backup_files = QPushButton(tr("نسخ الملفات فقط احتياطيًا"))
+        self.btn_backup_db = QPushButton(tr("نسخ قاعدة البيانات فقط احتياطيًا"))
+        self.btn_backup_full = PrimaryButton(tr("نسخة احتياطية كاملة"))
         row.addWidget(self.btn_backup_files)
         row.addWidget(self.btn_backup_db)
         row.addWidget(self.btn_backup_full)
         lay.addLayout(row)
 
         # Open Folder
-        self.btn_open_folder = QPushButton("📂 فتح مجلد النسخ الاحتياطي")
+        self.btn_open_folder = QPushButton(tr("📂 فتح مجلد النسخ الاحتياطي"))
         self.btn_open_folder.clicked.connect(self._open_backup_folder)
         row.addWidget(self.btn_open_folder)
 
@@ -287,14 +288,14 @@ class BackupPage(BaseExtraPage):
 
         self.table = QTableWidget()
         self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["التاريخ", "المحتوى", "المسار"])
+        self.table.setHorizontalHeaderLabels([tr("التاريخ"), tr("المحتوى"), tr("المسار")])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         lay.addWidget(self.table)
 
         # Restore/Delete buttons
         act_row = QHBoxLayout()
-        self.btn_restore = QPushButton("استعادة المحدد")
-        self.btn_delete = QPushButton("حذف المحدد")
+        self.btn_restore = QPushButton(tr("استعادة المحدد"))
+        self.btn_delete = QPushButton(tr("حذف المحدد"))
         act_row.addWidget(self.btn_restore)
         act_row.addWidget(self.btn_delete)
         act_row.addStretch(1)
@@ -303,17 +304,17 @@ class BackupPage(BaseExtraPage):
         self.content_area.addWidget(card)
 
         # Schedules Card
-        sched_card, s_lay = make_card("📅 النسخ الاحتياطي المجدول", "نسخ احتياطي تلقائي")
+        sched_card, s_lay = make_card(tr("📅 النسخ الاحتياطي المجدول"), tr("نسخ احتياطي تلقائي"))
 
         self.schedule_table = QTableWidget()
         self.schedule_table.setColumnCount(4)
-        self.schedule_table.setHorizontalHeaderLabels(["التكرار", "الوقت/الأيام", "المحتوى", "تاريخ الإنشاء"])
+        self.schedule_table.setHorizontalHeaderLabels([tr("التكرار"), tr("الوقت/الأيام"), tr("المحتوى"), tr("تاريخ الإنشاء")])
         self.schedule_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         s_lay.addWidget(self.schedule_table)
 
         sched_btn_row = QHBoxLayout()
-        self.btn_add_schedule = QPushButton("➕ إضافة جدولة")
-        self.btn_delete_schedule = QPushButton("🗑️ حذف الجدولة")
+        self.btn_add_schedule = QPushButton(tr("➕ إضافة جدولة"))
+        self.btn_delete_schedule = QPushButton(tr("🗑️ حذف الجدولة"))
         self.btn_add_schedule.clicked.connect(self._add_schedule)
         self.btn_delete_schedule.clicked.connect(self._delete_schedule)
         sched_btn_row.addWidget(self.btn_add_schedule)
@@ -386,7 +387,7 @@ class BackupPage(BaseExtraPage):
                 # Filter by project path
                 if manifest.get("project_path") == self.current.path:
                     backups.append({
-                        "date": manifest.get("timestamp", "غير معروف"),
+                        "date": manifest.get("timestamp", tr("غير معروف")),
                         "has_files": manifest.get("has_files", False),
                         "has_db": manifest.get("has_db", False),
                         "path": str(backup_dir)
@@ -407,8 +408,8 @@ class BackupPage(BaseExtraPage):
             
             # Contents
             contents = []
-            if backup["has_files"]: contents.append("ملفات")
-            if backup["has_db"]: contents.append("قاعدة بيانات")
+            if backup["has_files"]: contents.append(tr("ملفات"))
+            if backup["has_db"]: contents.append(tr("قاعدة بيانات"))
             self.table.setItem(row, 1, QTableWidgetItem(" + ".join(contents)))
             
             # Path
@@ -431,7 +432,7 @@ class BackupPage(BaseExtraPage):
         if not project_path.exists():
             QMessageBox.critical(
                 self,
-                "خطأ في المسار",
+                tr("خطأ في المسار"),
                 f"مسار المشروع غير موجود:\n{self.current.path}\n\n"
                 f"يرجى تحديث المسار من الإعدادات (زر ⚙)."
             )
@@ -440,7 +441,7 @@ class BackupPage(BaseExtraPage):
         if not project_path.is_dir():
             QMessageBox.critical(
                 self,
-                "خطأ في المسار",
+                tr("خطأ في المسار"),
                 f"مسار المشروع ليس مجلدًا:\n{self.current.path}"
             )
             return
@@ -451,7 +452,7 @@ class BackupPage(BaseExtraPage):
             if file_count == 0:
                 result = QMessageBox.question(
                     self,
-                    "مجلد فارغ",
+                    tr("مجلد فارغ"),
                     f"يبدو أن مجلد المشروع فارغ (0 ملفات).\n\n"
                     f"المسار: {self.current.path}\n\n"
                     f"هل تريد المتابعة على أي حال؟",
@@ -470,7 +471,7 @@ class BackupPage(BaseExtraPage):
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         self.status_label.setVisible(True)
-        self.status_label.setText(f"جارٍ تحضير النسخة الاحتياطية من: {self.current.path}")
+        self.status_label.setText(f"{tr('جارٍ تحضير النسخة الاحتياطية من: ')}{self.current.path}")
         
         # Create worker and thread
         self.worker = BackupWorker(
@@ -511,10 +512,10 @@ class BackupPage(BaseExtraPage):
         
         # Show result
         if success:
-            QMessageBox.information(self, "تم بنجاح", f"{message}\n\nتم حفظ النسخة الاحتياطية في:\n{backup_dir}")
+            QMessageBox.information(self, tr("تم بنجاح"), f"{message}\n\nتم حفظ النسخة الاحتياطية في:\n{backup_dir}")
             self._refresh_list()
         else:
-            QMessageBox.critical(self, "خطأ", f"فشل النسخ الاحتياطي:\n{message}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل النسخ الاحتياطي:\n{message}")
 
     def _open_backup_folder(self):
         root = Path("backups").resolve()
@@ -526,7 +527,7 @@ class BackupPage(BaseExtraPage):
         
         selected = self.table.currentRow()
         if selected < 0:
-            QMessageBox.information(self, "لا يوجد تحديد", "يرجى اختيار نسخة احتياطية للاستعادة.")
+            QMessageBox.information(self, tr("لا يوجد تحديد"), tr("يرجى اختيار نسخة احتياطية للاستعادة."))
             return
 
         backup_path = self.table.item(selected, 2).text()
@@ -534,7 +535,7 @@ class BackupPage(BaseExtraPage):
 
         r = QMessageBox.question(
             self,
-            "تأكيد الاستعادة",
+            tr("تأكيد الاستعادة"),
             f"سيتم استعادة النسخة الاحتياطية من:\n{backup_date}\n\n"
             f"تحذير: سيؤدي هذا إلى استبدال الملفات الحالية!\n\n"
             f"هل تريد المتابعة؟",
@@ -554,7 +555,7 @@ class BackupPage(BaseExtraPage):
         
         selected = self.table.currentRow()
         if selected < 0:
-            QMessageBox.information(self, "لا يوجد تحديد", "يرجى اختيار نسخة احتياطية للحذف.")
+            QMessageBox.information(self, tr("لا يوجد تحديد"), tr("يرجى اختيار نسخة احتياطية للحذف."))
             return
 
         backup_path = self.table.item(selected, 2).text()
@@ -562,8 +563,8 @@ class BackupPage(BaseExtraPage):
 
         r = QMessageBox.question(
             self,
-            "تأكيد الحذف",
-            f"هل تريد حذف النسخة الاحتياطية من {backup_date}؟\n\n"
+            tr("تأكيد الحذف"),
+            f"{tr('هل تريد حذف النسخة الاحتياطية من ')}{backup_date}؟\n\n"
             f"لا يمكن التراجع عن هذا الإجراء!",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
@@ -573,10 +574,10 @@ class BackupPage(BaseExtraPage):
         try:
             import shutil
             shutil.rmtree(backup_path)
-            QMessageBox.information(self, "تم الحذف", "تم حذف النسخة الاحتياطية بنجاح.")
+            QMessageBox.information(self, tr("تم الحذف"), tr("تم حذف النسخة الاحتياطية بنجاح."))
             self._refresh_list()
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل حذف النسخة الاحتياطية:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل حذف النسخة الاحتياطية:\n{e}")
 
     def _refresh_schedules(self):
         """Refresh the schedules table"""
@@ -592,13 +593,13 @@ class BackupPage(BaseExtraPage):
             self.schedule_table.insertRow(row)
             
             freq_raw = sched.get("frequency", "")
-            freq_labels = {"hourly": "كل ساعة", "daily": "يوميًا", "weekly": "أسبوعيًا"}
-            freq = freq_labels.get(freq_raw, freq_raw or "غير متوفر")
-            time_spec = sched.get("time_spec", "غير متوفر")
+            freq_labels = {"hourly": tr("كل ساعة"), "daily": tr("يوميًا"), "weekly": tr("أسبوعيًا")}
+            freq = freq_labels.get(freq_raw, freq_raw or tr("غير متوفر"))
+            time_spec = sched.get("time_spec", tr("غير متوفر"))
             content = []
-            if sched.get("backup_files"): content.append("ملفات")
-            if sched.get("backup_db"): content.append("قاعدة بيانات")
-            created = sched.get("created_at", "غير متوفر")[:10]
+            if sched.get("backup_files"): content.append(tr("ملفات"))
+            if sched.get("backup_db"): content.append(tr("قاعدة بيانات"))
+            created = sched.get("created_at", tr("غير متوفر"))[:10]
 
             self.schedule_table.setItem(row, 0, QTableWidgetItem(freq))
             self.schedule_table.setItem(row, 1, QTableWidgetItem(time_spec))
@@ -615,7 +616,7 @@ class BackupPage(BaseExtraPage):
         from PyQt6.QtCore import QTime
         
         dlg = QDialog(self)
-        dlg.setWindowTitle("إضافة جدولة نسخ احتياطي")
+        dlg.setWindowTitle(tr("إضافة جدولة نسخ احتياطي"))
         dlg.setMinimumWidth(400)
 
         layout = QVBoxLayout(dlg)
@@ -623,24 +624,24 @@ class BackupPage(BaseExtraPage):
 
         freq_combo = QComboBox()
         # Display text is Arabic; underlying value (used by scheduler logic) stays English.
-        freq_combo.addItem("كل ساعة", "hourly")
-        freq_combo.addItem("يوميًا", "daily")
-        freq_combo.addItem("أسبوعيًا", "weekly")
-        form.addRow("التكرار:", freq_combo)
+        freq_combo.addItem(tr("كل ساعة"), "hourly")
+        freq_combo.addItem(tr("يوميًا"), "daily")
+        freq_combo.addItem(tr("أسبوعيًا"), "weekly")
+        form.addRow(tr("التكرار:"), freq_combo)
 
         time_edit = QTimeEdit()
         time_edit.setTime(QTime(0, 0))
-        form.addRow("الوقت (لليومي):", time_edit)
+        form.addRow(tr("الوقت (لليومي):"), time_edit)
 
         days_edit = QLineEdit()
-        days_edit.setPlaceholderText("مثال: mon,wed,fri (للأسبوعي)")
-        form.addRow("الأيام (للأسبوعي):", days_edit)
+        days_edit.setPlaceholderText(tr("مثال: mon,wed,fri (للأسبوعي)"))
+        form.addRow(tr("الأيام (للأسبوعي):"), days_edit)
 
-        files_chk = QCheckBox("نسخ الملفات احتياطيًا")
+        files_chk = QCheckBox(tr("نسخ الملفات احتياطيًا"))
         files_chk.setChecked(True)
         form.addRow(files_chk)
 
-        db_chk = QCheckBox("نسخ قاعدة البيانات احتياطيًا")
+        db_chk = QCheckBox(tr("نسخ قاعدة البيانات احتياطيًا"))
         db_chk.setChecked(True)
         form.addRow(db_chk)
         
@@ -677,24 +678,24 @@ class BackupPage(BaseExtraPage):
                     backup_db=db_chk.isChecked(),
                     callback=self._scheduled_backup_callback
                 )
-                freq_labels = {"hourly": "كل ساعة", "daily": "يوميًا", "weekly": "أسبوعيًا"}
-                QMessageBox.information(self, "تم بنجاح", f"تمت إضافة الجدولة: {freq_labels.get(freq, freq)}")
+                freq_labels = {"hourly": tr("كل ساعة"), "daily": tr("يوميًا"), "weekly": tr("أسبوعيًا")}
+                QMessageBox.information(self, tr("تم بنجاح"), f"{tr('تمت إضافة الجدولة: ')}{freq_labels.get(freq, freq)}")
                 self._refresh_schedules()
             except Exception as e:
-                QMessageBox.critical(self, "خطأ", f"فشل إضافة الجدولة:\n{e}")
+                QMessageBox.critical(self, tr("خطأ"), f"فشل إضافة الجدولة:\n{e}")
 
     def _delete_schedule(self):
         """Delete selected schedule"""
         selected = self.schedule_table.currentRow()
         if selected < 0:
-            QMessageBox.information(self, "لا يوجد تحديد", "يرجى اختيار جدولة للحذف.")
+            QMessageBox.information(self, tr("لا يوجد تحديد"), tr("يرجى اختيار جدولة للحذف."))
             return
 
         sched_id = self.schedule_table.item(selected, 0).data(Qt.ItemDataRole.UserRole)
 
         r = QMessageBox.question(
             self,
-            "تأكيد الحذف",
+            tr("تأكيد الحذف"),
             f"هل تريد حذف هذه الجدولة؟\n\nلا يمكن التراجع عن هذا الإجراء!",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
@@ -703,10 +704,10 @@ class BackupPage(BaseExtraPage):
 
         try:
             self.scheduler.remove_schedule(sched_id)
-            QMessageBox.information(self, "تم الحذف", "تم حذف الجدولة بنجاح.")
+            QMessageBox.information(self, tr("تم الحذف"), tr("تم حذف الجدولة بنجاح."))
             self._refresh_schedules()
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل حذف الجدولة:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل حذف الجدولة:\n{e}")
 
     def _scheduled_backup_callback(self, project_path: str, backup_files: bool, backup_db: bool):
         """Callback executed by scheduler (usually in bg thread)"""
@@ -715,7 +716,7 @@ class BackupPage(BaseExtraPage):
         
         selected = self.table.currentRow()
         if selected < 0:
-            QMessageBox.information(self, "لا يوجد تحديد", "يرجى اختيار نسخة احتياطية للحذف.")
+            QMessageBox.information(self, tr("لا يوجد تحديد"), tr("يرجى اختيار نسخة احتياطية للحذف."))
             return
 
         backup_path = self.table.item(selected, 2).text()
@@ -723,8 +724,8 @@ class BackupPage(BaseExtraPage):
 
         r = QMessageBox.question(
             self,
-            "تأكيد الحذف",
-            f"هل تريد حذف النسخة الاحتياطية من {backup_date}؟\n\n"
+            tr("تأكيد الحذف"),
+            f"{tr('هل تريد حذف النسخة الاحتياطية من ')}{backup_date}؟\n\n"
             f"لا يمكن التراجع عن هذا الإجراء!",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
@@ -734,10 +735,10 @@ class BackupPage(BaseExtraPage):
         try:
             import shutil
             shutil.rmtree(backup_path)
-            QMessageBox.information(self, "تم الحذف", "تم حذف النسخة الاحتياطية بنجاح.")
+            QMessageBox.information(self, tr("تم الحذف"), tr("تم حذف النسخة الاحتياطية بنجاح."))
             self._refresh_list()
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل حذف النسخة الاحتياطية:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل حذف النسخة الاحتياطية:\n{e}")
 
 
 # ----------------- Database Page -----------------
@@ -745,14 +746,14 @@ class DatabasePage(BaseExtraPage):
     def __init__(self, store: ProjectsStore, parent_window: QWidget):
         super().__init__(store, parent_window)
         
-        card, lay = make_card("عارض قاعدة البيانات", "عرض مباشر للجداول")
+        card, lay = make_card(tr("عارض قاعدة البيانات"), tr("عرض مباشر للجداول"))
 
-        self.btn_refresh = QPushButton("تحديث الجداول")
+        self.btn_refresh = QPushButton(tr("تحديث الجداول"))
         lay.addWidget(row_buttons(self.btn_refresh))
 
         self.table = QTableWidget()
         self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(["الجدول", "الصفوف", "الحجم (ميجابايت)", "المحرك"])
+        self.table.setHorizontalHeaderLabels([tr("الجدول"), tr("الصفوف"), tr("الحجم (ميجابايت)"), tr("المحرك")])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         lay.addWidget(self.table)
 
@@ -797,7 +798,7 @@ class DatabasePage(BaseExtraPage):
                     self.table.setItem(i, 3, QTableWidgetItem(engine))
             conn.close()
         except Exception as e:
-            QMessageBox.warning(self, "خطأ في قاعدة البيانات", str(e))
+            QMessageBox.warning(self, tr("خطأ في قاعدة البيانات"), str(e))
     
     def _on_table_double_click(self, item: QTableWidgetItem):
         if not self.current:
@@ -816,7 +817,7 @@ class DatabasePage(BaseExtraPage):
             dlg = TableDataDialog(table_name, db_params, self)
             dlg.exec()
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل فتح عارض الجدول:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل فتح عارض الجدول:\n{e}")
 
 
 # ----------------- URL Converter Page -----------------
@@ -824,26 +825,26 @@ class UrlConvertPage(BaseExtraPage):
     def __init__(self, store: ProjectsStore, parent_window: QWidget):
         super().__init__(store, parent_window)
         
-        card, lay = make_card("محول الروابط", "البحث عن الروابط واستبدالها في قاعدة البيانات")
+        card, lay = make_card(tr("محول الروابط"), tr("البحث عن الروابط واستبدالها في قاعدة البيانات"))
 
         self.old_url = QLineEdit()
-        self.old_url.setPlaceholderText("الرابط القديم (مثال: http://localhost/mysite)")
+        self.old_url.setPlaceholderText(tr("الرابط القديم (مثال: http://localhost/mysite)"))
         self.new_url = QLineEdit()
-        self.new_url.setPlaceholderText("الرابط الجديد (مثال: https://example.com)")
-        self.chk_guid = QCheckBox("تحديث المعرّفات الفريدة (GUID) (للمستخدمين المتقدمين فقط)")
+        self.new_url.setPlaceholderText(tr("الرابط الجديد (مثال: https://example.com)"))
+        self.chk_guid = QCheckBox(tr("تحديث المعرّفات الفريدة (GUID) (للمستخدمين المتقدمين فقط)"))
 
-        self.btn_convert = PrimaryButton("تحويل الرابط")
+        self.btn_convert = PrimaryButton(tr("تحويل الرابط"))
 
-        lay.addWidget(QLabel("الرابط القديم:"))
+        lay.addWidget(QLabel(tr("الرابط القديم:")))
         lay.addWidget(self.old_url)
-        lay.addWidget(QLabel("الرابط الجديد:"))
+        lay.addWidget(QLabel(tr("الرابط الجديد:")))
         lay.addWidget(self.new_url)
 
-        self.chk_guid = QCheckBox("تحديث المعرّفات الفريدة (GUID) (غير موصى به)")
-        self.chk_guid.setToolTip("فعّل هذا الخيار فقط إذا كنت تعرف ما تفعله. عادةً يجب أن تبقى المعرّفات الفريدة (GUID) ثابتة.")
+        self.chk_guid = QCheckBox(tr("تحديث المعرّفات الفريدة (GUID) (غير موصى به)"))
+        self.chk_guid.setToolTip(tr("فعّل هذا الخيار فقط إذا كنت تعرف ما تفعله. عادةً يجب أن تبقى المعرّفات الفريدة (GUID) ثابتة."))
 
-        self.chk_rename = QCheckBox("إعادة تسمية مجلد المشروع ليطابق اسم الرابط")
-        self.chk_rename.setToolTip("مثال: localhost/myshop -> يُعاد تسمية المجلد إلى 'myshop'")
+        self.chk_rename = QCheckBox(tr("إعادة تسمية مجلد المشروع ليطابق اسم الرابط"))
+        self.chk_rename.setToolTip(tr("مثال: localhost/myshop -> يُعاد تسمية المجلد إلى 'myshop'"))
         self.chk_rename.setChecked(False)
         
         lay.addWidget(self.chk_guid)
@@ -876,7 +877,7 @@ class UrlConvertPage(BaseExtraPage):
         old = self.old_url.text().strip()
         new = self.new_url.text().strip()
         if not old or not new:
-            QMessageBox.warning(self, "غير صالح", "كلا الرابطين مطلوبان.")
+            QMessageBox.warning(self, tr("غير صالح"), tr("كلا الرابطين مطلوبان."))
             return
             
         self.parent_window._run_url_worker(
@@ -894,17 +895,17 @@ class SecurityPage(BaseExtraPage):
         super().__init__(store, parent_window)
         
         # 1. Hardening Card
-        h_card, h_lay = make_card("التحصين", "تطبيق قواعد أمان .htaccess")
-        self.btn_harden = PrimaryButton("تطبيق التحصين")
-        h_lay.addWidget(QLabel("سيؤدي هذا إلى إضافة قواعد إلى ملف .htaccess لمنع تصفح المجلدات وحماية wp-config.php."))
+        h_card, h_lay = make_card(tr("التحصين"), tr("تطبيق قواعد أمان .htaccess"))
+        self.btn_harden = PrimaryButton(tr("تطبيق التحصين"))
+        h_lay.addWidget(QLabel(tr("سيؤدي هذا إلى إضافة قواعد إلى ملف .htaccess لمنع تصفح المجلدات وحماية wp-config.php.")))
         h_lay.addWidget(row_buttons(self.btn_harden))
 
         # 2. Scanner Card
-        s_card, s_lay = make_card("فاحص البرمجيات الخبيثة", "فحص ملفات المشروع بحثًا عن أكواد مشبوهة")
-        self.btn_scan = PrimaryButton("تشغيل الفحص")
+        s_card, s_lay = make_card(tr("فاحص البرمجيات الخبيثة"), tr("فحص ملفات المشروع بحثًا عن أكواد مشبوهة"))
+        self.btn_scan = PrimaryButton(tr("تشغيل الفحص"))
         self.scan_results = QTextEdit()
         self.scan_results.setReadOnly(True)
-        self.scan_results.setPlaceholderText("ستظهر نتائج الفحص هنا...")
+        self.scan_results.setPlaceholderText(tr("ستظهر نتائج الفحص هنا..."))
         self.scan_results.setFixedHeight(200)
         s_lay.addWidget(self.scan_results)
         s_lay.addWidget(row_buttons(self.btn_scan))
@@ -935,26 +936,26 @@ class SecurityPage(BaseExtraPage):
         try:
             from app.core.security import apply_htaccess_hardening
             apply_htaccess_hardening(self.current.path, self.parent_window.log)
-            QMessageBox.information(self, "تم بنجاح", "تم تطبيق التحصين الأمني بنجاح.")
+            QMessageBox.information(self, tr("تم بنجاح"), tr("تم تطبيق التحصين الأمني بنجاح."))
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", f"فشل تطبيق التحصين:\n{e}")
+            QMessageBox.critical(self, tr("خطأ"), f"فشل تطبيق التحصين:\n{e}")
 
     def _run_scan(self):
         if not self.current: return
         self.scan_results.clear()
-        self.scan_results.append("جارٍ بدء الفحص (في الخلفية)...")
+        self.scan_results.append(tr("جارٍ بدء الفحص (في الخلفية)..."))
         self.parent_window._run_scan_worker(self.current.path)
 
     def on_scan_finished(self, results: list):
         self.scan_results.clear()
         if not results:
-            self.scan_results.append("✅ لم يتم العثور على ملفات مشبوهة.")
-            QMessageBox.information(self, "اكتمل الفحص", "لم يتم العثور على ملفات مشبوهة.")
+            self.scan_results.append(tr("✅ لم يتم العثور على ملفات مشبوهة."))
+            QMessageBox.information(self, tr("اكتمل الفحص"), tr("لم يتم العثور على ملفات مشبوهة."))
         else:
-            self.scan_results.append(f"⚠️ تم العثور على {len(results)} ملفًا مشبوهًا:")
+            self.scan_results.append(f"{tr('⚠️ تم العثور على ')}{len(results)}{tr(' ملفًا مشبوهًا:')}")
             for r in results:
-                self.scan_results.append(f"- {r['file']} (التطابقات: {', '.join(r['sigs'])})")
-            QMessageBox.warning(self, "اكتمل الفحص", f"تم العثور على {len(results)} ملفًا مشبوهًا! تحقق من منطقة النتائج.")
+                self.scan_results.append(f"- {r['file']}{tr(' (التطابقات: ')}{', '.join(r['sigs'])})")
+            QMessageBox.warning(self, tr("اكتمل الفحص"), f"{tr('تم العثور على ')}{len(results)}{tr(' ملفًا مشبوهًا! تحقق من منطقة النتائج.')}")
 
 
 # ----------------- Manager Page (Plugins & Themes) -----------------
@@ -968,9 +969,9 @@ class ManagerPage(BaseExtraPage):
         self.plugins_tab = QWidget()
         p_lay = QVBoxLayout(self.plugins_tab)
         self.plugin_list = QTableWidget(0, 3)
-        self.plugin_list.setHorizontalHeaderLabels(["الاسم", "الحالة", "الإصدار"])
+        self.plugin_list.setHorizontalHeaderLabels([tr("الاسم"), tr("الحالة"), tr("الإصدار")])
         self.plugin_list.horizontalHeader().setStretchLastSection(True)
-        self.btn_refresh_plugins = QPushButton("تحديث الإضافات")
+        self.btn_refresh_plugins = QPushButton(tr("تحديث الإضافات"))
         p_lay.addWidget(self.plugin_list)
         p_lay.addWidget(row_buttons(self.btn_refresh_plugins))
         
@@ -978,19 +979,19 @@ class ManagerPage(BaseExtraPage):
         self.themes_tab = QWidget()
         t_lay = QVBoxLayout(self.themes_tab)
         self.theme_list = QTableWidget(0, 3)
-        self.theme_list.setHorizontalHeaderLabels(["الاسم", "الحالة", "الإصدار"])
+        self.theme_list.setHorizontalHeaderLabels([tr("الاسم"), tr("الحالة"), tr("الإصدار")])
         self.theme_list.horizontalHeader().setStretchLastSection(True)
-        self.btn_refresh_themes = QPushButton("تحديث القوالب")
+        self.btn_refresh_themes = QPushButton(tr("تحديث القوالب"))
         t_lay.addWidget(self.theme_list)
 
         # Tools row
-        self.btn_fix_wpcli = QPushButton("🛠️ إصلاح/تثبيت WP-CLI")
-        self.btn_fix_wpcli.setToolTip("فرض تنزيل WP-CLI إذا كان مفقودًا أو لا يعمل.")
+        self.btn_fix_wpcli = QPushButton(tr("🛠️ إصلاح/تثبيت WP-CLI"))
+        self.btn_fix_wpcli.setToolTip(tr("فرض تنزيل WP-CLI إذا كان مفقودًا أو لا يعمل."))
 
         t_lay.addWidget(row_buttons(self.btn_refresh_themes, self.btn_fix_wpcli))
 
-        self.tabs.addTab(self.plugins_tab, "الإضافات")
-        self.tabs.addTab(self.themes_tab, "القوالب")
+        self.tabs.addTab(self.plugins_tab, tr("الإضافات"))
+        self.tabs.addTab(self.themes_tab, tr("القوالب"))
         
         self.content_area.addWidget(self.tabs)
         
@@ -1041,7 +1042,7 @@ class ManagerPage(BaseExtraPage):
         btn = self.btn_refresh_plugins if item_type == "plugin" else self.btn_refresh_themes
         original_text = btn.text()
         btn.setEnabled(False)
-        btn.setText("جارٍ التحميل...")
+        btn.setText(tr("جارٍ التحميل..."))
         
         # Create worker and thread
         self._worker_thread = QThread()
@@ -1085,8 +1086,8 @@ class ManagerPage(BaseExtraPage):
         btn.setText(original_text)
         
         if not success:
-            item_type_ar = "الإضافات" if item_type == "plugin" else "القوالب"
-            QMessageBox.critical(self, "خطأ", f"فشل تحميل {item_type_ar}:\n{error_msg}")
+            item_type_ar = tr("الإضافات") if item_type == "plugin" else tr("القوالب")
+            QMessageBox.critical(self, tr("خطأ"), f"{tr('فشل تحميل ')}{item_type_ar}:\n{error_msg}")
             return
         
         # Populate table
@@ -1122,12 +1123,12 @@ class ManagerPage(BaseExtraPage):
         # verbatim to toggle_wp_item() as a WP-CLI command argument. Arabic display
         # text is derived separately via action_ar below.
         action = "deactivate" if status == "active" else "activate"
-        action_ar = "إلغاء تفعيل" if action == "deactivate" else "تفعيل"
+        action_ar = tr("إلغاء تفعيل") if action == "deactivate" else tr("تفعيل")
         if item_type == "theme" and action == "deactivate":
-            self.parent_window.show_toast("لا يمكن إلغاء تفعيل القوالب، يمكن فقط استبدالها بتفعيل قالب آخر", "warning")
+            self.parent_window.show_toast(tr("لا يمكن إلغاء تفعيل القوالب، يمكن فقط استبدالها بتفعيل قالب آخر"), "warning")
             return
 
-        r = QMessageBox.question(self, "إجراء", f"هل تريد {action_ar} {name}؟")
+        r = QMessageBox.question(self, tr("إجراء"), f"{tr('هل تريد ')}{action_ar} {name}{tr('؟')}")
         if r == QMessageBox.StandardButton.Yes:
             try:
                 from app.core.wp_ops import toggle_wp_item, get_effective_tooling
@@ -1136,43 +1137,43 @@ class ManagerPage(BaseExtraPage):
                 toggle_wp_item(Path(self.current.path), php, wpcli, is_phar, slug, action, item_type, log=self.parent_window.log)
 
                 # Show success toast instead of blocking message
-                action_past_ar = "تفعيل" if action == "activate" else "إلغاء تفعيل"
-                self.parent_window.show_toast(f"✓ تم {action_past_ar} {name} بنجاح!", "success")
+                action_past_ar = tr("تفعيل") if action == "activate" else tr("إلغاء تفعيل")
+                self.parent_window.show_toast(f"{tr('✓ تم ')}{action_past_ar} {name}{tr(' بنجاح!')}", "success")
 
                 self._refresh_items(item_type)
             except Exception as e:
                 # Show error toast with details
-                self.parent_window.show_toast(f"فشل {action_ar} {name}: {str(e)}", "error", duration=5000)
+                self.parent_window.show_toast(f"{tr('فشل ')}{action_ar} {name}: {str(e)}", "error", duration=5000)
 
     def _on_fix_wpcli(self):
         if not self.current: return
-        r = QMessageBox.question(self, "إصلاح WP-CLI", "سيحاول هذا تنزيل WP-CLI لهذا المشروع تحديدًا. هل تريد المتابعة؟")
+        r = QMessageBox.question(self, tr("إصلاح WP-CLI"), tr("سيحاول هذا تنزيل WP-CLI لهذا المشروع تحديدًا. هل تريد المتابعة؟"))
         if r == QMessageBox.StandardButton.Yes:
             from app.core.wp_ops import download_wpcli_for_project
-            self.parent_window.log("جارٍ بدء إصلاح WP-CLI يدويًا...")
+            self.parent_window.log(tr("جارٍ بدء إصلاح WP-CLI يدويًا..."))
             ok, path = download_wpcli_for_project(self.current, self.parent_window.log)
             if ok:
-                QMessageBox.information(self, "تم الإصلاح", f"تم تثبيت WP-CLI في:\n{path}")
+                QMessageBox.information(self, tr("تم الإصلاح"), f"تم تثبيت WP-CLI في:\n{path}")
                 self._refresh_items("plugin")
             else:
-                QMessageBox.critical(self, "فشل", "تعذر تنزيل WP-CLI. يرجى التحقق من اتصال الإنترنت أو السجلات.")
+                QMessageBox.critical(self, tr("فشل"), tr("تعذر تنزيل WP-CLI. يرجى التحقق من اتصال الإنترنت أو السجلات."))
 
 # ----------------- Config Page (wp-config.php Editor) -----------------
 class ConfigPage(BaseExtraPage):
     def __init__(self, store: ProjectsStore, parent_window: QWidget):
         super().__init__(store, parent_window)
         
-        card, lay = make_card("محرر إعدادات ووردبريس (wp-config)", "تبديل الثوابت الشائعة لووردبريس")
+        card, lay = make_card(tr("محرر إعدادات ووردبريس (wp-config)"), tr("تبديل الثوابت الشائعة لووردبريس"))
 
         self.grid = QGridLayout()
         self.checks = {}
 
         options = [
-            ("WP_DEBUG", "تفعيل وضع التصحيح (Debug)"),
-            ("WP_DEBUG_LOG", "تسجيل الأخطاء في wp-content/debug.log"),
-            ("WP_DEBUG_DISPLAY", "عرض الأخطاء على الشاشة"),
-            ("SCRIPT_DEBUG", "استخدام السكربتات غير المضغوطة"),
-            ("SAVEQUERIES", "حفظ استعلامات قاعدة البيانات للتحليل"),
+            ("WP_DEBUG", tr("تفعيل وضع التصحيح (Debug)")),
+            ("WP_DEBUG_LOG", tr("تسجيل الأخطاء في wp-content/debug.log")),
+            ("WP_DEBUG_DISPLAY", tr("عرض الأخطاء على الشاشة")),
+            ("SCRIPT_DEBUG", tr("استخدام السكربتات غير المضغوطة")),
+            ("SAVEQUERIES", tr("حفظ استعلامات قاعدة البيانات للتحليل")),
         ]
         
         for i, (key, label) in enumerate(options):
@@ -1214,19 +1215,19 @@ class ConfigPage(BaseExtraPage):
         try:
             from app.core.wp_ops import update_wp_config_constant
             update_wp_config_constant(Path(self.current.path), key, "true" if val else "false", is_string=False)
-            self.parent_window.log(f"تم تحديث الإعداد: تعيين {key} إلى {val}")
+            self.parent_window.log(f"{tr('تم تحديث الإعداد: تعيين ')}{key}{tr(' إلى ')}{val}")
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", str(e))
+            QMessageBox.critical(self, tr("خطأ"), str(e))
 
 # ----------------- DevTools Page -----------------
 class DevToolsPage(BaseExtraPage):
     def __init__(self, store: ProjectsStore, parent_window: QWidget):
         super().__init__(store, parent_window)
 
-        card, lay = make_card("أدوات المطورين", "أدوات لتحسين الإنتاجية")
+        card, lay = make_card(tr("أدوات المطورين"), tr("أدوات لتحسين الإنتاجية"))
 
-        self.btn_vscode = PrimaryButton("إنشاء إعدادات Xdebug لـ VS Code")
-        lay.addWidget(QLabel("ينشئ ملف .vscode/launch.json لتسهيل التصحيح باستخدام Xdebug."))
+        self.btn_vscode = PrimaryButton(tr("إنشاء إعدادات Xdebug لـ VS Code"))
+        lay.addWidget(QLabel(tr("ينشئ ملف .vscode/launch.json لتسهيل التصحيح باستخدام Xdebug.")))
         lay.addWidget(row_buttons(self.btn_vscode))
         
         self.content_area.addWidget(card)
@@ -1266,7 +1267,7 @@ class DevToolsPage(BaseExtraPage):
             }
             import json
             launch_path.write_text(json.dumps(config, indent=4), encoding="utf-8")
-            QMessageBox.information(self, "تم بنجاح", f"تم إنشاء إعدادات VS Code في {launch_path}")
-            self.parent_window.log("تم إنشاء ملف VS Code launch.json.")
+            QMessageBox.information(self, tr("تم بنجاح"), f"{tr('تم إنشاء إعدادات VS Code في ')}{launch_path}")
+            self.parent_window.log(tr("تم إنشاء ملف VS Code launch.json."))
         except Exception as e:
-            QMessageBox.critical(self, "خطأ", str(e))
+            QMessageBox.critical(self, tr("خطأ"), str(e))

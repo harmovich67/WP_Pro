@@ -30,6 +30,7 @@ from app.core.wp_ops import (
 )
 from app.ui.extra_pages import BaseExtraPage
 from app.ui.widgets import PrimaryButton, make_card
+from app.core.i18n import t as tr
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -72,15 +73,15 @@ class _PostEditDialog(QDialog):
                  data: dict | None = None, parent=None):
         super().__init__(parent)
         is_edit = data is not None
-        label = "مقال" if post_type == "post" else "صفحة"
-        self.setWindowTitle(f"{'تعديل' if is_edit else 'إضافة'} {label}")
+        label = tr("مقال") if post_type == "post" else tr("صفحة")
+        self.setWindowTitle(f"{tr('تعديل') if is_edit else tr('إضافة')} {label}")
         self.setMinimumSize(640, 520)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
         self._title = QLineEdit(data.get("post_title", "") if data else "")
-        self._title.setPlaceholderText("اكتب العنوان هنا…")
+        self._title.setPlaceholderText(tr("اكتب العنوان هنا…"))
 
         self._status = QComboBox()
         self._status.addItems(["publish", "draft", "private", "pending"])
@@ -91,19 +92,19 @@ class _PostEditDialog(QDialog):
 
         self._excerpt = QLineEdit(
             data.get("post_excerpt", "") if data else "")
-        self._excerpt.setPlaceholderText("مقتطف اختياري")
+        self._excerpt.setPlaceholderText(tr("مقتطف اختياري"))
 
         self._content = QTextEdit()
         self._content.setPlaceholderText(
-            "محتوى المقال (نص عادي أو HTML)…")
+            tr("محتوى المقال (نص عادي أو HTML)…"))
         if data and data.get("post_content"):
             self._content.setPlainText(data["post_content"])
 
-        form.addRow("العنوان:", self._title)
-        form.addRow("الحالة:", self._status)
-        form.addRow("المقتطف:", self._excerpt)
+        form.addRow(tr("العنوان:"), self._title)
+        form.addRow(tr("الحالة:"), self._status)
+        form.addRow(tr("المقتطف:"), self._excerpt)
         layout.addLayout(form)
-        layout.addWidget(QLabel("المحتوى:"))
+        layout.addWidget(QLabel(tr("المحتوى:")))
         layout.addWidget(self._content, 1)
 
         btns = QDialogButtonBox(
@@ -127,13 +128,13 @@ class _UserCreateDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("إنشاء مستخدم جديد")
+        self.setWindowTitle(tr("إنشاء مستخدم جديد"))
         self.setMinimumWidth(420)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
-        self._username  = QLineEdit(); self._username.setPlaceholderText("اسم المستخدم")
+        self._username  = QLineEdit(); self._username.setPlaceholderText(tr("اسم المستخدم"))
         self._email     = QLineEdit(); self._email.setPlaceholderText("user@example.com")
         self._password  = QLineEdit(); self._password.setEchoMode(QLineEdit.EchoMode.Password)
         self._firstname = QLineEdit()
@@ -142,12 +143,12 @@ class _UserCreateDialog(QDialog):
         self._role.addItems(
             ["subscriber", "contributor", "author", "editor", "administrator"])
 
-        form.addRow("اسم المستخدم:", self._username)
-        form.addRow("البريد الإلكتروني:", self._email)
-        form.addRow("كلمة المرور:", self._password)
-        form.addRow("الاسم الأول:", self._firstname)
-        form.addRow("اسم العائلة:", self._lastname)
-        form.addRow("الدور:", self._role)
+        form.addRow(tr("اسم المستخدم:"), self._username)
+        form.addRow(tr("البريد الإلكتروني:"), self._email)
+        form.addRow(tr("كلمة المرور:"), self._password)
+        form.addRow(tr("الاسم الأول:"), self._firstname)
+        form.addRow(tr("اسم العائلة:"), self._lastname)
+        form.addRow(tr("الدور:"), self._role)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
@@ -173,7 +174,7 @@ class _OptionEditDialog(QDialog):
 
     def __init__(self, name: str, value: str, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"تعديل الخيار: {name}")
+        self.setWindowTitle(f"{tr('تعديل الخيار: ')}{name}")
         self.setMinimumWidth(520)
 
         layout = QVBoxLayout(self)
@@ -185,8 +186,8 @@ class _OptionEditDialog(QDialog):
         self._value.setPlainText(value)
         self._value.setMaximumHeight(220)
 
-        form.addRow("الخيار:", name_lbl)
-        form.addRow("القيمة:", self._value)
+        form.addRow(tr("الخيار:"), name_lbl)
+        form.addRow(tr("القيمة:"), self._value)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
@@ -206,14 +207,14 @@ class _AcfGroupDialog(QDialog):
     def __init__(self, data: dict | None = None, parent=None):
         super().__init__(parent)
         is_edit = data is not None
-        self.setWindowTitle("تعديل مجموعة حقول ACF" if is_edit else "مجموعة حقول ACF جديدة")
+        self.setWindowTitle(tr("تعديل مجموعة حقول ACF") if is_edit else tr("مجموعة حقول ACF جديدة"))
         self.setMinimumWidth(460)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
         self._title = QLineEdit(data.get("title", "") if data else "")
-        self._title.setPlaceholderText("مثال: تفاصيل المنتج")
+        self._title.setPlaceholderText(tr("مثال: تفاصيل المنتج"))
 
         _locations = ["post", "page", "attachment", "user",
                       "taxonomy", "comment", "widget", "nav_menu"]
@@ -236,12 +237,12 @@ class _AcfGroupDialog(QDialog):
                 self._position.setCurrentIndex(idx)
 
         self._desc = QLineEdit(data.get("description", "") if data else "")
-        self._desc.setPlaceholderText("وصف اختياري")
+        self._desc.setPlaceholderText(tr("وصف اختياري"))
 
-        form.addRow("الاسم *:", self._title)
-        form.addRow("الموقع (post type):", self._location)
-        form.addRow("الموضع في الصفحة:", self._position)
-        form.addRow("الوصف:", self._desc)
+        form.addRow(tr("الاسم *:"), self._title)
+        form.addRow(tr("الموقع (post type):"), self._location)
+        form.addRow(tr("الموضع في الصفحة:"), self._position)
+        form.addRow(tr("الوصف:"), self._desc)
         layout.addLayout(form)
 
         btns = QDialogButtonBox(
@@ -267,17 +268,17 @@ class _AcfFieldDialog(QDialog):
                  data: dict | None = None, parent=None):
         super().__init__(parent)
         is_edit = data is not None
-        self.setWindowTitle("تعديل حقل ACF" if is_edit else "إضافة حقل ACF جديد")
+        self.setWindowTitle(tr("تعديل حقل ACF") if is_edit else tr("إضافة حقل ACF جديد"))
         self.setMinimumWidth(480)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
         self._label = QLineEdit(data.get("label", "") if data else "")
-        self._label.setPlaceholderText("مثال: صورة الغلاف")
+        self._label.setPlaceholderText(tr("مثال: صورة الغلاف"))
 
         self._name = QLineEdit(data.get("name", "") if data else "")
-        self._name.setPlaceholderText("مثال: cover_image  (حروف إنجليزية وأرقام و _)")
+        self._name.setPlaceholderText(tr("مثال: cover_image  (حروف إنجليزية وأرقام و _)"))
 
         # Auto-fill name from label only when adding (not editing)
         if not is_edit:
@@ -298,19 +299,19 @@ class _AcfFieldDialog(QDialog):
                 self._type.setCurrentIndex(idx)
 
         self._instructions = QLineEdit(data.get("instructions", "") if data else "")
-        self._instructions.setPlaceholderText("تعليمات للمحرر (اختياري)")
+        self._instructions.setPlaceholderText(tr("تعليمات للمحرر (اختياري)"))
 
-        self._required = QCheckBox("حقل مطلوب")
+        self._required = QCheckBox(tr("حقل مطلوب"))
         if data:
             self._required.setChecked(bool(data.get("required", 0)))
 
         if is_edit:
             self._name.setEnabled(False)  # slug should not change after creation
 
-        form.addRow("التسمية *:", self._label)
-        form.addRow("الاسم (slug) *:", self._name)
-        form.addRow("النوع:", self._type)
-        form.addRow("التعليمات:", self._instructions)
+        form.addRow(tr("التسمية *:"), self._label)
+        form.addRow(tr("الاسم (slug) *:"), self._name)
+        form.addRow(tr("النوع:"), self._type)
+        form.addRow(tr("التعليمات:"), self._instructions)
         form.addRow("", self._required)
         layout.addLayout(form)
 
@@ -338,18 +339,18 @@ class _CptDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("إضافة نوع محتوى مخصص (CPT)")
+        self.setWindowTitle(tr("إضافة نوع محتوى مخصص (CPT)"))
         self.setMinimumWidth(520)
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
 
         self._slug     = QLineEdit()
-        self._slug.setPlaceholderText("مثال: product  (حروف صغيرة وأرقام و _)")
+        self._slug.setPlaceholderText(tr("مثال: product  (حروف صغيرة وأرقام و _)"))
         self._singular = QLineEdit()
-        self._singular.setPlaceholderText("مثال: Product")
+        self._singular.setPlaceholderText(tr("مثال: Product"))
         self._plural   = QLineEdit()
-        self._plural.setPlaceholderText("مثال: Products")
+        self._plural.setPlaceholderText(tr("مثال: Products"))
         self._icon     = QLineEdit("dashicons-admin-post")
         self._icon.setPlaceholderText("dashicons-admin-post")
 
@@ -361,26 +362,26 @@ class _CptDialog(QDialog):
                 self._plural.setText(nice + "s")
         self._slug.textChanged.connect(_auto_labels)
 
-        form.addRow("الـ Slug *:", self._slug)
-        form.addRow("التسمية المفردة *:", self._singular)
-        form.addRow("التسمية الجمع *:", self._plural)
-        form.addRow("الأيقونة (dashicon):", self._icon)
+        form.addRow(tr("الـ Slug *:"), self._slug)
+        form.addRow(tr("التسمية المفردة *:"), self._singular)
+        form.addRow(tr("التسمية الجمع *:"), self._plural)
+        form.addRow(tr("الأيقونة (dashicon):"), self._icon)
         layout.addLayout(form)
 
         # Supports checkboxes
-        layout.addWidget(QLabel("يدعم (supports):"))
+        layout.addWidget(QLabel(tr("يدعم (supports):")))
         supports_row1 = QHBoxLayout()
         supports_row2 = QHBoxLayout()
 
         self._sup: dict[str, QCheckBox] = {}
         for key, label, default, row in [
-            ("title",          "العنوان",          True,  supports_row1),
-            ("editor",         "المحرر",           True,  supports_row1),
-            ("thumbnail",      "الصورة البارزة",   True,  supports_row1),
-            ("excerpt",        "المقتطف",          False, supports_row2),
-            ("comments",       "التعليقات",        False, supports_row2),
-            ("revisions",      "المراجعات",        False, supports_row2),
-            ("custom-fields",  "الحقول المخصصة",   False, supports_row2),
+            ("title",          tr("العنوان"),          True,  supports_row1),
+            ("editor",         tr("المحرر"),           True,  supports_row1),
+            ("thumbnail",      tr("الصورة البارزة"),   True,  supports_row1),
+            ("excerpt",        tr("المقتطف"),          False, supports_row2),
+            ("comments",       tr("التعليقات"),        False, supports_row2),
+            ("revisions",      tr("المراجعات"),        False, supports_row2),
+            ("custom-fields",  tr("الحقول المخصصة"),   False, supports_row2),
         ]:
             cb = QCheckBox(label)
             cb.setChecked(default)
@@ -392,10 +393,10 @@ class _CptDialog(QDialog):
 
         # Options row
         options_row = QHBoxLayout()
-        self._public     = QCheckBox("عام (Public)");     self._public.setChecked(True)
-        self._archive    = QCheckBox("له أرشيف");          self._archive.setChecked(True)
-        self._rest       = QCheckBox("إظهار في REST");     self._rest.setChecked(True)
-        self._hier       = QCheckBox("هرمي (Hierarchical)"); self._hier.setChecked(False)
+        self._public     = QCheckBox(tr("عام (Public)"));     self._public.setChecked(True)
+        self._archive    = QCheckBox(tr("له أرشيف"));          self._archive.setChecked(True)
+        self._rest       = QCheckBox(tr("إظهار في REST"));     self._rest.setChecked(True)
+        self._hier       = QCheckBox(tr("هرمي (Hierarchical)")); self._hier.setChecked(False)
         for cb in [self._public, self._archive, self._rest, self._hier]:
             options_row.addWidget(cb)
         options_row.addStretch()
@@ -457,14 +458,14 @@ class _AcfCodeDialog(QDialog):
 
     def __init__(self, fname: str, ftype: str, flabel: str, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(f"كود PHP: {flabel} ({ftype})")
+        self.setWindowTitle(f"{tr('كود PHP: ')}{flabel} ({ftype})")
         self.setMinimumSize(680, 520)
 
         layout = QVBoxLayout(self)
 
         # Header
         header = QLabel(
-            f"<b>حقل:</b> {flabel}  &nbsp;|&nbsp;  "
+            f"{tr('<b>حقل:</b> ')}{flabel}  &nbsp;|&nbsp;  "
             f"<b>الاسم:</b> <code>{fname}</code>  &nbsp;|&nbsp;  "
             f"<b>النوع:</b> <code>{ftype}</code>")
         header.setStyleSheet("padding: 6px; color: #D1FAE5;")
@@ -489,9 +490,9 @@ class _AcfCodeDialog(QDialog):
         layout.addWidget(self._code_edit, 1)
 
         btn_row = QHBoxLayout()
-        btn_copy = QPushButton("📋 نسخ الكود")
+        btn_copy = QPushButton(tr("📋 نسخ الكود"))
         btn_copy.clicked.connect(self._copy_code)
-        btn_close = QPushButton("إغلاق")
+        btn_close = QPushButton(tr("إغلاق"))
         btn_close.clicked.connect(self.accept)
         btn_row.addWidget(btn_copy)
         btn_row.addStretch()
@@ -500,7 +501,7 @@ class _AcfCodeDialog(QDialog):
 
     def _copy_code(self):
         QApplication.clipboard().setText(self._code_edit.toPlainText())
-        QMessageBox.information(self, "تم", "تم نسخ الكود إلى الـ Clipboard!")
+        QMessageBox.information(self, tr("تم"), tr("تم نسخ الكود إلى الـ Clipboard!"))
 
 
 class _CodePreviewDialog(QDialog):
@@ -525,9 +526,9 @@ class _CodePreviewDialog(QDialog):
         layout.addWidget(self._code_edit, 1)
 
         btn_row = QHBoxLayout()
-        btn_copy = QPushButton("📋 نسخ الكود")
+        btn_copy = QPushButton(tr("📋 نسخ الكود"))
         btn_copy.clicked.connect(self._copy_code)
-        btn_close = QPushButton("إغلاق")
+        btn_close = QPushButton(tr("إغلاق"))
         btn_close.clicked.connect(self.accept)
         btn_row.addWidget(btn_copy)
         btn_row.addStretch()
@@ -536,7 +537,7 @@ class _CodePreviewDialog(QDialog):
 
     def _copy_code(self):
         QApplication.clipboard().setText(self._code_edit.toPlainText())
-        QMessageBox.information(self, "تم", "تم نسخ الكود إلى الـ Clipboard!")
+        QMessageBox.information(self, tr("تم"), tr("تم نسخ الكود إلى الـ Clipboard!"))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -635,8 +636,8 @@ class SiteDashboardPage(BaseExtraPage):
         self._lbl_version = QLabel("")
         self._lbl_version.setStyleSheet("color: #9CA3AF; font-size: 12px;")
 
-        btn_open  = _secondary_btn("🌐 فتح الموقع")
-        btn_admin = _secondary_btn("⚙️ فتح لوحة الإدارة")
+        btn_open  = _secondary_btn(tr("🌐 فتح الموقع"))
+        btn_admin = _secondary_btn(tr("⚙️ فتح لوحة الإدارة"))
         btn_open.clicked.connect(self._open_site)
         btn_admin.clicked.connect(self._open_admin)
 
@@ -662,7 +663,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._lbl_profile_lang.setStyleSheet(
             "background:#1E3A5F; color:#93C5FD; border-radius:4px;"
             "padding:2px 8px; font-size:11px; font-weight:600;")
-        self._lbl_profile_hint = QLabel("جاري تحليل الموقع…")
+        self._lbl_profile_hint = QLabel(tr("جاري تحليل الموقع…"))
         self._lbl_profile_hint.setStyleSheet("color:#6B7280; font-size:11px;")
         self._lbl_profile_hint.setVisible(False)
         self._profile_bar.addWidget(self._lbl_profile_store)
@@ -702,17 +703,17 @@ class SiteDashboardPage(BaseExtraPage):
     # ─────────────────────────────────────────────────────────────────
 
     def _build_tabs(self):
-        self._tabs.addTab(self._build_content_tab("post"),  "📝 المقالات")
-        self._tabs.addTab(self._build_content_tab("page"),  "📄 الصفحات")
-        self._tabs.addTab(self._build_users_tab(),           "👥 المستخدمون")
-        self._tabs.addTab(self._build_plugins_tab(),         "🧩 الإضافات")
-        self._tabs.addTab(self._build_themes_tab(),          "🎨 القوالب")
-        self._tabs.addTab(self._build_options_tab(),         "⚙️ الخيارات")
-        self._tabs.addTab(self._build_acf_tab(),             "🔧 حقول ACF")
-        self._tabs.addTab(self._build_cpt_tab(),             "📋 أنواع المحتوى")
-        self._tabs.addTab(self._build_comments_tab(),        "💬 التعليقات")
-        self._tabs.addTab(self._build_taxonomies_tab(),      "🏷️ التصنيفات")
-        self._tabs.addTab(self._build_quick_actions_tab(),   "⚡ إجراءات سريعة")
+        self._tabs.addTab(self._build_content_tab("post"),  tr("📝 المقالات"))
+        self._tabs.addTab(self._build_content_tab("page"),  tr("📄 الصفحات"))
+        self._tabs.addTab(self._build_users_tab(),           tr("👥 المستخدمون"))
+        self._tabs.addTab(self._build_plugins_tab(),         tr("🧩 الإضافات"))
+        self._tabs.addTab(self._build_themes_tab(),          tr("🎨 القوالب"))
+        self._tabs.addTab(self._build_options_tab(),         tr("⚙️ الخيارات"))
+        self._tabs.addTab(self._build_acf_tab(),             tr("🔧 حقول ACF"))
+        self._tabs.addTab(self._build_cpt_tab(),             tr("📋 أنواع المحتوى"))
+        self._tabs.addTab(self._build_comments_tab(),        tr("💬 التعليقات"))
+        self._tabs.addTab(self._build_taxonomies_tab(),      tr("🏷️ التصنيفات"))
+        self._tabs.addTab(self._build_quick_actions_tab(),   tr("⚡ إجراءات سريعة"))
         self._tabs.currentChanged.connect(self._on_tab_changed)
 
     # ── Posts & Pages ─────────────────────────────────────────────────
@@ -722,11 +723,11 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        label = "مقال" if post_type == "post" else "صفحة"
-        btn_new     = PrimaryButton(f"➕ {label} جديد" if post_type == "post" else f"➕ {label} جديدة")
-        btn_edit    = _secondary_btn("✏️ تعديل")
-        btn_delete  = _secondary_btn("🗑️ حذف")
-        btn_refresh = _secondary_btn("🔄 تحديث")
+        label = tr("مقال") if post_type == "post" else tr("صفحة")
+        btn_new     = PrimaryButton(f"➕ {label}{tr(' جديد')}" if post_type == "post" else f"➕ {label}{tr(' جديد')}ة")
+        btn_edit    = _secondary_btn(tr("✏️ تعديل"))
+        btn_delete  = _secondary_btn(tr("🗑️ حذف"))
+        btn_refresh = _secondary_btn(tr("🔄 تحديث"))
 
         row = QHBoxLayout()
         row.addWidget(btn_new)
@@ -738,7 +739,7 @@ class SiteDashboardPage(BaseExtraPage):
 
         table = QTableWidget()
         table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(["ID", "العنوان", "الحالة", "التاريخ"])
+        table.setHorizontalHeaderLabels(["ID", tr("العنوان"), tr("الحالة"), tr("التاريخ")])
         hh = table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -773,9 +774,9 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_new     = PrimaryButton("➕ مستخدم جديد")
-        btn_delete  = _secondary_btn("🗑️ حذف المستخدم")
-        btn_refresh = _secondary_btn("🔄 تحديث")
+        btn_new     = PrimaryButton(tr("➕ مستخدم جديد"))
+        btn_delete  = _secondary_btn(tr("🗑️ حذف المستخدم"))
+        btn_refresh = _secondary_btn(tr("🔄 تحديث"))
 
         row = QHBoxLayout()
         row.addWidget(btn_new)
@@ -787,7 +788,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._users_table = QTableWidget()
         self._users_table.setColumnCount(5)
         self._users_table.setHorizontalHeaderLabels(
-            ["ID", "اسم الدخول", "الاسم المعروض", "البريد الإلكتروني", "الدور"])
+            ["ID", tr("اسم الدخول"), tr("الاسم المعروض"), tr("البريد الإلكتروني"), tr("الدور")])
         self._users_table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch)
         self._users_table.setSelectionBehavior(
@@ -809,9 +810,9 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_toggle  = _secondary_btn("⚡ تفعيل / إلغاء التفعيل")
-        btn_delete  = _secondary_btn("🗑️ حذف")
-        btn_refresh = _secondary_btn("🔄 تحديث")
+        btn_toggle  = _secondary_btn(tr("⚡ تفعيل / إلغاء التفعيل"))
+        btn_delete  = _secondary_btn(tr("🗑️ حذف"))
+        btn_refresh = _secondary_btn(tr("🔄 تحديث"))
 
         row = QHBoxLayout()
         row.addWidget(btn_toggle)
@@ -823,7 +824,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._plugins_table = QTableWidget()
         self._plugins_table.setColumnCount(4)
         self._plugins_table.setHorizontalHeaderLabels(
-            ["Slug", "الحالة", "الإصدار", "تحديث"])
+            ["Slug", tr("الحالة"), tr("الإصدار"), tr("تحديث")])
         hh = self._plugins_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -848,8 +849,8 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_activate = PrimaryButton("✅ تفعيل القالب")
-        btn_refresh  = _secondary_btn("🔄 تحديث")
+        btn_activate = PrimaryButton(tr("✅ تفعيل القالب"))
+        btn_refresh  = _secondary_btn(tr("🔄 تحديث"))
 
         row = QHBoxLayout()
         row.addWidget(btn_activate)
@@ -860,7 +861,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._themes_table = QTableWidget()
         self._themes_table.setColumnCount(3)
         self._themes_table.setHorizontalHeaderLabels(
-            ["الاسم", "الحالة", "الإصدار"])
+            [tr("الاسم"), tr("الحالة"), tr("الإصدار")])
         hh = self._themes_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -883,8 +884,8 @@ class SiteDashboardPage(BaseExtraPage):
         vbox = QVBoxLayout(w)
         vbox.setContentsMargins(0, 8, 0, 0)
 
-        btn_edit    = _secondary_btn("✏️ تعديل الخيار")
-        btn_refresh = _secondary_btn("🔄 تحديث")
+        btn_edit    = _secondary_btn(tr("✏️ تعديل الخيار"))
+        btn_refresh = _secondary_btn(tr("🔄 تحديث"))
 
         row = QHBoxLayout()
         row.addWidget(btn_edit)
@@ -901,7 +902,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._options_table = QTableWidget()
         self._options_table.setColumnCount(2)
         self._options_table.setHorizontalHeaderLabels(
-            ["اسم الخيار", "القيمة"])
+            [tr("اسم الخيار"), tr("القيمة")])
         hh = self._options_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -1045,7 +1046,7 @@ class SiteDashboardPage(BaseExtraPage):
             self._lbl_profile_lang.setVisible(True)
 
         if not profile["is_store"] and not profile["is_multilingual"]:
-            self._lbl_profile_hint.setText("موقع عادي — لا يوجد متجر أو تعدد لغات")
+            self._lbl_profile_hint.setText(tr("موقع عادي — لا يوجد متجر أو تعدد لغات"))
             self._lbl_profile_hint.setVisible(True)
 
     # ─────────────────────────────────────────────────────────────────
@@ -1070,15 +1071,15 @@ class SiteDashboardPage(BaseExtraPage):
         tooling = self._get_tooling()
         if not tooling:
             QMessageBox.warning(
-                self, "WP-CLI غير متوفر",
+                self, tr("WP-CLI غير متوفر"),
                 "لم يتم العثور على PHP أو WP-CLI.\n"
                 "تأكد من تثبيتهما أو أن المشروع يحتوي على .tools/wp-cli.phar")
             return
 
         if self._thread and self._thread.isRunning():
             QMessageBox.warning(
-                self, "جاري التنفيذ",
-                "عملية أخرى قيد التشغيل بالفعل، يرجى الانتظار.")
+                self, tr("جاري التنفيذ"),
+                tr("عملية أخرى قيد التشغيل بالفعل، يرجى الانتظار."))
             return
 
         php, wpcli, is_phar = tooling
@@ -1131,7 +1132,7 @@ class SiteDashboardPage(BaseExtraPage):
                             ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل المحتوى:\n{output[:600]}")
+                self, tr("خطأ"), f"فشل تحميل المحتوى:\n{output[:600]}")
             return
         try:
             posts = self._parse_json(output)
@@ -1153,7 +1154,7 @@ class SiteDashboardPage(BaseExtraPage):
                     str(p.get("post_date", ""))[:10]))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في التحليل",
+                self, tr("خطأ في التحليل"),
                 f"لا يمكن قراءة بيانات المحتوى:\n{exc}")
 
     def _new_content(self, post_type: str):
@@ -1164,7 +1165,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["title"]:
-            QMessageBox.warning(self, "مطلوب", "العنوان مطلوب.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("العنوان مطلوب."))
             return
         args = [
             "post", "create",
@@ -1186,7 +1187,7 @@ class SiteDashboardPage(BaseExtraPage):
         row = table.currentRow()
         if row < 0:
             QMessageBox.information(
-                self, "اختر", "اختر عنصراً للتعديل.")
+                self, tr("اختر"), tr("اختر عنصراً للتعديل."))
             return
         id_item = table.item(row, 0)
         post_data: dict = id_item.data(Qt.ItemDataRole.UserRole) if id_item else {}
@@ -1217,7 +1218,7 @@ class SiteDashboardPage(BaseExtraPage):
         row = table.currentRow()
         if row < 0:
             QMessageBox.information(
-                self, "اختر", "اختر عنصراً للحذف.")
+                self, tr("اختر"), tr("اختر عنصراً للحذف."))
             return
         id_item = table.item(row, 0)
         post_data: dict = id_item.data(Qt.ItemDataRole.UserRole) if id_item else {}
@@ -1225,8 +1226,8 @@ class SiteDashboardPage(BaseExtraPage):
         post_title = (table.item(row, 1).text()
                       if table.item(row, 1) else post_id)
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"هل تريد حذف '{post_title}' بشكل نهائي؟",
+            self, tr("تأكيد الحذف"),
+            f"{tr('هل تريد حذف \'')}{post_title}{tr('\' بشكل نهائي؟')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -1239,7 +1240,7 @@ class SiteDashboardPage(BaseExtraPage):
             self._load_content(post_type)
         else:
             QMessageBox.warning(
-                self, "فشلت العملية", f"{output[:600]}")
+                self, tr("فشلت العملية"), f"{output[:600]}")
 
     # ─────────────────────────────────────────────────────────────────
     # Users
@@ -1257,7 +1258,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_users_table(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل المستخدمين:\n{output[:600]}")
+                self, tr("خطأ"), f"فشل تحميل المستخدمين:\n{output[:600]}")
             return
         try:
             users = self._parse_json(output)
@@ -1276,7 +1277,7 @@ class SiteDashboardPage(BaseExtraPage):
                     i, 4, QTableWidgetItem(str(u.get("roles", ""))))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في التحليل",
+                self, tr("خطأ في التحليل"),
                 f"لا يمكن قراءة بيانات المستخدمين:\n{exc}")
 
     def _new_user(self):
@@ -1287,8 +1288,8 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["username"] or not d["email"]:
-            QMessageBox.warning(self, "مطلوب",
-                                "اسم المستخدم والبريد الإلكتروني مطلوبان.")
+            QMessageBox.warning(self, tr("مطلوب"),
+                                tr("اسم المستخدم والبريد الإلكتروني مطلوبان."))
             return
         args = [
             "user", "create",
@@ -1305,14 +1306,14 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_users() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم إنشاء المستخدم:\n{out[:600]}")))
+                    self, tr("فشل"), f"لم يتم إنشاء المستخدم:\n{out[:600]}")))
 
     def _delete_user(self):
         if not self.current:
             return
         row = self._users_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر مستخدماً للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مستخدماً للحذف."))
             return
         id_item = self._users_table.item(row, 0)
         user_data: dict = id_item.data(Qt.ItemDataRole.UserRole) if id_item else {}
@@ -1320,8 +1321,8 @@ class SiteDashboardPage(BaseExtraPage):
         login   = (self._users_table.item(row, 1).text()
                    if self._users_table.item(row, 1) else user_id)
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"حذف المستخدم '{login}'؟ (المحتوى يبقى كما هو)",
+            self, tr("تأكيد الحذف"),
+            f"{tr('حذف المستخدم \'')}{login}{tr('\'؟ (المحتوى يبقى كما هو)')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -1330,7 +1331,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_users() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم حذف المستخدم:\n{out[:600]}")))
+                    self, tr("فشل"), f"لم يتم حذف المستخدم:\n{out[:600]}")))
 
     # ─────────────────────────────────────────────────────────────────
     # Plugins
@@ -1347,7 +1348,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_plugins_table(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل الإضافات:\n{output[:600]}")
+                self, tr("خطأ"), f"فشل تحميل الإضافات:\n{output[:600]}")
             return
         try:
             plugins = self._parse_json(output)
@@ -1373,7 +1374,7 @@ class SiteDashboardPage(BaseExtraPage):
                 self._plugins_table.setItem(i, 3, u_item)
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في التحليل",
+                self, tr("خطأ في التحليل"),
                 f"لا يمكن قراءة بيانات الإضافات:\n{exc}")
 
     def _toggle_plugin(self):
@@ -1381,7 +1382,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         row = self._plugins_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر إضافة.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر إضافة."))
             return
         pl_data: dict = (self._plugins_table.item(row, 0)
                          .data(Qt.ItemDataRole.UserRole) or {})
@@ -1393,7 +1394,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_plugins() if ok else
                 QMessageBox.warning(
-                    self, "فشل",
+                    self, tr("فشل"),
                     f"لم يتم تنفيذ الإجراء:\n{out[:600]}")))
 
     def _delete_plugin(self):
@@ -1401,14 +1402,14 @@ class SiteDashboardPage(BaseExtraPage):
             return
         row = self._plugins_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر إضافة للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر إضافة للحذف."))
             return
         pl_data: dict = (self._plugins_table.item(row, 0)
                          .data(Qt.ItemDataRole.UserRole) or {})
         name = pl_data.get("name", "")
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"هل تريد حذف الإضافة '{name}' بشكل كامل؟",
+            self, tr("تأكيد الحذف"),
+            f"{tr('هل تريد حذف الإضافة \'')}{name}{tr('\' بشكل كامل؟')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -1417,7 +1418,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_plugins() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم حذف الإضافة:\n{out[:600]}")))
+                    self, tr("فشل"), f"لم يتم حذف الإضافة:\n{out[:600]}")))
 
     # ─────────────────────────────────────────────────────────────────
     # Themes
@@ -1434,7 +1435,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_themes_table(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل القوالب:\n{output[:600]}")
+                self, tr("خطأ"), f"فشل تحميل القوالب:\n{output[:600]}")
             return
         try:
             themes = self._parse_json(output)
@@ -1452,7 +1453,7 @@ class SiteDashboardPage(BaseExtraPage):
                     i, 2, QTableWidgetItem(str(t.get("version", ""))))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في التحليل",
+                self, tr("خطأ في التحليل"),
                 f"لا يمكن قراءة بيانات القوالب:\n{exc}")
 
     def _activate_theme(self):
@@ -1460,7 +1461,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         row = self._themes_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر قالباً لتفعيله.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر قالباً لتفعيله."))
             return
         t_data: dict = (self._themes_table.item(row, 0)
                         .data(Qt.ItemDataRole.UserRole) or {})
@@ -1470,7 +1471,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_themes() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم تفعيل القالب:\n{out[:600]}")))
+                    self, tr("فشل"), f"لم يتم تفعيل القالب:\n{out[:600]}")))
 
     # ─────────────────────────────────────────────────────────────────
     # Options  (read = direct MySQL  |  write = WP-CLI option update)
@@ -1525,7 +1526,7 @@ class SiteDashboardPage(BaseExtraPage):
                 self._options_table.setItem(i, 1, QTableWidgetItem(display))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في قاعدة البيانات",
+                self, tr("خطأ في قاعدة البيانات"),
                 f"لا يمكن تحميل الإعدادات:\n{exc}")
 
     def _edit_option(self):
@@ -1534,7 +1535,7 @@ class SiteDashboardPage(BaseExtraPage):
         row = self._options_table.currentRow()
         if row < 0:
             QMessageBox.information(
-                self, "اختر", "اختر خياراً للتعديل.")
+                self, tr("اختر"), tr("اختر خياراً للتعديل."))
             return
         n_item = self._options_table.item(row, 0)
         if not n_item:
@@ -1557,7 +1558,7 @@ class SiteDashboardPage(BaseExtraPage):
             conn.close()
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ", f"لا يمكن تحميل قيمة الخيار:\n{exc}")
+                self, tr("خطأ"), f"لا يمكن تحميل قيمة الخيار:\n{exc}")
             return
 
         dlg = _OptionEditDialog(opt_name, full_val, parent=self)
@@ -1570,7 +1571,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_options() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم حفظ الخيار:\n{out[:600]}")))
+                    self, tr("فشل"), f"لم يتم حفظ الخيار:\n{out[:600]}")))
 
     # ─────────────────────────────────────────────────────────────────
     # Quick-open helpers
@@ -1592,35 +1593,35 @@ class SiteDashboardPage(BaseExtraPage):
 
     # ── Field type options offered in the "Add Field" dialog ─────────
     _ACF_FIELD_TYPES = [
-        ("text",         "نص"),
-        ("textarea",     "نص متعدد الأسطر"),
-        ("number",       "رقم"),
-        ("email",        "بريد إلكتروني"),
-        ("url",          "رابط (URL)"),
-        ("password",     "كلمة مرور"),
-        ("image",        "صورة"),
-        ("file",         "ملف"),
-        ("gallery",      "معرض صور"),
-        ("wysiwyg",      "محرر WYSIWYG"),
+        ("text",         tr("نص")),
+        ("textarea",     tr("نص متعدد الأسطر")),
+        ("number",       tr("رقم")),
+        ("email",        tr("بريد إلكتروني")),
+        ("url",          tr("رابط (URL)")),
+        ("password",     tr("كلمة مرور")),
+        ("image",        tr("صورة")),
+        ("file",         tr("ملف")),
+        ("gallery",      tr("معرض صور")),
+        ("wysiwyg",      tr("محرر WYSIWYG")),
         ("oembed",       "oEmbed"),
-        ("select",       "قائمة اختيار"),
-        ("checkbox",     "مربع اختيار"),
-        ("radio",        "زر اختيار (Radio)"),
-        ("button_group", "مجموعة أزرار"),
-        ("true_false",   "صح / خطأ"),
-        ("link",         "رابط"),
-        ("post_object",  "كائن مقال (Post Object)"),
-        ("page_link",    "رابط صفحة"),
-        ("relationship", "علاقة (Relationship)"),
-        ("taxonomy",     "تصنيف"),
-        ("user",         "مستخدم"),
-        ("date_picker",  "منتقي تاريخ"),
-        ("date_time_picker", "منتقي تاريخ ووقت"),
-        ("time_picker",  "منتقي وقت"),
-        ("color_picker", "منتقي لون"),
-        ("group",        "مجموعة"),
-        ("repeater",     "متكرر (Repeater)"),
-        ("flexible_content", "محتوى مرن (Flexible Content)"),
+        ("select",       tr("قائمة اختيار")),
+        ("checkbox",     tr("مربع اختيار")),
+        ("radio",        tr("زر اختيار (Radio)")),
+        ("button_group", tr("مجموعة أزرار")),
+        ("true_false",   tr("صح / خطأ")),
+        ("link",         tr("رابط")),
+        ("post_object",  tr("كائن مقال (Post Object)")),
+        ("page_link",    tr("رابط صفحة")),
+        ("relationship", tr("علاقة (Relationship)")),
+        ("taxonomy",     tr("تصنيف")),
+        ("user",         tr("مستخدم")),
+        ("date_picker",  tr("منتقي تاريخ")),
+        ("date_time_picker", tr("منتقي تاريخ ووقت")),
+        ("time_picker",  tr("منتقي وقت")),
+        ("color_picker", tr("منتقي لون")),
+        ("group",        tr("مجموعة")),
+        ("repeater",     tr("متكرر (Repeater)")),
+        ("flexible_content", tr("محتوى مرن (Flexible Content)")),
     ]
 
     # ── ACF tab builder ───────────────────────────────────────────────
@@ -1633,7 +1634,7 @@ class SiteDashboardPage(BaseExtraPage):
 
         # ── ACF status label ──────────────────────────────────────────
         self._acf_status_lbl = QLabel(
-            "⚠️  لم يتم اكتشاف ACF بعد — اختر مشروعاً للتحقق")
+            tr("⚠️  لم يتم اكتشاف ACF بعد — اختر مشروعاً للتحقق"))
         self._acf_status_lbl.setStyleSheet(
             "color: #9CA3AF; font-size: 12px; padding: 4px;")
         vbox.addWidget(self._acf_status_lbl)
@@ -1647,9 +1648,9 @@ class SiteDashboardPage(BaseExtraPage):
         left_v.setContentsMargins(0, 0, 4, 0)
 
         grp_btn_row = QHBoxLayout()
-        btn_new_group   = PrimaryButton("➕ مجموعة جديدة")
-        btn_edit_group  = _secondary_btn("✏️ تعديل")
-        btn_del_group   = _secondary_btn("🗑️ حذف")
+        btn_new_group   = PrimaryButton(tr("➕ مجموعة جديدة"))
+        btn_edit_group  = _secondary_btn(tr("✏️ تعديل"))
+        btn_del_group   = _secondary_btn(tr("🗑️ حذف"))
         btn_ref_groups  = _secondary_btn("🔄")
         btn_ref_groups.setFixedWidth(36)
         grp_btn_row.addWidget(btn_new_group)
@@ -1659,7 +1660,7 @@ class SiteDashboardPage(BaseExtraPage):
         grp_btn_row.addWidget(btn_ref_groups)
         left_v.addLayout(grp_btn_row)
 
-        left_v.addWidget(QLabel("مجموعات الحقول:"))
+        left_v.addWidget(QLabel(tr("مجموعات الحقول:")))
         self._acf_groups_list = QListWidget()
         self._acf_groups_list.setAlternatingRowColors(True)
         left_v.addWidget(self._acf_groups_list, 1)
@@ -1670,12 +1671,12 @@ class SiteDashboardPage(BaseExtraPage):
         right_v.setContentsMargins(4, 0, 0, 0)
 
         fld_btn_row = QHBoxLayout()
-        btn_new_field    = PrimaryButton("➕ حقل جديد")
-        btn_edit_field   = _secondary_btn("✏️ تعديل")
-        btn_del_field    = _secondary_btn("🗑️ حذف")
-        btn_show_code    = _secondary_btn("🖥️ كود PHP")
-        btn_all_code     = _secondary_btn("📋 كود الكل")
-        btn_ask_ai       = _secondary_btn("🤖 اسأل AI")
+        btn_new_field    = PrimaryButton(tr("➕ حقل جديد"))
+        btn_edit_field   = _secondary_btn(tr("✏️ تعديل"))
+        btn_del_field    = _secondary_btn(tr("🗑️ حذف"))
+        btn_show_code    = _secondary_btn(tr("🖥️ كود PHP"))
+        btn_all_code     = _secondary_btn(tr("📋 كود الكل"))
+        btn_ask_ai       = _secondary_btn(tr("🤖 اسأل AI"))
         for b in [btn_edit_field, btn_del_field, btn_show_code, btn_all_code, btn_ask_ai]:
             b.setStyleSheet(_BTN_STYLE)
         fld_btn_row.addWidget(btn_new_field)
@@ -1687,11 +1688,11 @@ class SiteDashboardPage(BaseExtraPage):
         fld_btn_row.addStretch()
         right_v.addLayout(fld_btn_row)
 
-        right_v.addWidget(QLabel("الحقول في المجموعة المختارة:"))
+        right_v.addWidget(QLabel(tr("الحقول في المجموعة المختارة:")))
         self._acf_fields_table = QTableWidget()
         self._acf_fields_table.setColumnCount(4)
         self._acf_fields_table.setHorizontalHeaderLabels(
-            ["التسمية", "الاسم (slug)", "النوع", "المفتاح"])
+            [tr("التسمية"), tr("الاسم (slug)"), tr("النوع"), tr("المفتاح")])
         hh = self._acf_fields_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -1708,8 +1709,8 @@ class SiteDashboardPage(BaseExtraPage):
 
         # ── Auto code preview panel ───────────────────────────────────
         code_hdr = QHBoxLayout()
-        code_hdr.addWidget(QLabel("⚡ كود الفرونت (تلقائي):"))
-        btn_copy_preview = _secondary_btn("📋 نسخ")
+        code_hdr.addWidget(QLabel(tr("⚡ كود الفرونت (تلقائي):")))
+        btn_copy_preview = _secondary_btn(tr("📋 نسخ"))
         btn_copy_preview.setFixedWidth(70)
         code_hdr.addStretch()
         code_hdr.addWidget(btn_copy_preview)
@@ -1719,7 +1720,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._acf_code_preview.setReadOnly(True)
         self._acf_code_preview.setFixedHeight(160)
         self._acf_code_preview.setPlaceholderText(
-            "← اختر حقلاً من الجدول لعرض كود PHP الخاص به هنا تلقائياً")
+            tr("← اختر حقلاً من الجدول لعرض كود PHP الخاص به هنا تلقائياً"))
         self._acf_code_preview.setStyleSheet(
             "font-family: Consolas, 'Courier New', monospace;"
             "font-size: 11px; background: #0F172A; color: #86EFAC;"
@@ -1828,8 +1829,8 @@ class SiteDashboardPage(BaseExtraPage):
 
         present = self._is_acf_present()
         self._acf_status_lbl.setText(
-            "✅  ACF مُكتشف ونشط" if present
-            else "⚠️  لم يتم اكتشاف ACF — الوظائف محدودة")
+            tr("✅  ACF مُكتشف ونشط") if present
+            else tr("⚠️  لم يتم اكتشاف ACF — الوظائف محدودة"))
         self._acf_status_lbl.setStyleSheet(
             f"color: {'#34D399' if present else '#F59E0B'};"
             f" font-size: 12px; padding: 4px;")
@@ -1880,7 +1881,7 @@ class SiteDashboardPage(BaseExtraPage):
                     })
             except Exception as exc:
                 QMessageBox.warning(
-                    self, "خطأ في قاعدة البيانات", f"لا يمكن تحميل مجموعات ACF:\n{exc}")
+                    self, tr("خطأ في قاعدة البيانات"), f"لا يمكن تحميل مجموعات ACF:\n{exc}")
 
         for g in groups:
             item = QListWidgetItem(
@@ -1949,7 +1950,7 @@ class SiteDashboardPage(BaseExtraPage):
                     })
             except Exception as exc:
                 QMessageBox.warning(
-                    self, "خطأ في قاعدة البيانات", f"لا يمكن تحميل الحقول:\n{exc}")
+                    self, tr("خطأ في قاعدة البيانات"), f"لا يمكن تحميل الحقول:\n{exc}")
 
         self._acf_fields_table.setRowCount(len(fields))
         for i, f in enumerate(fields):
@@ -1973,7 +1974,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["title"]:
-            QMessageBox.warning(self, "مطلوب", "اسم المجموعة مطلوب.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("اسم المجموعة مطلوب."))
             return
 
         key = self._gen_acf_key("group")
@@ -2006,8 +2007,8 @@ class SiteDashboardPage(BaseExtraPage):
             encoding="utf-8")
 
         QMessageBox.information(
-            self, "تم",
-            f"تم إنشاء مجموعة الحقول '{d['title']}' بنجاح!\n"
+            self, tr("تم"),
+            f"{tr('تم إنشاء مجموعة الحقول \'')}{d['title']}' بنجاح!\n"
             f"الملف: {out_file}\n\n"
             "ستظهر الحقول في ACF تلقائياً عند زيارة الموقع.")
         self._load_acf_groups()
@@ -2021,12 +2022,12 @@ class SiteDashboardPage(BaseExtraPage):
         item = self._acf_groups_list.item(row)
         if not item:
             QMessageBox.information(
-                self, "اختر مجموعة", "اختر مجموعة حقول أولاً.")
+                self, tr("اختر مجموعة"), tr("اختر مجموعة حقول أولاً."))
             return
         group = item.data(Qt.ItemDataRole.UserRole)
         if group.get("source") != "json":
             QMessageBox.information(
-                self, "غير مدعوم",
+                self, tr("غير مدعوم"),
                 "إضافة الحقول مباشرةً متاحة فقط للمجموعات المحفوظة كـ JSON.\n"
                 "انقر 'مجموعة جديدة' لإنشاء مجموعة جديدة.")
             return
@@ -2036,7 +2037,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["label"] or not d["name"]:
-            QMessageBox.warning(self, "مطلوب", "العنوان والـ name مطلوبان.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("العنوان والـ name مطلوبان."))
             return
 
         # Normalise slug
@@ -2097,13 +2098,13 @@ class SiteDashboardPage(BaseExtraPage):
         row = self._acf_groups_list.currentRow()
         item = self._acf_groups_list.item(row)
         if not item:
-            QMessageBox.information(self, "اختر", "اختر مجموعة للتعديل.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مجموعة للتعديل."))
             return
         group = item.data(Qt.ItemDataRole.UserRole)
         if group.get("source") != "json":
             QMessageBox.information(
-                self, "غير مدعوم",
-                "التعديل المباشر متاح فقط للمجموعات المحفوظة كـ JSON.")
+                self, tr("غير مدعوم"),
+                tr("التعديل المباشر متاح فقط للمجموعات المحفوظة كـ JSON."))
             return
 
         dlg = _AcfGroupDialog(data=group.get("data", {}), parent=self)
@@ -2111,7 +2112,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["title"]:
-            QMessageBox.warning(self, "مطلوب", "اسم المجموعة مطلوب.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("اسم المجموعة مطلوب."))
             return
 
         jf = Path(group["file"])
@@ -2135,18 +2136,18 @@ class SiteDashboardPage(BaseExtraPage):
         row_g = self._acf_groups_list.currentRow()
         item_g = self._acf_groups_list.item(row_g)
         if not item_g:
-            QMessageBox.information(self, "اختر", "اختر مجموعة أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مجموعة أولاً."))
             return
         group = item_g.data(Qt.ItemDataRole.UserRole)
         if group.get("source") != "json":
             QMessageBox.information(
-                self, "غير مدعوم",
-                "التعديل المباشر متاح فقط للحقول المحفوظة كـ JSON.")
+                self, tr("غير مدعوم"),
+                tr("التعديل المباشر متاح فقط للحقول المحفوظة كـ JSON."))
             return
 
         row_f = self._acf_fields_table.currentRow()
         if row_f < 0:
-            QMessageBox.information(self, "اختر", "اختر حقلاً للتعديل.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر حقلاً للتعديل."))
             return
         label_item = self._acf_fields_table.item(row_f, 0)
         fd: dict = label_item.data(Qt.ItemDataRole.UserRole) or {}
@@ -2156,7 +2157,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["label"]:
-            QMessageBox.warning(self, "مطلوب", "التسمية مطلوبة.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("التسمية مطلوبة."))
             return
 
         jf = Path(group["file"])
@@ -2180,12 +2181,12 @@ class SiteDashboardPage(BaseExtraPage):
         row = self._acf_groups_list.currentRow()
         item = self._acf_groups_list.item(row)
         if not item:
-            QMessageBox.information(self, "اختر", "اختر مجموعة للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مجموعة للحذف."))
             return
         group = item.data(Qt.ItemDataRole.UserRole)
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"حذف مجموعة '{group['title']}'؟\n"
+            self, tr("تأكيد الحذف"),
+            f"{tr('حذف مجموعة \'')}{group['title']}'؟\n"
             "سيتم حذف ملف JSON — الحقول الموجودة في DB لن تُحذف.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
@@ -2194,7 +2195,7 @@ class SiteDashboardPage(BaseExtraPage):
             try:
                 Path(group["file"]).unlink(missing_ok=True)
             except Exception as exc:
-                QMessageBox.warning(self, "خطأ", str(exc))
+                QMessageBox.warning(self, tr("خطأ"), str(exc))
         self._load_acf_groups()
 
     # ── Delete Field ──────────────────────────────────────────────────
@@ -2203,18 +2204,18 @@ class SiteDashboardPage(BaseExtraPage):
         row_g = self._acf_groups_list.currentRow()
         item_g = self._acf_groups_list.item(row_g)
         if not item_g:
-            QMessageBox.information(self, "اختر", "اختر مجموعة أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مجموعة أولاً."))
             return
         group = item_g.data(Qt.ItemDataRole.UserRole)
         if group.get("source") != "json":
             QMessageBox.information(
-                self, "غير مدعوم",
-                "الحذف المباشر متاح فقط للحقول المحفوظة كـ JSON.")
+                self, tr("غير مدعوم"),
+                tr("الحذف المباشر متاح فقط للحقول المحفوظة كـ JSON."))
             return
 
         row_f = self._acf_fields_table.currentRow()
         if row_f < 0:
-            QMessageBox.information(self, "اختر", "اختر حقلاً للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر حقلاً للحذف."))
             return
         label_item = self._acf_fields_table.item(row_f, 0)
         fd: dict = label_item.data(Qt.ItemDataRole.UserRole) or {}
@@ -2222,7 +2223,7 @@ class SiteDashboardPage(BaseExtraPage):
         field_label = fd.get("label", field_key)
 
         reply = QMessageBox.question(
-            self, "تأكيد الحذف", f"حذف الحقل '{field_label}'؟",
+            self, tr("تأكيد الحذف"), f"{tr('حذف الحقل \'')}{field_label}{tr('\'؟')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -2243,7 +2244,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _show_acf_field_code(self):
         row_f = self._acf_fields_table.currentRow()
         if row_f < 0:
-            QMessageBox.information(self, "اختر", "اختر حقلاً أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر حقلاً أولاً."))
             return
         label_item = self._acf_fields_table.item(row_f, 0)
         fd: dict = label_item.data(Qt.ItemDataRole.UserRole) or {}
@@ -2282,13 +2283,13 @@ class SiteDashboardPage(BaseExtraPage):
         row_g = self._acf_groups_list.currentRow()
         item_g = self._acf_groups_list.item(row_g)
         if not item_g:
-            QMessageBox.information(self, "اختر", "اختر مجموعة أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مجموعة أولاً."))
             return
         group = item_g.data(Qt.ItemDataRole.UserRole)
         fields: list[dict] = group.get("data", {}).get("fields", [])
         if not fields:
             QMessageBox.information(
-                self, "لا توجد حقول", "لا توجد حقول في هذه المجموعة.")
+                self, tr("لا توجد حقول"), tr("لا توجد حقول في هذه المجموعة."))
             return
 
         lines = [
@@ -2318,7 +2319,7 @@ class SiteDashboardPage(BaseExtraPage):
         full_code = "\n".join(lines)
 
         dlg = _CodePreviewDialog(
-            f"كود PHP لكل حقول: {group.get('title', 'Group')}",
+            f"{tr('كود PHP لكل حقول: ')}{group.get('title', 'Group')}",
             full_code, parent=self)
         dlg.exec()
 
@@ -2378,11 +2379,11 @@ class SiteDashboardPage(BaseExtraPage):
 
         # ── Buttons ───────────────────────────────────────────────────
         btn_row = QHBoxLayout()
-        btn_new_cpt    = PrimaryButton("➕ نوع محتوى جديد")
-        btn_del_cpt    = _secondary_btn("🗑️ حذف")
-        btn_show_cpt_code = _secondary_btn("🖥️ كود PHP")
-        btn_ask_cpt_ai = _secondary_btn("🤖 اسأل AI")
-        btn_refresh    = _secondary_btn("🔄 تحديث")
+        btn_new_cpt    = PrimaryButton(tr("➕ نوع محتوى جديد"))
+        btn_del_cpt    = _secondary_btn(tr("🗑️ حذف"))
+        btn_show_cpt_code = _secondary_btn(tr("🖥️ كود PHP"))
+        btn_ask_cpt_ai = _secondary_btn(tr("🤖 اسأل AI"))
+        btn_refresh    = _secondary_btn(tr("🔄 تحديث"))
         btn_refresh.setFixedWidth(80)
         btn_row.addWidget(btn_new_cpt)
         btn_row.addWidget(btn_del_cpt)
@@ -2402,7 +2403,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._cpt_table = QTableWidget()
         self._cpt_table.setColumnCount(5)
         self._cpt_table.setHorizontalHeaderLabels(
-            ["Slug", "التسمية", "عام", "له أرشيف", "المصدر"])
+            ["Slug", tr("التسمية"), tr("عام"), tr("له أرشيف"), tr("المصدر")])
         hh = self._cpt_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -2469,7 +2470,7 @@ class SiteDashboardPage(BaseExtraPage):
 
             for c in rows:
                 name = str(c.get("name", ""))
-                src = "🔧 Harmulizer" if name in mu_slugs else "🔌 إضافة/قالب"
+                src = "🔧 Harmulizer" if name in mu_slugs else tr("🔌 إضافة/قالب")
                 self._add_cpt_row(
                     name,
                     str(c.get("label", name)),
@@ -2478,7 +2479,7 @@ class SiteDashboardPage(BaseExtraPage):
                     src)
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ", f"لا يمكن قراءة أنواع المحتوى:\n{exc}")
+                self, tr("خطأ"), f"لا يمكن قراءة أنواع المحتوى:\n{exc}")
 
     def _add_cpt_row(self, slug, label, public, archive, source):
         r = self._cpt_table.rowCount()
@@ -2576,7 +2577,7 @@ class SiteDashboardPage(BaseExtraPage):
             return
         d = dlg.get_data()
         if not d["slug"]:
-            QMessageBox.warning(self, "مطلوب", "Slug (اسم النوع) مطلوب.")
+            QMessageBox.warning(self, tr("مطلوب"), tr("Slug (اسم النوع) مطلوب."))
             return
         d["slug"] = re.sub(r"[^a-z0-9_]", "_",
                            d["slug"].lower()).strip("_")
@@ -2584,8 +2585,8 @@ class SiteDashboardPage(BaseExtraPage):
         existing = self._mu_plugin_read_slugs()
         if d["slug"] in existing:
             QMessageBox.warning(
-                self, "موجود بالفعل",
-                f"نوع المحتوى '{d['slug']}' موجود بالفعل في الـ mu-plugin.")
+                self, tr("موجود بالفعل"),
+                f"{tr('نوع المحتوى \'')}{d['slug']}{tr('\' موجود بالفعل في الـ mu-plugin.')}")
             return
 
         snippet  = self._generate_cpt_php(d)
@@ -2593,8 +2594,8 @@ class SiteDashboardPage(BaseExtraPage):
         self._mu_plugin_write(current.rstrip() + "\n\n" + snippet)
 
         QMessageBox.information(
-            self, "تم",
-            f"✅ تم إضافة نوع المحتوى '{d['slug']}' بنجاح!\n"
+            self, tr("تم"),
+            f"{tr('✅ تم إضافة نوع المحتوى \'')}{d['slug']}' بنجاح!\n"
             f"الملف: wp-content/mu-plugins/{self._MU_PLUGIN_FILE}\n\n"
             "يُحمَّل تلقائياً بواسطة WordPress.")
         self._load_cpt_list()
@@ -2604,21 +2605,21 @@ class SiteDashboardPage(BaseExtraPage):
     def _delete_cpt(self):
         row = self._cpt_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر نوع محتوى للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر نوع محتوى للحذف."))
             return
         slug_item = self._cpt_table.item(row, 0)
         slug = slug_item.data(Qt.ItemDataRole.UserRole) if slug_item else ""
         src_item = self._cpt_table.item(row, 4)
         if src_item and "Harmulizer" not in src_item.text():
             QMessageBox.information(
-                self, "غير قابل للحذف",
+                self, tr("غير قابل للحذف"),
                 "يمكن حذف أنواع المحتوى المُضافة بواسطة Harmulizer فقط.\n"
                 "الأنواع القادمة من إضافات أو القالب تُدار من wp-admin.")
             return
 
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"إزالة نوع المحتوى '{slug}' من mu-plugin؟\n"
+            self, tr("تأكيد الحذف"),
+            f"{tr('إزالة نوع المحتوى \'')}{slug}' من mu-plugin؟\n"
             "المحتوى الموجود في DB لن يُحذف.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
@@ -2635,7 +2636,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _show_cpt_code(self):
         row = self._cpt_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر نوع محتوى.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر نوع محتوى."))
             return
         slug_item = self._cpt_table.item(row, 0)
         slug  = slug_item.data(Qt.ItemDataRole.UserRole) if slug_item else ""
@@ -2648,7 +2649,7 @@ class SiteDashboardPage(BaseExtraPage):
         snippet = m.group(0) if m else f"// CPT '{slug}' registered externally"
 
         dlg = _CodePreviewDialog(
-            title=f"كود CPT: {label}",
+            title=f"{tr('كود CPT: ')}{label}",
             code=snippet,
             language="php",
             parent=self)
@@ -2667,7 +2668,7 @@ class SiteDashboardPage(BaseExtraPage):
             label = li.text() if li else slug
 
         question = (
-            f"أنا مطور WordPress. عندي Custom Post Type اسمه '{slug}' "
+            f"{tr('أنا مطور WordPress. عندي Custom Post Type اسمه \'')}{slug}' "
             f"(Label: {label or slug}).\n"
             f"أحتاج مساعدة في:\n"
             f"1. كيفية عرض محتوى هذا النوع في الـ template (archive-{slug}.php و single-{slug}.php)\n"
@@ -2696,7 +2697,7 @@ class SiteDashboardPage(BaseExtraPage):
             cb = QApplication.clipboard()
             cb.setText(question)
             QMessageBox.information(
-                self, "تم النسخ",
+                self, tr("تم النسخ"),
                 "تم نسخ السؤال إلى الـ Clipboard.\n"
                 "افتح تبويب 'المساعد الذكي' والصق السؤال هناك.\n\n"
                 f"السؤال:\n{question[:300]}…")
@@ -2717,29 +2718,29 @@ class SiteDashboardPage(BaseExtraPage):
         self._comments_filter.addItems([
             "all", "approve", "hold", "spam", "trash"])
         self._comments_filter.currentIndexChanged.connect(self._load_comments)
-        filter_row.addWidget(QLabel("الفلتر:"))
+        filter_row.addWidget(QLabel(tr("الفلتر:")))
         filter_row.addWidget(self._comments_filter)
         filter_row.addStretch()
 
-        btn_approve = PrimaryButton("✅ موافقة")
-        btn_hold    = _secondary_btn("⏸️ تعليق")
-        btn_spam    = _secondary_btn("🚫 بريد مزعج")
-        btn_trash   = _secondary_btn("🗑️ سلة المهملات")
-        btn_delete  = _secondary_btn("❌ حذف نهائي")
-        btn_refresh = _secondary_btn("🔄 تحديث")
+        btn_approve = PrimaryButton(tr("✅ موافقة"))
+        btn_hold    = _secondary_btn(tr("⏸️ تعليق"))
+        btn_spam    = _secondary_btn(tr("🚫 بريد مزعج"))
+        btn_trash   = _secondary_btn(tr("🗑️ سلة المهملات"))
+        btn_delete  = _secondary_btn(tr("❌ حذف نهائي"))
+        btn_refresh = _secondary_btn(tr("🔄 تحديث"))
 
         for b in [btn_approve, btn_hold, btn_spam, btn_trash, btn_delete, btn_refresh]:
             filter_row.addWidget(b)
         vbox.addLayout(filter_row)
 
-        hint = QLabel("انقر مرتين على تعليق لعرض محتواه الكامل.")
+        hint = QLabel(tr("انقر مرتين على تعليق لعرض محتواه الكامل."))
         hint.setStyleSheet("color: #9CA3AF; font-size: 11px;")
         vbox.addWidget(hint)
 
         self._comments_table = QTableWidget()
         self._comments_table.setColumnCount(6)
         self._comments_table.setHorizontalHeaderLabels(
-            ["ID", "الكاتب", "البريد", "التعليق", "الحالة", "التاريخ"])
+            ["ID", tr("الكاتب"), tr("البريد"), tr("التعليق"), tr("الحالة"), tr("التاريخ")])
         hh = self._comments_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
@@ -2781,7 +2782,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_comments_table(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل التعليقات:\n{output[:600]}")
+                self, tr("خطأ"), f"فشل تحميل التعليقات:\n{output[:600]}")
             return
         try:
             comments = self._parse_json(output)
@@ -2817,13 +2818,13 @@ class SiteDashboardPage(BaseExtraPage):
                         str(c.get("comment_date", ""))[:16]))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ في التحليل",
+                self, tr("خطأ في التحليل"),
                 f"لا يمكن قراءة التعليقات:\n{exc}")
 
     def _selected_comment_id(self) -> str | None:
         row = self._comments_table.currentRow()
         if row < 0:
-            QMessageBox.information(self, "اختر", "اختر تعليقاً أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر تعليقاً أولاً."))
             return None
         id_item = self._comments_table.item(row, 0)
         c: dict = id_item.data(Qt.ItemDataRole.UserRole) if id_item else {}
@@ -2839,15 +2840,15 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_comments() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم تنفيذ الإجراء:\n{out[:400]}")))
+                    self, tr("فشل"), f"لم يتم تنفيذ الإجراء:\n{out[:400]}")))
 
     def _delete_comment(self):
         cid = self._selected_comment_id()
         if not cid:
             return
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"حذف التعليق #{cid} بشكل نهائي؟",
+            self, tr("تأكيد الحذف"),
+            f"{tr('حذف التعليق #')}{cid}{tr(' بشكل نهائي؟')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -2856,7 +2857,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok, out: (
                 self._load_comments() if ok else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم حذف التعليق:\n{out[:400]}")))
+                    self, tr("فشل"), f"لم يتم حذف التعليق:\n{out[:400]}")))
 
     def _view_comment(self):
         row = self._comments_table.currentRow()
@@ -2868,7 +2869,7 @@ class SiteDashboardPage(BaseExtraPage):
         content = c.get("comment_content", "")
         status  = c.get("comment_status", "")
         dlg = _CodePreviewDialog(
-            title=f"تعليق من {author}  [{status}]",
+            title=f"{tr('تعليق من ')}{author}  [{status}]",
             code=content,
             language="text",
             parent=self)
@@ -2892,8 +2893,8 @@ class SiteDashboardPage(BaseExtraPage):
         lv.setContentsMargins(0, 0, 4, 0)
 
         tax_btn_row = QHBoxLayout()
-        btn_ref_tax = _secondary_btn("🔄 تحديث")
-        tax_btn_row.addWidget(QLabel("التصنيفات:"))
+        btn_ref_tax = _secondary_btn(tr("🔄 تحديث"))
+        tax_btn_row.addWidget(QLabel(tr("التصنيفات:")))
         tax_btn_row.addStretch()
         tax_btn_row.addWidget(btn_ref_tax)
         lv.addLayout(tax_btn_row)
@@ -2908,8 +2909,8 @@ class SiteDashboardPage(BaseExtraPage):
         rv.setContentsMargins(4, 0, 0, 0)
 
         term_btn_row = QHBoxLayout()
-        btn_new_term = PrimaryButton("➕ مصطلح جديد")
-        btn_del_term = _secondary_btn("🗑️ حذف")
+        btn_new_term = PrimaryButton(tr("➕ مصطلح جديد"))
+        btn_del_term = _secondary_btn(tr("🗑️ حذف"))
         btn_ref_terms = _secondary_btn("🔄")
         btn_ref_terms.setFixedWidth(36)
         term_btn_row.addWidget(btn_new_term)
@@ -2918,11 +2919,11 @@ class SiteDashboardPage(BaseExtraPage):
         term_btn_row.addWidget(btn_ref_terms)
         rv.addLayout(term_btn_row)
 
-        rv.addWidget(QLabel("المصطلحات في التصنيف المختار:"))
+        rv.addWidget(QLabel(tr("المصطلحات في التصنيف المختار:")))
         self._terms_table = QTableWidget()
         self._terms_table.setColumnCount(4)
         self._terms_table.setHorizontalHeaderLabels(
-            ["ID", "الاسم", "Slug", "عدد المقالات"])
+            ["ID", tr("الاسم"), "Slug", tr("عدد المقالات")])
         hh = self._terms_table.horizontalHeader()
         hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         hh.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -2961,7 +2962,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_tax_list(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل التصنيفات:\n{output[:400]}")
+                self, tr("خطأ"), f"فشل تحميل التصنيفات:\n{output[:400]}")
             return
         try:
             taxs = self._parse_json(output)
@@ -2975,7 +2976,7 @@ class SiteDashboardPage(BaseExtraPage):
                 self._tax_list.setCurrentRow(0)
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ", f"لا يمكن قراءة التصنيفات:\n{exc}")
+                self, tr("خطأ"), f"لا يمكن قراءة التصنيفات:\n{exc}")
 
     def _on_taxonomy_selected(self, row: int):
         item = self._tax_list.item(row)
@@ -2992,7 +2993,7 @@ class SiteDashboardPage(BaseExtraPage):
     def _fill_terms_table(self, ok: bool, output: str):
         if not ok:
             QMessageBox.warning(
-                self, "خطأ", f"فشل تحميل المصطلحات:\n{output[:400]}")
+                self, tr("خطأ"), f"فشل تحميل المصطلحات:\n{output[:400]}")
             return
         try:
             terms = self._parse_json(output)
@@ -3010,7 +3011,7 @@ class SiteDashboardPage(BaseExtraPage):
                     i, 3, QTableWidgetItem(str(t.get("count", ""))))
         except Exception as exc:
             QMessageBox.warning(
-                self, "خطأ", f"لا يمكن قراءة المصطلحات:\n{exc}")
+                self, tr("خطأ"), f"لا يمكن قراءة المصطلحات:\n{exc}")
 
     def _new_term(self):
         if not self.current:
@@ -3018,12 +3019,12 @@ class SiteDashboardPage(BaseExtraPage):
         row = self._tax_list.currentRow()
         item = self._tax_list.item(row)
         if not item:
-            QMessageBox.information(self, "اختر", "اختر تصنيفاً أولاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر تصنيفاً أولاً."))
             return
         taxonomy = item.data(Qt.ItemDataRole.UserRole)
         name, ok = QInputDialog.getText(
-            self, "مصطلح جديد",
-            f"اسم المصطلح الجديد في '{taxonomy}':")
+            self, tr("مصطلح جديد"),
+            f"{tr('اسم المصطلح الجديد في \'')}{taxonomy}':")
         if not ok or not name.strip():
             return
         self._run_async(
@@ -3031,7 +3032,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok2, out: (
                 self._on_taxonomy_selected(self._tax_list.currentRow()) if ok2 else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم إنشاء المصطلح:\n{out[:400]}")))
+                    self, tr("فشل"), f"لم يتم إنشاء المصطلح:\n{out[:400]}")))
 
     def _delete_term(self):
         if not self.current:
@@ -3039,13 +3040,13 @@ class SiteDashboardPage(BaseExtraPage):
         tax_row  = self._tax_list.currentRow()
         tax_item = self._tax_list.item(tax_row)
         if not tax_item:
-            QMessageBox.information(self, "اختر", "اختر تصنيفاً.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر تصنيفاً."))
             return
         taxonomy = tax_item.data(Qt.ItemDataRole.UserRole)
 
         term_row = self._terms_table.currentRow()
         if term_row < 0:
-            QMessageBox.information(self, "اختر", "اختر مصطلحاً للحذف.")
+            QMessageBox.information(self, tr("اختر"), tr("اختر مصطلحاً للحذف."))
             return
         id_item = self._terms_table.item(term_row, 0)
         t: dict = id_item.data(Qt.ItemDataRole.UserRole) if id_item else {}
@@ -3053,8 +3054,8 @@ class SiteDashboardPage(BaseExtraPage):
         term_name = str(t.get("name", term_id))
 
         reply = QMessageBox.question(
-            self, "تأكيد الحذف",
-            f"حذف المصطلح '{term_name}' من '{taxonomy}'؟",
+            self, tr("تأكيد الحذف"),
+            f"{tr('حذف المصطلح \'')}{term_name}{tr('\' من \'')}{taxonomy}{tr('\'؟')}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -3063,7 +3064,7 @@ class SiteDashboardPage(BaseExtraPage):
             lambda ok2, out: (
                 self._on_taxonomy_selected(self._tax_list.currentRow()) if ok2 else
                 QMessageBox.warning(
-                    self, "فشل", f"لم يتم حذف المصطلح:\n{out[:400]}")))
+                    self, tr("فشل"), f"لم يتم حذف المصطلح:\n{out[:400]}")))
 
     # ═════════════════════════════════════════════════════════════════
     # ██  QUICK ACTIONS TAB  (index 10)
@@ -3088,53 +3089,53 @@ class SiteDashboardPage(BaseExtraPage):
         vbox.setContentsMargins(8, 12, 8, 8)
         vbox.setSpacing(10)
 
-        title = QLabel("⚡  إجراءات سريعة — تُنفَّذ مباشرةً بضغطة واحدة")
+        title = QLabel(tr("⚡  إجراءات سريعة — تُنفَّذ مباشرةً بضغطة واحدة"))
         title.setStyleSheet("color: #F8FAFC; font-size: 16px; font-weight: 800; padding: 10px 4px;")
         vbox.addWidget(title)
 
         # ── Action cards ──────────────────────────────────────────────
         actions = [
-            ("🔄",  "مسح Rewrite Rules",
-             "تجديد قواعد الـ URL وإصلاح مشاكل 404",
+            ("🔄",  tr("مسح Rewrite Rules"),
+             tr("تجديد قواعد الـ URL وإصلاح مشاكل 404"),
              self._qa_rewrite_flush, "#6366F1"),
-            ("🗑️",  "حذف جميع Transients",
-             "تنظيف الـ cache المؤقت المخزن في قاعدة البيانات",
+            ("🗑️",  tr("حذف جميع Transients"),
+             tr("تنظيف الـ cache المؤقت المخزن في قاعدة البيانات"),
              self._qa_delete_transients, "#EF4444"),
-            ("🧹",  "إفراغ سلة المهملات",
-             "حذف جميع المقالات والصفحات من سلة المهملات نهائياً",
+            ("🧹",  tr("إفراغ سلة المهملات"),
+             tr("حذف جميع المقالات والصفحات من سلة المهملات نهائياً"),
              self._qa_empty_trash, "#EF4444"),
-            ("📊",  "تحسين قاعدة البيانات",
-             "تشغيل OPTIMIZE TABLE لتسريع الاستعلامات",
+            ("📊",  tr("تحسين قاعدة البيانات"),
+             tr("تشغيل OPTIMIZE TABLE لتسريع الاستعلامات"),
              self._qa_db_optimize, "#10B981"),
-            ("🖼️",  "إعادة توليد الصور المصغرة",
-             "Regenerate thumbnails للصور المرفوعة",
+            ("🖼️",  tr("إعادة توليد الصور المصغرة"),
+             tr("Regenerate thumbnails للصور المرفوعة"),
              self._qa_regen_thumbs, "#3B82F6"),
-            ("🔑",  "تغيير كلمة مرور Admin",
-             "تغيير كلمة مرور أول مستخدم admin بدون الدخول لـ wp-admin",
+            ("🔑",  tr("تغيير كلمة مرور Admin"),
+             tr("تغيير كلمة مرور أول مستخدم admin بدون الدخول لـ wp-admin"),
              self._qa_reset_admin_pass, "#F59E0B"),
-            ("🌐",  "تحديث Site URL",
-             "تحديث siteurl و home في قاعدة البيانات",
+            ("🌐",  tr("تحديث Site URL"),
+             tr("تحديث siteurl و home في قاعدة البيانات"),
              self._qa_update_siteurl, "#F59E0B"),
-            ("📋",  "عرض معلومات الموقع",
-             "إصدار PHP، إصدار WordPress، وعدد الإضافات النشطة",
+            ("📋",  tr("عرض معلومات الموقع"),
+             tr("إصدار PHP، إصدار WordPress، وعدد الإضافات النشطة"),
              self._qa_site_info, "#64748B"),
-            ("🔌",  "تفعيل / تعطيل Maintenance Mode",
-             "تفعيل وضع الصيانة أو إلغاؤه",
+            ("🔌",  tr("تفعيل / تعطيل Maintenance Mode"),
+             tr("تفعيل وضع الصيانة أو إلغاؤه"),
              self._qa_toggle_maintenance, "#F59E0B"),
-            ("🔒",  "تحديث Salt Keys",
-             "توليد مفاتيح أمان جديدة وتحديثها في قاعدة البيانات",
+            ("🔒",  tr("تحديث Salt Keys"),
+             tr("توليد مفاتيح أمان جديدة وتحديثها في قاعدة البيانات"),
              self._qa_update_salts, "#EF4444"),
-            ("📦",  "تحديث جميع الإضافات",
-             "تحديث كل الـ plugins المثبتة دفعة واحدة",
+            ("📦",  tr("تحديث جميع الإضافات"),
+             tr("تحديث كل الـ plugins المثبتة دفعة واحدة"),
              self._qa_update_all_plugins, "#10B981"),
-            ("🛡️",  "فحص ملفات WordPress",
-             "التحقق من سلامة ملفات WordPress الأساسية",
+            ("🛡️",  tr("فحص ملفات WordPress"),
+             tr("التحقق من سلامة ملفات WordPress الأساسية"),
              self._qa_verify_checksums, "#6366F1"),
-            ("📤",  "تصدير قاعدة البيانات",
-             "تصدير نسخة احتياطية من قاعدة البيانات (SQL)",
+            ("📤",  tr("تصدير قاعدة البيانات"),
+             tr("تصدير نسخة احتياطية من قاعدة البيانات (SQL)"),
              self._qa_export_db, "#3B82F6"),
-            ("🔍",  "البحث والاستبدال في DB",
-             "استبدال نص في قاعدة البيانات (مفيد عند تغيير الـ URL)",
+            ("🔍",  tr("البحث والاستبدال في DB"),
+             tr("استبدال نص في قاعدة البيانات (مفيد عند تغيير الـ URL)"),
              self._qa_search_replace, "#F59E0B"),
         ]
 
@@ -3155,7 +3156,7 @@ class SiteDashboardPage(BaseExtraPage):
         outer_v.addWidget(scroll, 1)
 
         # Log area fixed at bottom
-        log_lbl = QLabel("سجل العمليات:")
+        log_lbl = QLabel(tr("سجل العمليات:"))
         log_lbl.setStyleSheet("color: #9CA3AF; font-size: 11px; padding: 4px 8px 0 8px;")
         outer_v.addWidget(log_lbl)
 
@@ -3165,7 +3166,7 @@ class SiteDashboardPage(BaseExtraPage):
         self._qa_log.setStyleSheet(
             "background: #0F172A; color: #94A3B8; font-family: monospace; "
             "font-size: 11px; border: 1px solid #334155; border-radius: 6px; margin: 0 8px 8px 8px;")
-        self._qa_log.setPlaceholderText("سجل العمليات يظهر هنا…")
+        self._qa_log.setPlaceholderText(tr("سجل العمليات يظهر هنا…"))
         outer_v.addWidget(self._qa_log)
 
         return outer
@@ -3214,7 +3215,7 @@ class SiteDashboardPage(BaseExtraPage):
         h.addLayout(txt_v, 1)
 
         # 4. Action Button
-        btn = PrimaryButton("تنفيذ")
+        btn = PrimaryButton(tr("تنفيذ"))
         btn.setFixedWidth(85)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         # Apply specialized hover for destructive actions
@@ -3231,69 +3232,69 @@ class SiteDashboardPage(BaseExtraPage):
 
     def _qa_rewrite_flush(self):
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تنفيذ: wp rewrite flush…")
+        self._qa_log_msg(tr("⏳ تنفيذ: wp rewrite flush…"))
         self._run_async(
             ["rewrite", "flush"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم' if ok else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم') if ok else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_delete_transients(self):
         self._qa_log.clear()
-        self._qa_log_msg("⏳ حذف جميع transients…")
+        self._qa_log_msg(tr("⏳ حذف جميع transients…"))
         self._run_async(
             ["transient", "delete", "--all"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم' if ok else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم') if ok else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_empty_trash(self):
         reply = QMessageBox.question(
-            self, "تأكيد",
-            "هل تريد حذف جميع محتويات سلة المهملات نهائياً؟",
+            self, tr("تأكيد"),
+            tr("هل تريد حذف جميع محتويات سلة المهملات نهائياً؟"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
         self._qa_log.clear()
-        self._qa_log_msg("⏳ إفراغ السلة…")
+        self._qa_log_msg(tr("⏳ إفراغ السلة…"))
         self._run_async(
             ["post", "delete", "--all", "--post_status=trash", "--force"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم' if ok else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم') if ok else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_db_optimize(self):
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تحسين قاعدة البيانات…")
+        self._qa_log_msg(tr("⏳ تحسين قاعدة البيانات…"))
         self._run_async(
             ["db", "optimize"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم' if ok else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم') if ok else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_regen_thumbs(self):
         reply = QMessageBox.question(
-            self, "تأكيد",
+            self, tr("تأكيد"),
             "إعادة توليد الصور المصغرة قد تستغرق وقتاً طويلاً.\nمتابعة؟",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
         self._qa_log.clear()
-        self._qa_log_msg("⏳ جاري توليد الصور… (قد يستغرق دقائق)")
+        self._qa_log_msg(tr("⏳ جاري توليد الصور… (قد يستغرق دقائق)"))
         self._run_async(
             ["media", "regenerate", "--yes"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم' if ok else '❌ فشل'}: {out[:400]}"))
+                f"{tr('✅ تم') if ok else tr('❌ فشل')}: {out[:400]}"))
 
     def _qa_reset_admin_pass(self):
         new_pass, ok = QInputDialog.getText(
-            self, "تغيير كلمة مرور Admin",
-            "أدخل كلمة المرور الجديدة لأول مستخدم (admin):",
+            self, tr("تغيير كلمة مرور Admin"),
+            tr("أدخل كلمة المرور الجديدة لأول مستخدم (admin):"),
             QLineEdit.EchoMode.Password)
         if not ok or not new_pass.strip():
             return
         if len(new_pass) < 6:
             QMessageBox.warning(
-                self, "ضعيفة", "كلمة المرور قصيرة جداً (6 أحرف كحد أدنى).")
+                self, tr("ضعيفة"), tr("كلمة المرور قصيرة جداً (6 أحرف كحد أدنى)."))
             return
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تغيير كلمة المرور…")
+        self._qa_log_msg(tr("⏳ تغيير كلمة المرور…"))
         # Get first admin user ID first, then update
         self._run_async(
             ["user", "list", "--role=administrator",
@@ -3302,12 +3303,12 @@ class SiteDashboardPage(BaseExtraPage):
 
     def _qa_update_pass_step2(self, ok: bool, output: str, new_pass: str):
         if not ok:
-            self._qa_log_msg(f"❌ لا يمكن تحديد Admin ID: {output[:200]}")
+            self._qa_log_msg(f"{tr('❌ لا يمكن تحديد Admin ID: ')}{output[:200]}")
             return
         try:
             users = self._parse_json(output)
             if not users:
-                self._qa_log_msg("❌ لا يوجد مستخدم بصلاحية admin.")
+                self._qa_log_msg(tr("❌ لا يوجد مستخدم بصلاحية admin."))
                 return
             admin_id = str(users[0].get("ID", "1"))
         except Exception:
@@ -3315,108 +3316,108 @@ class SiteDashboardPage(BaseExtraPage):
         self._run_async(
             ["user", "update", admin_id, f"--user_pass={new_pass}"],
             lambda ok2, out: self._qa_log_msg(
-                f"{'✅ تم تغيير كلمة المرور' if ok2 else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم تغيير كلمة المرور') if ok2 else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_update_siteurl(self):
         if not self.current:
             return
         current_url = self.current.url or ""
         new_url, ok = QInputDialog.getText(
-            self, "تحديث Site URL",
-            "أدخل الـ URL الجديد للموقع (بدون / في النهاية):",
+            self, tr("تحديث Site URL"),
+            tr("أدخل الـ URL الجديد للموقع (بدون / في النهاية):"),
             text=current_url)
         if not ok or not new_url.strip():
             return
         new_url = new_url.strip().rstrip("/")
         self._qa_log.clear()
-        self._qa_log_msg(f"⏳ تحديث siteurl → {new_url}")
+        self._qa_log_msg(f"{tr('⏳ تحديث siteurl → ')}{new_url}")
         self._run_async(
             ["option", "update", "siteurl", new_url],
             lambda ok2, out: (
                 self._run_async(
                     ["option", "update", "home", new_url],
                     lambda ok3, out3: self._qa_log_msg(
-                        f"{'✅ تم تحديث siteurl + home' if ok3 else '❌ فشل home'}"
+                        f"{tr('✅ تم تحديث siteurl + home') if ok3 else tr('❌ فشل home')}"
                     )) if ok2 else
-                self._qa_log_msg(f"❌ فشل تحديث siteurl: {out[:200]}")))
+                self._qa_log_msg(f"{tr('❌ فشل تحديث siteurl: ')}{out[:200]}")))
 
     def _qa_site_info(self):
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تحميل معلومات الموقع…")
+        self._qa_log_msg(tr("⏳ تحميل معلومات الموقع…"))
         self._run_async(
             ["core", "version"],
             lambda ok, out: self._qa_log_msg(
-                f"🌐 إصدار WordPress: {out.strip() if ok else '?'}"))
+                f"{tr('🌐 إصدار WordPress: ')}{out.strip() if ok else '?'}"))
         self._run_async(
             ["eval", "echo phpversion();"],
             lambda ok, out: self._qa_log_msg(
-                f"🐘 إصدار PHP: {out.strip() if ok else '?'}"))
+                f"{tr('🐘 إصدار PHP: ')}{out.strip() if ok else '?'}"))
         self._run_async(
             ["plugin", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🧩 الإضافات النشطة: {out.strip() if ok else '?'}"))
+                f"{tr('🧩 الإضافات النشطة: ')}{out.strip() if ok else '?'}"))
         self._run_async(
             ["theme", "list", "--status=active", "--format=count"],
             lambda ok, out: self._qa_log_msg(
-                f"🎨 القوالب النشطة: {out.strip() if ok else '?'}"))
+                f"{tr('🎨 القوالب النشطة: ')}{out.strip() if ok else '?'}"))
 
     def _qa_toggle_maintenance(self):
         reply = QMessageBox.question(
-            self, "وضع الصيانة",
-            "اضغط Yes لتفعيل وضع الصيانة، أو No لإلغائه.",
+            self, tr("وضع الصيانة"),
+            tr("اضغط Yes لتفعيل وضع الصيانة، أو No لإلغائه."),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel)
         if reply == QMessageBox.StandardButton.Cancel:
             return
         activate = reply == QMessageBox.StandardButton.Yes
         self._qa_log.clear()
         if activate:
-            self._qa_log_msg("⏳ تفعيل وضع الصيانة…")
+            self._qa_log_msg(tr("⏳ تفعيل وضع الصيانة…"))
             self._run_async(
                 ["maintenance-mode", "activate"],
                 lambda ok, out: self._qa_log_msg(
-                    f"{'✅ تم تفعيل وضع الصيانة' if ok else '❌ فشل'}: {out[:200]}"))
+                    f"{tr('✅ تم تفعيل وضع الصيانة') if ok else tr('❌ فشل')}: {out[:200]}"))
         else:
-            self._qa_log_msg("⏳ إلغاء وضع الصيانة…")
+            self._qa_log_msg(tr("⏳ إلغاء وضع الصيانة…"))
             self._run_async(
                 ["maintenance-mode", "deactivate"],
                 lambda ok, out: self._qa_log_msg(
-                    f"{'✅ تم إلغاء وضع الصيانة' if ok else '❌ فشل'}: {out[:200]}"))
+                    f"{tr('✅ تم إلغاء وضع الصيانة') if ok else tr('❌ فشل')}: {out[:200]}"))
 
     def _qa_update_salts(self):
         reply = QMessageBox.question(
-            self, "تحديث Salt Keys",
+            self, tr("تحديث Salt Keys"),
             "سيتم توليد مفاتيح أمان جديدة.\nسيحتاج جميع المستخدمين لتسجيل الدخول مجدداً.\nمتابعة؟",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تحديث Salt Keys…")
+        self._qa_log_msg(tr("⏳ تحديث Salt Keys…"))
         self._run_async(
             ["config", "shuffle-salts"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم تحديث Salt Keys بنجاح' if ok else '❌ فشل'}: {out[:300]}"))
+                f"{tr('✅ تم تحديث Salt Keys بنجاح') if ok else tr('❌ فشل')}: {out[:300]}"))
 
     def _qa_update_all_plugins(self):
         reply = QMessageBox.question(
-            self, "تحديث الإضافات",
-            "هل تريد تحديث جميع الإضافات المثبتة؟",
+            self, tr("تحديث الإضافات"),
+            tr("هل تريد تحديث جميع الإضافات المثبتة؟"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
         self._qa_log.clear()
-        self._qa_log_msg("⏳ تحديث جميع الإضافات… (قد يستغرق دقيقة)")
+        self._qa_log_msg(tr("⏳ تحديث جميع الإضافات… (قد يستغرق دقيقة)"))
         self._run_async(
             ["plugin", "update", "--all"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم التحديث' if ok else '❌ فشل'}: {out[:400]}"))
+                f"{tr('✅ تم التحديث') if ok else tr('❌ فشل')}: {out[:400]}"))
 
     def _qa_verify_checksums(self):
         self._qa_log.clear()
-        self._qa_log_msg("⏳ فحص سلامة ملفات WordPress…")
+        self._qa_log_msg(tr("⏳ فحص سلامة ملفات WordPress…"))
         self._run_async(
             ["core", "verify-checksums"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ الملفات سليمة' if ok else '⚠️ تم اكتشاف تعديلات'}: {out[:400]}"))
+                f"{tr('✅ الملفات سليمة') if ok else tr('⚠️ تم اكتشاف تعديلات')}: {out[:400]}"))
 
     def _qa_export_db(self):
         if not self.current:
@@ -3428,37 +3429,37 @@ class SiteDashboardPage(BaseExtraPage):
             f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
         )
         path, _ = QFileDialog.getSaveFileName(
-            self, "حفظ نسخة احتياطية", default_name, "SQL Files (*.sql)")
+            self, tr("حفظ نسخة احتياطية"), default_name, "SQL Files (*.sql)")
         if not path:
             return
         self._qa_log.clear()
-        self._qa_log_msg(f"⏳ تصدير قاعدة البيانات إلى: {path}")
+        self._qa_log_msg(f"{tr('⏳ تصدير قاعدة البيانات إلى: ')}{path}")
         self._run_async(
             ["db", "export", path],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم التصدير بنجاح' if ok else '❌ فشل التصدير'}: {out[:300]}"))
+                f"{tr('✅ تم التصدير بنجاح') if ok else tr('❌ فشل التصدير')}: {out[:300]}"))
 
     def _qa_search_replace(self):
         if not self.current:
             return
         search, ok1 = QInputDialog.getText(
-            self, "البحث والاستبدال", "النص المراد البحث عنه:")
+            self, tr("البحث والاستبدال"), tr("النص المراد البحث عنه:"))
         if not ok1 or not search.strip():
             return
         replace, ok2 = QInputDialog.getText(
-            self, "البحث والاستبدال", f"استبدال '{search}' بـ:")
+            self, tr("البحث والاستبدال"), f"{tr('استبدال \'')}{search}{tr('\' بـ:')}")
         if not ok2:
             return
         reply = QMessageBox.warning(
-            self, "تأكيد",
+            self, tr("تأكيد"),
             f"سيتم استبدال:\n'{search}'\nبـ:\n'{replace}'\n\n"
             "في قاعدة البيانات. هذا لا يمكن التراجع عنه!\nمتابعة؟",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply != QMessageBox.StandardButton.Yes:
             return
         self._qa_log.clear()
-        self._qa_log_msg(f"⏳ استبدال '{search}' بـ '{replace}'…")
+        self._qa_log_msg(f"{tr('⏳ استبدال \'')}{search}{tr('\' بـ \'')}{replace}'…")
         self._run_async(
             ["search-replace", search.strip(), replace.strip(), "--all-tables"],
             lambda ok, out: self._qa_log_msg(
-                f"{'✅ تم الاستبدال' if ok else '❌ فشل'}: {out[:400]}"))
+                f"{tr('✅ تم الاستبدال') if ok else tr('❌ فشل')}: {out[:400]}"))

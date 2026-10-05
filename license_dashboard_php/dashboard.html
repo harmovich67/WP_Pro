@@ -600,7 +600,7 @@
         localStorage.setItem("adminToken", token);
 
         // Test token by fetching stats
-        fetch(`${API_URL}/api/stats`, {
+        fetch(`${API_URL}/api/index.php?route=stats&token=${token}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
           .then((res) => {
@@ -632,7 +632,7 @@
       }
 
       function loadStats() {
-        fetch(`${API_URL}/api/stats`, {
+        fetch(`${API_URL}/api/index.php?route=stats&token=${authToken}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         })
           .then((res) => res.json())
@@ -650,7 +650,7 @@
       }
 
       function loadLicenses() {
-        fetch(`${API_URL}/api/licenses`, {
+        fetch(`${API_URL}/api/index.php?route=licenses&token=${authToken}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         })
           .then((res) => res.json())
@@ -717,7 +717,7 @@
           notes: document.getElementById("newNotes").value,
         };
 
-        fetch(`${API_URL}/api/licenses`, {
+        fetch(`${API_URL}/api/index.php?route=licenses&token=${authToken}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -744,7 +744,7 @@
 
       // Actions
       function toggleLicense(id, activate) {
-        fetch(`${API_URL}/api/licenses/${id}`, {
+        fetch(`${API_URL}/api/index.php?route=licenses/${id}&token=${authToken}`, {
           method: "PUT",
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -763,7 +763,7 @@
       function deleteLicense(id) {
         if (!confirm("هل أنت متأكد من حذف هذا الترخيص؟")) return;
 
-        fetch(`${API_URL}/api/licenses/${id}`, {
+        fetch(`${API_URL}/api/index.php?route=licenses/${id}&token=${authToken}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${authToken}` },
         }).then(() => {

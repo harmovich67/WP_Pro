@@ -5,6 +5,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Callable
+from app.core.i18n import t as tr
+
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 try:
     import google.generativeai as genai
@@ -47,7 +51,7 @@ class GeminiAssistant:
     def analyze_debug_log(self, log_content: str) -> str:
         """Analyze WordPress debug log using AI"""
         if not self.is_ready():
-            return "❌ Gemini AI غير مُعد. يرجى ضبط مفتاح API."
+            return tr("❌ Gemini AI غير مُعد. يرجى ضبط مفتاح API.")
         
         prompt = f"""أنت خبير WordPress متخصص في تحليل الأخطاء.
 قم بتحليل سجل الأخطاء التالي وقدم:
@@ -64,12 +68,12 @@ class GeminiAssistant:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
-            return f"❌ خطأ في التحليل: {str(e)}"
+            return f"{tr('❌ خطأ في التحليل: ')}{str(e)}"
 
     def security_scan_code(self, code_snippet: str, file_path: str = "") -> str:
         """Scan code for security issues"""
         if not self.is_ready():
-            return "❌ Gemini AI غير مُعد."
+            return tr("❌ Gemini AI غير مُعد.")
 
         prompt = f"""أنت خبير أمان WordPress. قم بفحص الكود التالي بحثاً عن:
 1. ثغرات أمنية (SQL Injection, XSS, etc.)
@@ -86,12 +90,12 @@ class GeminiAssistant:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
-            return f"❌ خطأ: {str(e)}"
+            return f"{tr('❌ خطأ: ')}{str(e)}"
 
     def performance_suggestions(self, project_info: dict) -> str:
         """Get performance optimization suggestions"""
         if not self.is_ready():
-            return "❌ Gemini AI غير مُعد."
+            return tr("❌ Gemini AI غير مُعد.")
 
         prompt = f"""أنت خبير في تحسين أداء WordPress. بناءً على المعلومات التالية:
 - المشروع: {project_info.get('name', 'Unknown')}
@@ -104,12 +108,12 @@ class GeminiAssistant:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
-            return f"❌ خطأ: {str(e)}"
+            return f"{tr('❌ خطأ: ')}{str(e)}"
 
     def chat(self, message: str, context: str = "") -> str:
         """General chat about WordPress issues"""
         if not self.is_ready():
-            return "❌ Gemini AI غير مُعد. يرجى إضافة مفتاح API في الإعدادات."
+            return tr("❌ Gemini AI غير مُعد. يرجى إضافة مفتاح API في الإعدادات.")
         
         prompt = f"""أنت مساعد WordPress خبير. أجب على السؤال التالي بالعربية:
 
@@ -121,4 +125,4 @@ class GeminiAssistant:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
-            return f"❌ خطأ: {str(e)}"
+            return f"{tr('❌ خطأ: ')}{str(e)}"

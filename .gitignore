@@ -1,11 +1,44 @@
+# Virtual environments
 .venv/
+env/
+venv/
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Build outputs and distributions
 build/
 dist/
 wp_local_installer_pro/
-__pycache__/
-*.pyc
-*.db
+
+# Log files
 *.log
+*.log.txt
+*_log.txt
+build_log.txt
+
+# Databases and user schedules
+*.db
+*.sqlite
+*.sqlite3
+schedules.json
+
+# Environment and secrets
 .env
+.env.*
+
+# Archives and executables
 *.zip
-.claude/worktrees/
+*.tar.gz
+*.rar
+tools/
+cloudflared*
+
+# Agent / IDE configs
+.claude/
+.kiro/
+.vscode/
+.idea/

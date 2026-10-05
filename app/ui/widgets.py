@@ -3,7 +3,8 @@ from __future__ import annotations
 from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
-    QFrame, QVBoxLayout, QLabel, QGraphicsDropShadowEffect, QWidget, QHBoxLayout, QPushButton
+    QFrame, QVBoxLayout, QLabel, QGraphicsDropShadowEffect, QWidget, QHBoxLayout, QPushButton,
+    QSizePolicy
 )
 
 def make_card(title: str, subtitle: str = "") -> tuple[QFrame, QVBoxLayout]:
@@ -127,12 +128,12 @@ class Pill(QFrame):
         self.adjustSize()
 
 
-class ToastNotification(QFrame):
+class ToastNotification(QWidget):
     """Modern toast notification widget with auto-dismiss and animations"""
     
     def __init__(self, message: str, toast_type: str = "info", parent=None):
         super().__init__(parent)
-        self.setObjectName("ToastNotification")
+        self.setObjectName("ToastNotificationContainer")
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool | Qt.WindowType.WindowStaysOnTopHint)
         
@@ -146,62 +147,69 @@ class ToastNotification(QFrame):
         
         theme = self._colors.get(toast_type, self._colors["info"])
         
-        # Layout
-        layout = QHBoxLayout(self)
+        # Outer layout to provide room for drop shadow (prevents negative dirty rect on Windows)
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(16, 16, 16, 16)
+        
+        # Inner card
+        self.card = QFrame()
+        self.card.setObjectName("ToastNotificationCard")
+        layout = QHBoxLayout(self.card)
         layout.setContentsMargins(16, 12, 16, 12)
         layout.setSpacing(12)
         
         # Icon
         icon_label = QLabel(theme["icon"])
-        icon_label.setStyleSheet(f"color: {theme['text']}; font-size: 18px; font-weight: bold;")
+        icon_label.setStyleSheet(f"color: {theme['text']}; font-size: 18px; font-weight: bold; background: transparent; border: none;")
         layout.addWidget(icon_label)
         
         # Message
         msg_label = QLabel(message)
-        msg_label.setStyleSheet(f"color: {theme['text']}; font-size: 13px; font-weight: 500;")
+        msg_label.setStyleSheet(f"color: {theme['text']}; font-size: 13px; font-weight: 500; background: transparent; border: none;")
         msg_label.setWordWrap(True)
         layout.addWidget(msg_label, 1)
         
-        # Styling
-        self.setStyleSheet(f"""
-            QFrame#ToastNotification {{
+        # Styling on inner card
+        self.card.setStyleSheet(f"""
+            QFrame#ToastNotificationCard {{
                 background-color: {theme['bg']};
                 border: 2px solid {theme['border']};
                 border-radius: 8px;
             }}
         """)
         
-        # Shadow
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(20)
+        # Shadow applied to inner card so shadow bounds stay strictly inside outer container window
+        shadow = QGraphicsDropShadowEffect(self.card)
+        shadow.setBlurRadius(14)
         shadow.setXOffset(0)
-        shadow.setYOffset(4)
-        shadow.setColor(QColor(0, 0, 0, 100))
-        self.setGraphicsEffect(shadow)
+        shadow.setYOffset(2)
+        shadow.setColor(QColor(0, 0, 0, 90))
+        self.card.setGraphicsEffect(shadow)
+        
+        outer_layout.addWidget(self.card)
         
         # Set minimum width
-        self.setMinimumWidth(300)
-        self.setMaximumWidth(500)
+        self.setMinimumWidth(320)
+        self.setMaximumWidth(520)
         
         # Opacity for fade animation
         self._opacity = 1.0
         
     def show_animated(self, duration=3000):
         """Show toast with slide-in animation and auto-dismiss"""
-        # Calculate position before showing
         if self.parent():
-            parent_geo = self.parent().geometry()
-            # Ensure toast is sized first
+            parent_widget = self.parent()
             self.adjustSize()
             
-            # Position at top-left with safe margins (mirrored for RTL layout,
-            # where the sidebar/content are mirrored to the opposite side)
-            x = 30
-            y = 80
+            # Position relative to parent window in global coordinates
+            global_tl = parent_widget.mapToGlobal(parent_widget.rect().topLeft())
+            x = global_tl.x() + 30
+            y = global_tl.y() + 60
 
-            # Ensure position is valid and within bounds
-            x = max(20, min(x, parent_geo.width() - self.width() - 20))
-            y = max(20, y)
+            # Ensure position is valid and within parent window bounds
+            max_x = global_tl.x() + parent_widget.width() - self.width() - 20
+            x = max(global_tl.x() + 20, min(x, max(global_tl.x() + 20, max_x)))
+            y = max(global_tl.y() + 20, y)
             
             self.move(x, y)
         
@@ -210,13 +218,12 @@ class ToastNotification(QFrame):
         # Fade in
         self.setWindowOpacity(0)
         fade_in = QPropertyAnimation(self, b"windowOpacity")
-        fade_in.setDuration(300)
+        fade_in.setDuration(250)
         fade_in.setStartValue(0)
         fade_in.setEndValue(1)
         fade_in.setEasingCurve(QEasingCurve.Type.OutCubic)
         fade_in.start()
         
-        # Store animation to prevent garbage collection
         self._fade_in_anim = fade_in
         
         # Auto-dismiss after duration
@@ -225,14 +232,13 @@ class ToastNotification(QFrame):
     def hide_animated(self):
         """Hide toast with fade-out animation"""
         fade_out = QPropertyAnimation(self, b"windowOpacity")
-        fade_out.setDuration(300)
+        fade_out.setDuration(250)
         fade_out.setStartValue(1)
         fade_out.setEndValue(0)
         fade_out.setEasingCurve(QEasingCurve.Type.InCubic)
         fade_out.finished.connect(self.deleteLater)
         fade_out.start()
         
-        # Store to prevent garbage collection
         self._fade_out_anim = fade_out
 
 
@@ -242,11 +248,15 @@ class PrimaryButton(QPushButton):
         self.setObjectName("PrimaryButton")
 
 def row_buttons(*btns: QPushButton) -> QWidget:
+    """Lay out buttons in a row that always fills its full available width —
+    a single button spans the whole row instead of hugging the left edge
+    with dead space next to it, and multiple buttons split the width evenly.
+    Stays correctly proportioned as the window/screen is resized."""
     w = QWidget()
     h = QHBoxLayout(w)
-    h.setContentsMargins(0,0,0,0)
+    h.setContentsMargins(0, 0, 0, 0)
     h.setSpacing(8)
     for b in btns:
-        h.addWidget(b)
-    h.addStretch(1)
+        b.setSizePolicy(QSizePolicy.Policy.Expanding, b.sizePolicy().verticalPolicy())
+        h.addWidget(b, 1)
     return w

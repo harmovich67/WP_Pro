@@ -12,6 +12,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any
+from app.core.i18n import t as tr
 
 # ── Config file location ───────────────────────────────────────────────────────
 _CONFIG_DIR  = Path.home() / ".harmulizer_pro"
@@ -50,6 +51,9 @@ FEATURE_TIERS: Dict[str, Dict[str, Any]] = {
         "ai_assistant": False,
         "monitoring": False,
         "site_dashboard": False,
+        "url_sharing": False,
+        "php_switcher": False,
+        "multisite": False,
     },
     "basic": {
         "dashboard": True,
@@ -68,6 +72,9 @@ FEATURE_TIERS: Dict[str, Dict[str, Any]] = {
         "ai_assistant": False,
         "monitoring": False,
         "site_dashboard": True,
+        "url_sharing": False,
+        "php_switcher": False,
+        "multisite": False,
     },
     "pro": {
         "dashboard": True,
@@ -86,6 +93,9 @@ FEATURE_TIERS: Dict[str, Dict[str, Any]] = {
         "ai_assistant": False,
         "monitoring": False,
         "site_dashboard": True,
+        "url_sharing": True,
+        "php_switcher": True,
+        "multisite": True,
     },
     "enterprise": {
         "dashboard": True,
@@ -104,35 +114,41 @@ FEATURE_TIERS: Dict[str, Dict[str, Any]] = {
         "ai_assistant": True,
         "monitoring": True,
         "site_dashboard": True,
+        "url_sharing": True,
+        "php_switcher": True,
+        "multisite": True,
     },
 }
 
 # ── Feature display names (for UI) ────────────────────────────────────────────
 FEATURE_NAMES = {
-    "dashboard":       "لوحة التحكم",
-    "wizard":          "معالج التثبيت",
-    "max_projects":    "عدد المشاريع",
+    "dashboard":       tr("لوحة التحكم"),
+    "wizard":          tr("معالج التثبيت"),
+    "max_projects":    tr("عدد المشاريع"),
     "wpcli_console":   "WP-CLI Console",
-    "project_tools":   "أدوات المشروع",
-    "backup":          "النسخ الاحتياطي",
-    "scheduled_backup":"الجدولة التلقائية",
-    "database_viewer": "عارض قاعدة البيانات",
-    "url_converter":   "محول الروابط",
-    "security":        "أدوات الأمان",
-    "manager":         "إدارة الإضافات والقوالب",
-    "config_editor":   "محرر الإعدادات",
-    "devtools":        "أدوات المطورين",
-    "ai_assistant":    "المساعد الذكي",
-    "monitoring":      "المراقبة",
-    "site_dashboard":  "لوحة تحكم الموقع المصغرة",
+    "project_tools":   tr("أدوات المشروع"),
+    "backup":          tr("النسخ الاحتياطي"),
+    "scheduled_backup":tr("الجدولة التلقائية"),
+    "database_viewer": tr("عارض قاعدة البيانات"),
+    "url_converter":   tr("محول الروابط"),
+    "security":        tr("أدوات الأمان"),
+    "manager":         tr("إدارة الإضافات والقوالب"),
+    "config_editor":   tr("محرر الإعدادات"),
+    "devtools":        tr("أدوات المطورين"),
+    "ai_assistant":    tr("المساعد الذكي"),
+    "monitoring":      tr("المراقبة"),
+    "site_dashboard":  tr("لوحة تحكم الموقع المصغرة"),
+    "url_sharing":     tr("مشاركة رابط مباشر"),
+    "php_switcher":    tr("مبدّل إصدارات PHP"),
+    "multisite":       tr("شبكة متعددة (Multisite)"),
 }
 
 # Tier display names
 TIER_NAMES = {
-    "free":       "مجاني",
-    "basic":      "أساسي",
-    "pro":        "احترافي",
-    "enterprise": "مؤسسي",
+    "free":       tr("مجاني"),
+    "basic":      tr("أساسي"),
+    "pro":        tr("احترافي"),
+    "enterprise": tr("مؤسسي"),
 }
 
 
@@ -150,6 +166,7 @@ def get_default_feature_tiers() -> Dict[str, Dict[str, Any]]:
             "url_converter": False, "security": False, "manager": False,
             "config_editor": False, "devtools": False, "ai_assistant": False,
             "monitoring": False, "site_dashboard": False,
+            "url_sharing": False, "php_switcher": False, "multisite": False,
         },
         "basic": {
             "dashboard": True, "wizard": True, "max_projects": 3,
@@ -158,6 +175,7 @@ def get_default_feature_tiers() -> Dict[str, Dict[str, Any]]:
             "url_converter": True, "security": False, "manager": False,
             "config_editor": False, "devtools": False, "ai_assistant": False,
             "monitoring": False, "site_dashboard": True,
+            "url_sharing": False, "php_switcher": False, "multisite": False,
         },
         "pro": {
             "dashboard": True, "wizard": True, "max_projects": -1,
@@ -166,6 +184,7 @@ def get_default_feature_tiers() -> Dict[str, Dict[str, Any]]:
             "url_converter": True, "security": True, "manager": True,
             "config_editor": True, "devtools": False, "ai_assistant": False,
             "monitoring": False, "site_dashboard": True,
+            "url_sharing": True, "php_switcher": True, "multisite": True,
         },
         "enterprise": {
             "dashboard": True, "wizard": True, "max_projects": -1,
@@ -174,6 +193,7 @@ def get_default_feature_tiers() -> Dict[str, Dict[str, Any]]:
             "url_converter": True, "security": True, "manager": True,
             "config_editor": True, "devtools": True, "ai_assistant": True,
             "monitoring": True, "site_dashboard": True,
+            "url_sharing": True, "php_switcher": True, "multisite": True,
         },
     })
 
@@ -304,9 +324,9 @@ class FeatureFlags:
             if FEATURE_TIERS[tier].get(feature, False):
                 tier_name = TIER_NAMES[tier]
                 price = PRICING[tier]["price"]
-                return (f"ميزة '{feature_name}' تتطلب الترقية إلى "
+                return (f"{tr('ميزة \'')}{feature_name}{tr('\' تتطلب الترقية إلى ')}"
                         f"{tier_name} (${price}/شهر)")
-        return f"ميزة '{feature_name}' غير متاحة في خطتك الحالية"
+        return f"{tr('ميزة \'')}{feature_name}{tr('\' غير متاحة في خطتك الحالية')}"
 
 
 # ── Auto-apply overrides when module is first imported ────────────────────────

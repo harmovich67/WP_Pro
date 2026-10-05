@@ -4,6 +4,7 @@ Auto-fix Module for Common WordPress Issues
 from __future__ import annotations
 from pathlib import Path
 from typing import Callable
+from app.core.i18n import t as tr
 
 LogFn = Callable[[str], None]
 
@@ -26,10 +27,10 @@ RewriteRule . /index.php [L]
             
             htaccess = Path(project_path) / ".htaccess"
             htaccess.write_text(htaccess_content, encoding="utf-8")
-            log("✅ تمت إعادة إنشاء ملف .htaccess")
+            log(tr("✅ تمت إعادة إنشاء ملف .htaccess"))
             return True
         except Exception as e:
-            log(f"❌ فشل إعادة إنشاء ملف .htaccess: {e}")
+            log(f"{tr('❌ فشل إعادة إنشاء ملف .htaccess: ')}{e}")
             return False
     
     @staticmethod
@@ -48,10 +49,10 @@ RewriteRule . /index.php [L]
                     os.chmod(item, stat.S_IWRITE | stat.S_IREAD)
                     count += 1
             
-            log(f"✅ تم إصلاح الأذونات لعدد {count} من الملفات")
+            log(f"{tr('✅ تم إصلاح الأذونات لعدد ')}{count}{tr(' من الملفات')}")
             return True
         except Exception as e:
-            log(f"❌ فشل إصلاح الأذونات: {e}")
+            log(f"{tr('❌ فشل إصلاح الأذونات: ')}{e}")
             return False
     
     @staticmethod
@@ -76,8 +77,8 @@ RewriteRule . /index.php [L]
                             shutil.rmtree(item)
                             cleared += 1
             
-            log(f"✅ تم مسح {cleared} من عناصر ذاكرة التخزين المؤقت")
+            log(f"{tr('✅ تم مسح ')}{cleared}{tr(' من عناصر ذاكرة التخزين المؤقت')}")
             return True
         except Exception as e:
-            log(f"❌ فشل مسح ذاكرة التخزين المؤقت: {e}")
+            log(f"{tr('❌ فشل مسح ذاكرة التخزين المؤقت: ')}{e}")
             return False

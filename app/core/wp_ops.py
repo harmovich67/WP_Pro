@@ -1,4 +1,3 @@
-\
 from __future__ import annotations
 
 import os
@@ -16,7 +15,9 @@ from typing import Callable
 import requests
 import pymysql
 
+from app.core.projects_store import ProjectRecord
 from app.core.utils import run_cmd, which_any
+from app.core.i18n import t as tr
 
 WORDPRESS_LATEST_ZIP = "https://wordpress.org/latest.zip"
 WP_SALTS_API = "https://api.wordpress.org/secret-key/1.1/salt/"
@@ -74,7 +75,7 @@ def _ensure_url(url: str) -> str:
     return url
 
 def download_file(url: str, out_path: Path, log: LogFn, progress: ProgressFn, start_pct: int = 0, end_pct: int = 30):
-    log(f"جارٍ التنزيل: {url}")
+    log(f"{tr('جارٍ التنزيل: ')}{url}")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     with requests.get(url, stream=True, timeout=90) as r:
@@ -93,10 +94,10 @@ def download_file(url: str, out_path: Path, log: LogFn, progress: ProgressFn, st
                     pct = start_pct + int((end_pct - start_pct) * p)
                     progress(pct)
 
-    log(f"تم الحفظ: {out_path}")
+    log(f"{tr('تم الحفظ: ')}{out_path}")
 
 def extract_wordpress_zip(zip_path: Path, out_dir: Path, log: LogFn, progress: ProgressFn, start_pct: int = 30, end_pct: int = 45) -> Path:
-    log("جارٍ استخراج ملف WordPress المضغوط...")
+    log(tr("جارٍ استخراج ملف WordPress المضغوط..."))
     with zipfile.ZipFile(zip_path, "r") as z:
         infos = z.infolist()
         total = max(1, len(infos))
@@ -107,11 +108,11 @@ def extract_wordpress_zip(zip_path: Path, out_dir: Path, log: LogFn, progress: P
 
     wp_dir = out_dir / "wordpress"
     if not wp_dir.exists():
-        raise RuntimeError("هيكل الملف المضغوط غير متوقع (مجلد 'wordpress' غير موجود).")
+        raise RuntimeError(tr("هيكل الملف المضغوط غير متوقع (مجلد 'wordpress' غير موجود)."))
     return wp_dir
 
 def copy_tree_contents(src: Path, dst: Path, log: LogFn, progress: ProgressFn, start_pct: int = 45, end_pct: int = 55):
-    log("جارٍ نسخ الملفات...")
+    log(tr("جارٍ نسخ الملفات..."))
     dst.mkdir(parents=True, exist_ok=True)
     items = list(src.iterdir())
     total = max(1, len(items))
@@ -131,39 +132,39 @@ def test_mysql(db: DBParams) -> tuple[bool, str]:
     try:
         conn = mysql_connect(db.host, db.port, db.root_user, db.root_pass)
         conn.close()
-        return True, "الاتصال ناجح"
+        return True, tr("الاتصال ناجح")
     except Exception as e:
         return False, f"{e}"
 
 def create_database_and_user(db: DBParams, log: LogFn):
-    log("جارٍ الاتصال بـ MySQL/MariaDB...")
+    log(tr("جارٍ الاتصال بـ MySQL/MariaDB..."))
     conn = mysql_connect(db.host, db.port, db.root_user, db.root_pass)
     try:
         with conn.cursor() as cur:
-            log(f"جارٍ إنشاء قاعدة البيانات: {db.db_name}")
+            log(f"{tr('جارٍ إنشاء قاعدة البيانات: ')}{db.db_name}")
             cur.execute(
                 f"CREATE DATABASE IF NOT EXISTS `{db.db_name}` "
                 "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
             )
 
             if db.create_user:
-                log(f"جارٍ إنشاء مستخدم قاعدة البيانات: {db.user}@{db.user_host}")
+                log(f"{tr('جارٍ إنشاء مستخدم قاعدة البيانات: ')}{db.user}@{db.user_host}")
                 cur.execute("CREATE USER IF NOT EXISTS %s@%s IDENTIFIED BY %s;", (db.user, db.user_host, db.user_pass))
-                log("جارٍ منح الصلاحيات...")
+                log(tr("جارٍ منح الصلاحيات..."))
                 cur.execute(f"GRANT ALL PRIVILEGES ON `{db.db_name}`.* TO %s@%s;", (db.user, db.user_host))
                 cur.execute("FLUSH PRIVILEGES;")
     finally:
         conn.close()
 
 def drop_database(db: DBParams, log: LogFn):
-    log("جارٍ الاتصال بـ MySQL/MariaDB للحذف...")
+    log(tr("جارٍ الاتصال بـ MySQL/MariaDB للحذف..."))
     conn = mysql_connect(db.host, db.port, db.root_user, db.root_pass)
     try:
         with conn.cursor() as cur:
-            log(f"جارٍ حذف قاعدة البيانات: {db.db_name}")
+            log(f"{tr('جارٍ حذف قاعدة البيانات: ')}{db.db_name}")
             cur.execute(f"DROP DATABASE IF EXISTS `{db.db_name}`;")
             if db.create_user:
-                log(f"جارٍ حذف المستخدم: {db.user}@{db.user_host}")
+                log(f"{tr('جارٍ حذف المستخدم: ')}{db.user}@{db.user_host}")
                 cur.execute(f"DROP USER IF EXISTS %s@%s;", (db.user, db.user_host))
             cur.execute("FLUSH PRIVILEGES;")
     finally:
@@ -184,19 +185,19 @@ def _generate_random_salts_block() -> str:
 
 def fetch_salts_block(log: LogFn) -> str:
     try:
-        log("جارٍ جلب مفاتيح الأمان (Salts) من واجهة WordPress API...")
+        log(tr("جارٍ جلب مفاتيح الأمان (Salts) من واجهة WordPress API..."))
         r = requests.get(WP_SALTS_API, timeout=20)
         r.raise_for_status()
         return r.text.strip() + "\n"
     except Exception as e:
-        log(f"فشل جلب مفاتيح الأمان من الواجهة، سيتم استخدام مفاتيح عشوائية محلية. ({e})")
+        log(f"{tr('فشل جلب مفاتيح الأمان من الواجهة، سيتم استخدام مفاتيح عشوائية محلية. (')}{e})")
         return _generate_random_salts_block()
 
 def write_wp_config(target_path: Path, db: DBParams, wp_db_user: str, wp_db_pass: str, log: LogFn):
-    log("جارٍ إنشاء ملف wp-config.php ...")
+    log(tr("جارٍ إنشاء ملف wp-config.php ..."))
     sample = target_path / "wp-config-sample.php"
     if not sample.exists():
-        raise RuntimeError("ملف wp-config-sample.php غير موجود بعد الاستخراج.")
+        raise RuntimeError(tr("ملف wp-config-sample.php غير موجود بعد الاستخراج."))
 
     content = sample.read_text(encoding="utf-8", errors="ignore")
     content = content.replace("database_name_here", db.db_name)
@@ -216,8 +217,18 @@ def write_wp_config(target_path: Path, db: DBParams, wp_db_user: str, wp_db_pass
     if salt_re.search(content):
         content = salt_re.sub(salts + "\n", content, count=1)
 
+    ssl_proxy_snippet = (
+        "\n// SSL Reverse Proxy Detection (Cloudflare Tunnel / Live Share)\n"
+        "if ((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) || "
+        "(isset($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], 'https') !== false)) {\n"
+        "    $_SERVER['HTTPS'] = 'on';\n"
+        "}\n"
+    )
+    if "<?php" in content:
+        content = content.replace("<?php", "<?php" + ssl_proxy_snippet, 1)
+
     (target_path / "wp-config.php").write_text(content, encoding="utf-8")
-    log("تم إنشاء ملف wp-config.php.")
+    log(tr("تم إنشاء ملف wp-config.php."))
 
 def set_dev_mode_in_wp_config(target_path: Path, enabled: bool, log: LogFn):
     cfg = target_path / "wp-config.php"
@@ -239,7 +250,7 @@ def set_dev_mode_in_wp_config(target_path: Path, enabled: bool, log: LogFn):
             if marker in txt:
                 txt = txt.replace(marker, f"define( '{k}', {v} );\n{marker}")
     cfg.write_text(txt, encoding="utf-8")
-    log("تم تحديث وضع المطوّر في wp-config.php")
+    log(tr("تم تحديث وضع المطوّر في wp-config.php"))
 
 def detect_php(user_php: str, stack_php: str) -> str:
     if user_php.strip():
@@ -260,13 +271,13 @@ def detect_wpcli(user_wpcli: str, download_if_missing: bool, php_path: str, tool
 
     if download_if_missing:
         if not php_path:
-            raise RuntimeError("أداة WP-CLI غير موجودة و PHP غير متوفر لتشغيل wp-cli.phar.")
+            raise RuntimeError(tr("أداة WP-CLI غير موجودة و PHP غير متوفر لتشغيل wp-cli.phar."))
         tools_dir.mkdir(parents=True, exist_ok=True)
         phar = tools_dir / "wp-cli.phar"
         download_file(WPCLI_PHAR_URL, phar, log=log, progress=progress, start_pct=60, end_pct=65)
         return str(phar), True
 
-    raise RuntimeError("أداة WP-CLI غير موجودة. الرجاء تحديد المسار أو تفعيل التنزيل التلقائي.")
+    raise RuntimeError(tr("أداة WP-CLI غير موجودة. الرجاء تحديد المسار أو تفعيل التنزيل التلقائي."))
 
 def wpcli_base_cmd(php_path: str, wpcli_path: str, is_phar: bool) -> list[str]:
     if is_phar:
@@ -315,7 +326,7 @@ def ensure_wpcli_exists(p: ProjectRecord, log: LogFn = None) -> tuple[str, bool]
     # 2. Check if phar already exists in .tools
     target_path = Path(p.path)
     if not target_path.exists():
-        if log: log(f"مسار المشروع غير موجود: {target_path}")
+        if log: log(f"{tr('مسار المشروع غير موجود: ')}{target_path}")
         return "", False
 
     tools_dir = target_path / ".tools"
@@ -333,18 +344,18 @@ def download_wpcli_for_project(p: ProjectRecord, log: LogFn = None) -> tuple[str
     phar_path = tools_dir / "wp-cli.phar"
 
     if log:
-        log(f"جارٍ تنزيل WP-CLI للمشروع: {p.name} ...")
-        log(f"الوجهة: {phar_path}")
+        log(f"{tr('جارٍ تنزيل WP-CLI للمشروع: ')}{p.name} ...")
+        log(f"{tr('الوجهة: ')}{phar_path}")
 
     try:
         tools_dir.mkdir(parents=True, exist_ok=True)
         # Use dummy progress
         download_file(WPCLI_PHAR_URL, phar_path, log if log else (lambda _: None), lambda _: None)
-        if log: log("تم تنزيل WP-CLI بنجاح ✅")
+        if log: log(tr("تم تنزيل WP-CLI بنجاح ✅"))
         return str(phar_path), True
     except Exception as e:
         if log:
-            log(f"خطأ فادح: فشل تنزيل WP-CLI: {e}")
+            log(f"{tr('خطأ فادح: فشل تنزيل WP-CLI: ')}{e}")
         return "", False
 
 def get_effective_tooling(p: ProjectRecord, log: LogFn = None) -> tuple[str, str, bool]:
@@ -355,7 +366,7 @@ def get_effective_tooling(p: ProjectRecord, log: LogFn = None) -> tuple[str, str
     if log and php:
         # Quick validation
         if not os.path.exists(php) and not which_any([php]):
-            log(f"تحذير: مسار PHP غير موجود: {php}")
+            log(f"{tr('تحذير: مسار PHP غير موجود: ')}{php}")
     
     wpcli, is_phar = ensure_wpcli_exists(p, log)
     if not wpcli or not os.path.exists(wpcli):
@@ -371,7 +382,7 @@ def run_wpcli(target_path: Path, php_path: str, wpcli_path: str, is_phar: bool, 
     if hasattr(os, "geteuid") and os.geteuid() == 0:
         base.append("--allow-root")
     cmd = base + [f"--path={str(target_path)}"] + args
-    log("جارٍ تنفيذ الأمر: " + " ".join(cmd))
+    log(tr("جارٍ تنفيذ الأمر: ") + " ".join(cmd))
     res = run_cmd(cmd, cwd=target_path)
     if res.out.strip():
         log(res.out.strip())
@@ -381,10 +392,10 @@ def run_wpcli(target_path: Path, php_path: str, wpcli_path: str, is_phar: bool, 
         # Include output and error in exception message for better debugging
         error_details = []
         if res.out.strip():
-            error_details.append(f"المخرجات: {res.out.strip()}")
+            error_details.append(f"{tr('المخرجات: ')}{res.out.strip()}")
         if res.err.strip():
-            error_details.append(f"الخطأ: {res.err.strip()}")
-        error_msg = f"فشل تنفيذ WP-CLI (رمز الخروج {res.code})"
+            error_details.append(f"{tr('الخطأ: ')}{res.err.strip()}")
+        error_msg = f"{tr('فشل تنفيذ WP-CLI (رمز الخروج ')}{res.code})"
         if error_details:
             error_msg += "\n" + "\n".join(error_details)
         raise RuntimeError(error_msg)
@@ -393,7 +404,7 @@ def run_wpcli(target_path: Path, php_path: str, wpcli_path: str, is_phar: bool, 
 def wp_cli_install_core(target_path: Path, wp: WPParams, php_path: str, wpcli_path: str, is_phar: bool, log: LogFn):
     url = _ensure_url(wp.site_url)
     if not url:
-        raise RuntimeError("رابط الموقع فارغ.")
+        raise RuntimeError(tr("رابط الموقع فارغ."))
     run_wpcli(
         target_path, php_path, wpcli_path, is_phar,
         [
@@ -436,13 +447,13 @@ def export_db_mysqldump(db: DBParams, out_sql: Path, log: LogFn) -> bool:
         f"-p{db.root_pass}",
         db.db_name
     ]
-    log("جارٍ تصدير قاعدة البيانات باستخدام mysqldump...")
+    log(tr("جارٍ تصدير قاعدة البيانات باستخدام mysqldump..."))
     res = run_cmd(cmd)
     if res.code != 0:
         log(res.err.strip())
         return False
     out_sql.write_text(res.out, encoding="utf-8", errors="ignore")
-    log(f"تم تصدير قاعدة البيانات: {out_sql}")
+    log(f"{tr('تم تصدير قاعدة البيانات: ')}{out_sql}")
     return True
 
 def import_db_mysql(db: DBParams, in_sql: Path, log: LogFn) -> bool:
@@ -457,12 +468,12 @@ def import_db_mysql(db: DBParams, in_sql: Path, log: LogFn) -> bool:
         f"-p{db.root_pass}",
         db.db_name
     ]
-    log("جارٍ استيراد قاعدة البيانات باستخدام عميل mysql...")
+    log(tr("جارٍ استيراد قاعدة البيانات باستخدام عميل mysql..."))
     p = subprocess_run_with_stdin(cmd, in_sql.read_text(encoding="utf-8", errors="ignore"))
     if p["code"] != 0:
         log(p["err"].strip())
         return False
-    log("تم استيراد قاعدة البيانات بنجاح.")
+    log(tr("تم استيراد قاعدة البيانات بنجاح."))
     return True
 
 def subprocess_run_with_stdin(cmd: list[str], stdin_text: str) -> dict:
@@ -471,7 +482,7 @@ def subprocess_run_with_stdin(cmd: list[str], stdin_text: str) -> dict:
     return {"code": p.returncode, "out": p.stdout or "", "err": p.stderr or ""}
 
 def export_db_python(db: DBParams, out_sql: Path, log: LogFn):
-    log("جارٍ تصدير قاعدة البيانات (وضع بايثون الاحتياطي) ...")
+    log(tr("جارٍ تصدير قاعدة البيانات (وضع بايثون الاحتياطي) ..."))
     conn = mysql_connect(db.host, db.port, db.root_user, db.root_pass)
     try:
         with conn.cursor() as cur:
@@ -505,12 +516,12 @@ def export_db_python(db: DBParams, out_sql: Path, log: LogFn):
                         lines.append(f"INSERT INTO `{t}` ({cols_sql}) VALUES ({', '.join(vals)});")
             lines.append("SET FOREIGN_KEY_CHECKS=1;")
             out_sql.write_text("\n".join(lines), encoding="utf-8")
-            log(f"تم تصدير قاعدة البيانات: {out_sql}")
+            log(f"{tr('تم تصدير قاعدة البيانات: ')}{out_sql}")
     finally:
         conn.close()
 
 def import_db_python(db: DBParams, in_sql: Path, log: LogFn):
-    log("جارٍ استيراد قاعدة البيانات (وضع بايثون الاحتياطي) ...")
+    log(tr("جارٍ استيراد قاعدة البيانات (وضع بايثون الاحتياطي) ..."))
     sql = in_sql.read_text(encoding="utf-8", errors="ignore")
     conn = mysql_connect(db.host, db.port, db.root_user, db.root_pass)
     try:
@@ -520,12 +531,12 @@ def import_db_python(db: DBParams, in_sql: Path, log: LogFn):
             stmts = [s.strip() for s in sql.split(";") if s.strip()]
             for st in stmts:
                 cur.execute(st)
-        log("تم استيراد قاعدة البيانات بنجاح.")
+        log(tr("تم استيراد قاعدة البيانات بنجاح."))
     finally:
         conn.close()
 
 def backup_project_folder(project_path: Path, out_zip: Path, log: LogFn, progress: ProgressFn, start_pct: int = 0, end_pct: int = 100):
-    log("جارٍ ضغط مجلد المشروع...")
+    log(tr("جارٍ ضغط مجلد المشروع..."))
     files = []
     for root, _, fnames in os.walk(project_path):
         for f in fnames:
@@ -539,38 +550,38 @@ def backup_project_folder(project_path: Path, out_zip: Path, log: LogFn, progres
             z.write(p, rel.as_posix())
             pct = start_pct + int((end_pct - start_pct) * (i/total))
             progress(pct)
-    log(f"تم ضغط مجلد المشروع: {out_zip}")
+    log(f"{tr('تم ضغط مجلد المشروع: ')}{out_zip}")
 
 def preflight_checks(wp: WPParams, db: DBParams) -> list[tuple[bool, str]]:
     checks: list[tuple[bool, str]] = []
     doc_root = wp.doc_root.expanduser().resolve()
     target = (doc_root / wp.project_name).resolve()
 
-    checks.append((doc_root.exists(), f"مجلد الجذر موجود: {doc_root}"))
+    checks.append((doc_root.exists(), f"{tr('مجلد الجذر موجود: ')}{doc_root}"))
     if doc_root.exists():
         try:
             test_file = doc_root / ".write_test_tmp"
             test_file.write_text("ok", encoding="utf-8")
             test_file.unlink(missing_ok=True)  # py3.8+ compatibility uses try/except in UI if needed
-            checks.append((True, "مجلد الجذر قابل للكتابة"))
+            checks.append((True, tr("مجلد الجذر قابل للكتابة")))
         except Exception:
-            checks.append((False, "مجلد الجذر غير قابل للكتابة"))
+            checks.append((False, tr("مجلد الجذر غير قابل للكتابة")))
 
     if target.exists() and not wp.overwrite:
-        checks.append((False, f"المسار موجود مسبقاً والاستبدال معطّل: {target}"))
+        checks.append((False, f"{tr('المسار موجود مسبقاً والاستبدال معطّل: ')}{target}"))
     else:
-        checks.append((True, f"المسار الهدف جاهز: {target}"))
+        checks.append((True, f"{tr('المسار الهدف جاهز: ')}{target}"))
 
     ok_db, msg = test_mysql(db)
-    checks.append((ok_db, f"الاتصال بـ MySQL: {msg}"))
+    checks.append((ok_db, f"{tr('الاتصال بـ MySQL: ')}{msg}"))
 
     if wp.auto_install:
         php = detect_php(wp.php_path, "")
-        checks.append((bool(php), f"تم العثور على PHP: {php or 'غير موجود'}"))
+        checks.append((bool(php), f"{tr('تم العثور على PHP: ')}{php or tr('غير موجود')}"))
         if php:
             # wp-cli is optional if we can download
             wpcli_ok = bool(wp.wpcli_path.strip() or which_any(["wp", "wp.bat", "wp.cmd"]) or wp.download_wpcli)
-            checks.append((wpcli_ok, "أداة WP-CLI متوفرة أو قابلة للتنزيل"))
+            checks.append((wpcli_ok, tr("أداة WP-CLI متوفرة أو قابلة للتنزيل")))
     return checks
 
 def install_wordpress(
@@ -588,8 +599,8 @@ def install_wordpress(
 
     if target_path.exists():
         if not wp.overwrite:
-            raise RuntimeError(f"المسار موجود مسبقاً: {target_path}")
-        log("جارٍ استبدال المجلد الموجود...")
+            raise RuntimeError(f"{tr('المسار موجود مسبقاً: ')}{target_path}")
+        log(tr("جارٍ استبدال المجلد الموجود..."))
         shutil.rmtree(target_path)
 
     # Acquire zip
@@ -600,9 +611,9 @@ def install_wordpress(
         if wp.wp_zip_local.strip():
             src = Path(wp.wp_zip_local).expanduser().resolve()
             if not src.exists():
-                raise RuntimeError("الملف المضغوط المحلي غير موجود.")
+                raise RuntimeError(tr("الملف المضغوط المحلي غير موجود."))
             shutil.copy2(src, zip_path)
-            log(f"جارٍ استخدام الملف المضغوط المحلي: {src}")
+            log(f"{tr('جارٍ استخدام الملف المضغوط المحلي: ')}{src}")
             progress(15)
         else:
             url = wp.wp_zip_url.strip() or WORDPRESS_LATEST_ZIP
@@ -643,7 +654,7 @@ def install_wordpress(
         progress(73)
         php = detect_php(wp.php_path, "")
         if not php:
-            raise RuntimeError("التثبيت التلقائي مفعّل، لكن PHP غير موجود.")
+            raise RuntimeError(tr("التثبيت التلقائي مفعّل، لكن PHP غير موجود."))
         tools_dir = target_path / ".tools"
         wpcli, is_phar = detect_wpcli(wp.wpcli_path, wp.download_wpcli, php, tools_dir, log, progress)
 
@@ -680,7 +691,7 @@ def search_replace_url_in_db(db: DBParams, old_url: str, new_url: str, log: LogF
             # options table:
             options = f"{db.table_prefix}options"
             cur.execute(f"UPDATE `{options}` SET option_value = REPLACE(option_value, %s, %s) WHERE option_name IN ('siteurl','home');", (old_url, new_url))
-            log("تم تحديث siteurl/home في جدول الإعدادات (options).")
+            log(tr("تم تحديث siteurl/home في جدول الإعدادات (options)."))
     finally:
         conn.close()
 
@@ -701,9 +712,9 @@ def clone_project(
     Clone folder + DB (export/import) + update URL with wp-cli search-replace if available.
     """
     if dst_path.exists():
-        raise RuntimeError("المسار الهدف موجود مسبقاً.")
+        raise RuntimeError(tr("المسار الهدف موجود مسبقاً."))
     # 1) copy files
-    log("جارٍ استنساخ الملفات...")
+    log(tr("جارٍ استنساخ الملفات..."))
     shutil.copytree(src_path, dst_path)
     progress(30)
 
@@ -760,7 +771,7 @@ def write_project_meta(project_path: Path, meta: dict, log: LogFn | None = None)
     p = d / "project.json"
     p.write_text(__import__("json").dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     if log:
-        log(f"تم حفظ بيانات المشروع الوصفية: {p}")
+        log(f"{tr('تم حفظ بيانات المشروع الوصفية: ')}{p}")
 
 def backup_bundle(
     project_path: Path,
@@ -794,7 +805,7 @@ def backup_bundle(
     }
 
     if include_files:
-        log("نسخ احتياطي: جارٍ ضغط ملفات المشروع...")
+        log(tr("نسخ احتياطي: جارٍ ضغط ملفات المشروع..."))
         files_zip = bdir / "files.zip"
         backup_project_folder(project_path, files_zip, log, progress, start_pct=0, end_pct=70)
         manifest["artifacts"]["files_zip"] = files_zip.name
@@ -802,7 +813,7 @@ def backup_bundle(
         progress(70)
 
     if include_db:
-        log("نسخ احتياطي: جارٍ تصدير قاعدة البيانات...")
+        log(tr("نسخ احتياطي: جارٍ تصدير قاعدة البيانات..."))
         dump = bdir / "db.sql"
         ok = export_db_mysqldump(db, dump, log)
         if not ok:
@@ -814,7 +825,7 @@ def backup_bundle(
 
     (bdir / "manifest.json").write_text(__import__("json").dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     progress(100)
-    log(f"اكتملت النسخة الاحتياطية: {bdir}")
+    log(f"{tr('اكتملت النسخة الاحتياطية: ')}{bdir}")
     return bdir
 
 def restore_bundle(
@@ -831,15 +842,15 @@ def restore_bundle(
     Safety: creates a pre-restore backup inside backup_dir/../pre_restore_...
     """
     if not backup_dir.exists():
-        raise RuntimeError("مجلد النسخة الاحتياطية غير موجود.")
+        raise RuntimeError(tr("مجلد النسخة الاحتياطية غير موجود."))
 
     # Pre-restore backup
     pre_root = backup_dir.parent
-    log("جارٍ إنشاء نسخة احتياطية وقائية قبل الاستعادة...")
+    log(tr("جارٍ إنشاء نسخة احتياطية وقائية قبل الاستعادة..."))
     try:
         backup_bundle(project_path, db, pre_root, log, lambda _: None, include_files=True, include_db=True)
     except Exception as e:
-        log(f"تحذير: فشل إنشاء النسخة الاحتياطية الوقائية: {e}")
+        log(f"{tr('تحذير: فشل إنشاء النسخة الاحتياطية الوقائية: ')}{e}")
 
     progress(10)
 
@@ -847,8 +858,8 @@ def restore_bundle(
     if restore_files:
         zpath = backup_dir / "files.zip"
         if not zpath.exists():
-            raise RuntimeError("الملف files.zip غير موجود في النسخة الاحتياطية.")
-        log("جارٍ استعادة الملفات من الأرشيف المضغوط...")
+            raise RuntimeError(tr("الملف files.zip غير موجود في النسخة الاحتياطية."))
+        log(tr("جارٍ استعادة الملفات من الأرشيف المضغوط..."))
         import tempfile, zipfile, shutil
         with tempfile.TemporaryDirectory(prefix="wp_restore_") as tmp:
             tmpdir = Path(tmp)
@@ -866,15 +877,15 @@ def restore_bundle(
     if restore_db:
         spath = backup_dir / "db.sql"
         if not spath.exists():
-            raise RuntimeError("الملف db.sql غير موجود في النسخة الاحتياطية.")
-        log("جارٍ استعادة قاعدة البيانات...")
+            raise RuntimeError(tr("الملف db.sql غير موجود في النسخة الاحتياطية."))
+        log(tr("جارٍ استعادة قاعدة البيانات..."))
         ok = import_db_mysql(db, spath, log)
         if not ok:
             import_db_python(db, spath, log)
         progress(95)
 
     progress(100)
-    log("اكتملت الاستعادة بنجاح ✅")
+    log(tr("اكتملت الاستعادة بنجاح ✅"))
 
 def wp_cli_search_replace(
     target_path: Path,
@@ -909,7 +920,7 @@ def list_wp_items(target_path: Path, php_path: str, wpcli_path: str, is_phar: bo
         return json.loads(raw)
     except Exception as e:
         if log:
-            log(f"فشل جلب قائمة {item_type}: {e}")
+            log(f"{tr('فشل جلب قائمة ')}{item_type}: {e}")
         return []
 
 def toggle_wp_item(target_path: Path, php_path: str, wpcli_path: str, is_phar: bool, item_name: str, action: str, item_type: str = "plugin", log: LogFn = None):

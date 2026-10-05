@@ -14,11 +14,12 @@ import urllib.error
 
 from .encryption import LicenseEncryption, get_machine_id, create_offline_token, verify_offline_token
 from .feature_flags import FeatureFlags, FEATURE_TIERS, TRIAL_DAYS, PRICING
+from app.core.i18n import t as tr
 
 
 # API endpoint for license verification.
 # Points at the PHP license server deployed on InfinityFree (see license_dashboard_php/README.md).
-LICENSE_API_URL = os.environ.get("LICENSE_API_URL", "http://ser.42web.io/tafeal/api")
+LICENSE_API_URL = os.environ.get("LICENSE_API_URL", "https://ser.42web.io/tafeal/api/index.php?route=")
 
 # Local storage paths
 def _get_license_dir() -> Path:
@@ -234,12 +235,56 @@ class LicenseManager:
                 # Create offline token
                 self._save_offline_token()
                 
-                return True, "تم تفعيل الترخيص بنجاح! 🎉"
+                return True, tr("تم تفعيل الترخيص بنجاح! 🎉")
             else:
-                return False, result.get("message", "مفتاح الترخيص غير صالح")
+                return False, result.get("message", tr("مفتاح الترخيص غير صالح"))
         except Exception as e:
-            return False, f"خطأ في الاتصال بالخادم: {str(e)}"
+            return False, f"{tr('خطأ في الاتصال بالخادم: ')}{str(e)}"
     
+    def _make_api_request(self, url: str, data: bytes) -> dict:
+        import re
+        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        from cryptography.hazmat.backends import default_backend
+        
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'},
+            method='POST'
+        )
+        
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                content = response.read()
+                html = content.decode('utf-8', errors='ignore')
+        except urllib.error.URLError as e:
+            raise e
+        except Exception as e:
+            raise Exception("Network error")
+            
+        try:
+            return json.loads(html)
+        except Exception:
+            a_match = re.search(r'a=toNumbers\("([a-f0-9]+)"\)', html)
+            b_match = re.search(r'b=toNumbers\("([a-f0-9]+)"\)', html)
+            c_match = re.search(r'c=toNumbers\("([a-f0-9]+)"\)', html)
+            if a_match and b_match and c_match:
+                try:
+                    a = bytes.fromhex(a_match.group(1))
+                    b = bytes.fromhex(b_match.group(1))
+                    c = bytes.fromhex(c_match.group(1))
+                    cipher = Cipher(algorithms.AES(a), modes.CBC(b), backend=default_backend())
+                    decryptor = cipher.decryptor()
+                    cookie = (decryptor.update(c) + decryptor.finalize()).hex()
+                    
+                    req.add_header('Cookie', f'__test={cookie}')
+                    with urllib.request.urlopen(req, timeout=15) as response2:
+                        return json.loads(response2.read().decode('utf-8'))
+                except Exception as bypass_e:
+                    raise Exception("Failed to bypass server security") from bypass_e
+            
+            raise Exception("Invalid server response format")
+
     def _verify_online(self, license_key: str) -> dict:
         """Verify license with online server."""
         try:
@@ -248,16 +293,7 @@ class LicenseManager:
                 "license_key": license_key,
                 "machine_id": self._machine_id
             }).encode('utf-8')
-            
-            req = urllib.request.Request(
-                url,
-                data=data,
-                headers={'Content-Type': 'application/json'},
-                method='POST'
-            )
-            
-            with urllib.request.urlopen(req, timeout=10) as response:
-                return json.loads(response.read().decode('utf-8'))
+            return self._make_api_request(url, data)
         except urllib.error.URLError:
             # If server is unreachable, check offline token
             return self._verify_offline(license_key)
@@ -268,7 +304,7 @@ class LicenseManager:
         """Verify using offline token."""
         try:
             if not OFFLINE_TOKEN_FILE.exists():
-                return {"success": False, "message": "لا يوجد توكن للعمل بدون اتصال"}
+                return {"success": False, "message": tr("لا يوجد توكن للعمل بدون اتصال")}
             
             token = OFFLINE_TOKEN_FILE.read_text(encoding='utf-8')
             data = verify_offline_token(token, self._machine_id)
@@ -280,7 +316,7 @@ class LicenseManager:
                     "offline": True
                 }
             
-            return {"success": False, "message": "توكن العمل بدون اتصال منتهي الصلاحية"}
+            return {"success": False, "message": tr("توكن العمل بدون اتصال منتهي الصلاحية")}
         except Exception as e:
             return {"success": False, "message": str(e)}
     
@@ -306,7 +342,7 @@ class LicenseManager:
         Called periodically (monthly as per requirements).
         """
         if not self._license_info or not self._license_info.license_key:
-            return False, "لا يوجد ترخيص لتحديثه"
+            return False, tr("لا يوجد ترخيص لتحديثه")
         
         return self.activate(self._license_info.license_key, self._license_info.email)
     
@@ -332,16 +368,9 @@ class LicenseManager:
                         "license_key": self._license_info.license_key,
                         "machine_id": self._machine_id
                     }).encode('utf-8')
-                    
-                    req = urllib.request.Request(
-                        url,
-                        data=data,
-                        headers={'Content-Type': 'application/json'},
-                        method='POST'
-                    )
-                    urllib.request.urlopen(req, timeout=10)
-                except:
-                    pass  # Continue even if server unreachable
+                    self._make_api_request(url, data)
+                except Exception as e:
+                    print(f"Failed to notify server of deactivation: {e}")
             
             # Clear local data
             if LICENSE_FILE.exists():
@@ -386,10 +415,10 @@ class LicenseManager:
         """
         price = PRICING.get(tier, {}).get("price", 200)
         tier_name = {
-            "basic": "الأساسي",
-            "pro": "الاحترافي",
-            "enterprise": "المؤسسي"
-        }.get(tier, "الاحترافي")
+            "basic": tr("الأساسي"),
+            "pro": tr("الاحترافي"),
+            "enterprise": tr("المؤسسي")
+        }.get(tier, tr("الاحترافي"))
         
         message = f"""مرحباً! 👋
 
@@ -416,18 +445,18 @@ class LicenseManager:
         """Get license status for display in UI."""
         if self._license_info is None or not self.is_licensed():
             return {
-                "status": "غير مفعّل",
-                "tier": "مجاني",
+                "status": tr("غير مفعّل"),
+                "tier": tr("مجاني"),
                 "icon": "⚪",
                 "color": "#888888",
-                "message": "قم بتفعيل الترخيص للحصول على جميع الميزات"
+                "message": tr("قم بتفعيل الترخيص للحصول على جميع الميزات")
             }
         
         tier_display = {
-            "free": ("مجاني", "⚪", "#888888"),
-            "basic": ("أساسي", "🔵", "#3498db"),
-            "pro": ("احترافي", "🟡", "#f39c12"),
-            "enterprise": ("مؤسسي", "🟢", "#27ae60")
+            "free": (tr("مجاني"), "⚪", "#888888"),
+            "basic": (tr("أساسي"), "🔵", "#3498db"),
+            "pro": (tr("احترافي"), "🟡", "#f39c12"),
+            "enterprise": (tr("مؤسسي"), "🟢", "#27ae60")
         }
         
         tier = self._license_info.tier
@@ -436,17 +465,17 @@ class LicenseManager:
         if self._license_info.is_trial:
             days = self._license_info.trial_days_remaining()
             return {
-                "status": "فترة تجريبية",
-                "tier": f"{name} (تجريبي)",
+                "status": tr("فترة تجريبية"),
+                "tier": f"{name}{tr(' (تجريبي)')}",
                 "icon": "⏳",
                 "color": "#e74c3c",
-                "message": f"متبقي {days} يوم من الفترة التجريبية"
+                "message": f"{tr('متبقي ')}{days}{tr(' يوم من الفترة التجريبية')}"
             }
         
         return {
-            "status": "مفعّل",
+            "status": tr("مفعّل"),
             "tier": name,
             "icon": icon,
             "color": color,
-            "message": f"الترخيص: {self._encryption.obfuscate_key(self._license_info.license_key)}"
+            "message": f"{tr('الترخيص: ')}{self._encryption.obfuscate_key(self._license_info.license_key)}"
         }

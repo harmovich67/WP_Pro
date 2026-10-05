@@ -18,6 +18,7 @@ except ImportError:
 
 from app.core.api_thread import APIServerThread
 from app.ui.theme_bridge import ThemeBridge
+from app.core.i18n import t as tr
 
 
 logger = logging.getLogger(__name__)
@@ -81,7 +82,7 @@ class LicenseDashboardPage(QWidget):
         icon.setStyleSheet("font-size: 64px;")
         vbox.addWidget(icon)
 
-        title = QLabel("لوحة تحكم الترخيص")
+        title = QLabel(tr("لوحة تحكم الترخيص"))
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setStyleSheet("color: #e5e7eb; font-size: 22px; font-weight: bold;")
         vbox.addWidget(title)
@@ -95,7 +96,7 @@ class LicenseDashboardPage(QWidget):
         vbox.addWidget(info)
 
         # Password display
-        pw_label = QLabel(f"🔑 كلمة المرور:  {token}")
+        pw_label = QLabel(f"{tr('🔑 كلمة المرور:  ')}{token}")
         pw_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         pw_label.setStyleSheet(
             "color: #f59e0b; font-size: 14px; font-family: monospace; "
@@ -105,7 +106,7 @@ class LicenseDashboardPage(QWidget):
         vbox.addWidget(pw_label)
 
         # Open in browser button
-        self._btn_open_browser = QPushButton("🌐  افتح الداشبورد في المتصفح")
+        self._btn_open_browser = QPushButton(tr("🌐  افتح الداشبورد في المتصفح"))
         self._btn_open_browser.setEnabled(False)  # enabled after server starts
         self._btn_open_browser.setFixedHeight(44)
         self._btn_open_browser.setStyleSheet("""
@@ -120,12 +121,12 @@ class LicenseDashboardPage(QWidget):
         self._btn_open_browser.clicked.connect(self._open_in_browser)
         vbox.addWidget(self._btn_open_browser)
 
-        self._status_label = QLabel("⏳ جاري تشغيل الـ API server...")
+        self._status_label = QLabel(tr("⏳ جاري تشغيل الـ API server..."))
         self._status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._status_label.setStyleSheet("color: #6b7280; font-size: 12px;")
         vbox.addWidget(self._status_label)
 
-        install_note = QLabel("لتفعيل الداشبورد المدمج: pip install PyQt6-WebEngine")
+        install_note = QLabel(tr("لتفعيل الداشبورد المدمج: pip install PyQt6-WebEngine"))
         install_note.setAlignment(Qt.AlignmentFlag.AlignCenter)
         install_note.setStyleSheet("color: #4b5563; font-size: 11px;")
         vbox.addWidget(install_note)
@@ -160,9 +161,9 @@ class LicenseDashboardPage(QWidget):
             # Fallback mode: enable browser button
             if hasattr(self, '_btn_open_browser'):
                 self._btn_open_browser.setEnabled(True)
-                self._btn_open_browser.setText(f"🌐  افتح الداشبورد في المتصفح  ({server_url.replace('http://', '')})")
+                self._btn_open_browser.setText(f"{tr('🌐  افتح الداشبورد في المتصفح  (')}{server_url.replace('http://', '')})")
             if hasattr(self, '_status_label'):
-                self._status_label.setText(f"✅ الـ API server شغال على {server_url}")
+                self._status_label.setText(f"{tr('✅ الـ API server شغال على ')}{server_url}")
                 self._status_label.setStyleSheet("color: #10b981; font-size: 12px;")
             return
 
@@ -187,13 +188,13 @@ class LicenseDashboardPage(QWidget):
 
         if not _WEBENGINE_AVAILABLE:
             if hasattr(self, '_status_label'):
-                self._status_label.setText(f"❌ فشل تشغيل الـ API: {error_msg[:60]}")
+                self._status_label.setText(f"{tr('❌ فشل تشغيل الـ API: ')}{error_msg[:60]}")
                 self._status_label.setStyleSheet("color: #ef4444; font-size: 12px;")
             return
 
         QMessageBox.critical(
             self,
-            "خطأ في لوحة التحكم",
+            tr("خطأ في لوحة التحكم"),
             f"فشل تشغيل خادم لوحة تحكم الترخيص:\n\n{error_msg}\n\n"
             f"يرجى التحقق من أن المنفذ {self.port} متاح، ثم إعادة تشغيل التطبيق."
         )
@@ -218,7 +219,7 @@ class LicenseDashboardPage(QWidget):
             self.web_view.loadFinished.connect(self._on_page_loaded)
         else:
             logger.error(f"Dashboard HTML not found at {dashboard_html}")
-            self._show_error_page("ملف HTML الخاص بلوحة التحكم غير موجود")
+            self._show_error_page(tr("ملف HTML الخاص بلوحة التحكم غير موجود"))
     
     @pyqtSlot(bool)
     def _on_page_loaded(self, success: bool) -> None:
@@ -239,7 +240,7 @@ class LicenseDashboardPage(QWidget):
             self._inject_api_url()
         else:
             logger.error("Dashboard page failed to load")
-            self._show_error_page("فشل تحميل صفحة لوحة التحكم")
+            self._show_error_page(tr("فشل تحميل صفحة لوحة التحكم"))
     
     def _inject_api_url(self) -> None:
         """Inject API URL into the dashboard page"""
@@ -335,8 +336,7 @@ class LicenseDashboardPage(QWidget):
         """Stop the API server gracefully"""
         if self.api_thread and self.api_thread.is_running():
             logger.info("Stopping API server...")
-            self.api_thread.stop()
-            self.api_thread.wait(5000)  # Wait up to 5 seconds
+            self.api_thread.stop()   # joins the daemon thread internally (max 5 s)
             logger.info("API server stopped")
     
     def is_server_running(self) -> bool:
